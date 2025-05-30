@@ -6,15 +6,15 @@ Permite a restaurantes gestionar sus órdenes, gestionar la carta, y a los usuar
 
 ### Frontend
 - **Framework:** [Vite](https://vitejs.dev/) + **React**
-- **Estilos:** [TailwindCSS](https://tailwindcss.com/) (estilo moderno y plano)
+- **Estilos:** [TailwindCSS](https://tailwindcss.com/docs/installation/using-vite) (estilo moderno y plano)
 - **Hosting:** [Vercel](https://vercel.com/) (gratis con dominio personalizado)
 - **Dominio:** proveído por el cliente
 
 ### Backend (Serverless)
-- **Autenticación:** Firebase Auth
-- **Base de Datos:** Firebase Firestore
-- **Almacenamiento de Imágenes:** Firebase Storage
-- **Funciones API (backend):** Firebase Cloud Functions (Node.js + Express)
+- **Autenticación:** [Firebase]( https://console.firebase.google.com/) Auth
+- **Base de Datos:** [Firebase]( https://console.firebase.google.com/) Firestore
+- **Almacenamiento de Imágenes:** [Firebase]( https://console.firebase.google.com/) Storage
+- **Funciones API (backend):** [Firebase]( https://console.firebase.google.com/) Cloud Functions (Node.js + Express)
 
 ## 🔧 Entorno de desarrollo
 
@@ -83,14 +83,19 @@ Permite a restaurantes gestionar sus órdenes, gestionar la carta, y a los usuar
 ## 📁 Estructura recomendada del proyecto
 
 ```bash
-/torden-app
-├── /client (frontend React + Vite)
-│   ├── /pages (cliente, admin)
+/tu-orden-app
+├── /src
 │   ├── /components
-│   ├── /services (Firebase config, pedidos, productos)
+│   ├── /pages
+│   │   ├── index.jsx
+│   │   ├── /admin
+│   │   ├── /cliente
+│   │   └── /api            # Aquí van tus funciones backend
+│   │       ├── crearOrden.js
+│   │       └── productos.js
+│   ├── /services           # Firebase config, helpers para Firestore/Auth
 │   └── main.jsx
-├── /functions (backend Firebase)
-│   ├── index.js (Express app)
-│   └── /routes (api endpoints)
-├── firebase.json
+├── /public
+├── tailwind.config.js
+├── firebase-config.js      # (solo si decides no usar un wrapper)
 └── README.md
