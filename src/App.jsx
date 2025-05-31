@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Index from "./pages";
+import Index from "./pages/Index";
 import firestoreService from "./servicies/firestoreService"
 import theme from "./theme";
 
