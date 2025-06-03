@@ -1,25 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-// Services
+// services
 import firestoreService from "./servicies/firestoreService";
-// Providers
+// contexts
 import { RestaurantProvider } from "./contexts/RestaurantContext";
-import { AuthProvider } from "./contexts/AuthContext";
-// Others
+import { useAuth } from "./contexts/AuthContext";
+// others
 import domains from "./domains.json";
 import theme from "./theme";
 // Pages
-import Index from "./pages/Index"
-import Carta from "./pages/client/Carta"
-import Dashboard from "./pages/admin/Dashboard"
+import Index from "./pages/Index";
+import Carta from "./pages/client/Carta";
+import Login from "./pages/admin/Login";
+import Dashboard from "./pages/admin/Dashboard";
+
+// Componente para mostrar Login o Dashboard según sesión
+function AdminRoute() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <div className="text-white p-10">Verificando sesión...</div>;
+
+  return user ? <Dashboard /> : <Login />;
+}
 
 function App() {
-  const id =
-    domains[
-    window.location.host.includes("localhost")
-      ? "default"
-      : window.location.host.toLowerCase()
-    ];
+  const id = domains[
+    window.location.host.includes("localhost") ? "default" : window.location.host.toLowerCase()
+  ];
 
   const [restaurant, setRestaurant] = useState(null);
 
@@ -37,15 +44,13 @@ function App() {
 
   return (
     <RestaurantProvider value={{ id, restaurant }}>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<Index/>} />
-            <Route path="/carta" element={<Carta />} />
-            <Route path="/admin" element={<Dashboard />} />
-          </Routes>
-        </Router>
-      </AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/carta" element={<Carta />} />
+          <Route path="/admin" element={<AdminRoute />} />
+        </Routes>
+      </Router>
     </RestaurantProvider>
   );
 }

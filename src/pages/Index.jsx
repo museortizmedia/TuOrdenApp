@@ -1,7 +1,9 @@
 import React from "react";
+// Providers
 import { useRestaurant } from "../contexts/RestaurantContext";
-import theme from "../theme";
 import { useAuth } from "../contexts/AuthContext";
+// others
+import theme from "../theme";
 
 export default function Index() {
   const { restaurant } = useRestaurant();
@@ -63,7 +65,7 @@ export default function Index() {
       </div>
 
       <footer className="text-[0.6rem] text-gray-500 opacity-60 text-center px-4 pb-4">
-        © 2025. Todos los derechos reservados...
+        © 2025. Todos los derechos reservados. *Aplican condiciones. Promociones válidas solo en canales seleccionados. Imágenes de referencia. Los precios, productos y disponibilidad pueden variar. Esta plataforma actúa como intermediario entre el cliente y el restaurante. Para cualquier inconveniente, por favor comuníquese directamente con el establecimiento.
       </footer>
     </div>
   );
