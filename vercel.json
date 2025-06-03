@@ -5,7 +5,7 @@
       "has": [
         {
           "type": "host",
-          "value": "monstersburger.com.co"
+          "value": "www.monstersburger.com.co"
         }
       ],
       "destination": "/?id=4GtG9cHGEc82yscL4vie",
@@ -16,10 +16,10 @@
       "has": [
         {
           "type": "host",
-          "value": "otrodominio.com"
+          "value": "monstersburger.com.co"
         }
       ],
-      "destination": "/?id=OTROID1234567890",
+      "destination": "/?id=4GtG9cHGEc82yscL4vie",
       "permanent": true
     }
   ]
