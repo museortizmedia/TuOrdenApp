@@ -8,13 +8,16 @@ function App() {
   // Definicion del restaurante por dominios
   const id = domains[window.location.host.includes("localhost") ? "default" : window.location.host.toLowerCase()];
 
-  // Set data
+  // Loading control state
   const [isLoading, setIsLoading] = useState(true);
+
+  // Find restaurant data
   const [restaurantinfo, setRestaurantinfo] = useState({
     logo: "https://images.rappi.com/restaurants_logo/22-1715892877747.png",
     botons: []
   });
 
+  // First useEffect
   useEffect(() => {
     const fetchData = async () => {
       const restaurant = await firestoreService.findById("restaurants", id);
@@ -27,21 +30,18 @@ function App() {
       const botons = [
         {
           text: "Reservar",
-          onClick: () => {
-            if (restaurant.whatsapp) {
-              window.open(restaurant.whatsapp, "_blank", "noopener,noreferrer");
-            }
-          },
+          onClick: () => { if (restaurant.whatsapp) { window.open(restaurant.whatsapp, "_blank", "noopener,noreferrer"); } },
           style: "primary"
         },
         {
-          text: "Ver Menú",
+          text: "Ver Carta",
           onClick: () => console.log("Menú"),
           style: "secondary"
         }
       ];
 
       setRestaurantinfo({
+        ...restaurant,
         logo: restaurant.logo,
         botons
       });
@@ -59,12 +59,16 @@ function App() {
       </div>
     );
   }
-
+console.log(JSON.stringify(restaurantinfo));
   return (
+    <>
     <Index
       imageurl={restaurantinfo.logo}
       buttons={restaurantinfo.botons}
+      title={restaurantinfo.name}
+      subtitle={restaurantinfo.subtitle}
     />
+    </>
   );
 }
 
