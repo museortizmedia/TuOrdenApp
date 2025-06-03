@@ -4,6 +4,12 @@ import firestoreService from "./servicies/firestoreService"
 import theme from "./theme";
 
 function App() {
+  // Lectura url
+  const searchParams = new URLSearchParams(window.location.search);
+  const id = searchParams.get("id") || "001";
+  console.log(id)
+
+  // Set data
   const [isLoading, setIsLoading] = useState(true);
   const [restaurantinfo, setRestaurantinfo] = useState({
     logo: "https://images.rappi.com/restaurants_logo/22-1715892877747.png",
@@ -12,7 +18,7 @@ function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const restaurant = await firestoreService.findById("restaurants", "4GtG9cHGEc82yscL4vie");
+      const restaurant = await firestoreService.findById("restaurants", id);
       console.log(restaurant)
 
       //const restauranteExpandido = await firestoreService.deepResolveReferences(restaurant, 2);
