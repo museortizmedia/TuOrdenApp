@@ -24,9 +24,8 @@ function AdminRoute() {
 }
 
 function App() {
-  const id = domains[
-    window.location.host.includes("localhost") ? "default" : window.location.host.toLowerCase()
-  ];
+  const hostname = window.location.host.toLowerCase();
+  const id = domains[hostname] || domains["default"];
 
   const [restaurant, setRestaurant] = useState(null);
 
