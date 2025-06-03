@@ -136,7 +136,7 @@ function Carta() {
                             className="scroll-mt-[100px] md:scroll-mt-20"
                         >
                             <h2 className="text-xl font-bold mt-20 mb-10">{cat}</h2>
-                            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-10">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
                                 {groupedProducts[cat].map((product) => (
                                     <div
                                         key={product.id}

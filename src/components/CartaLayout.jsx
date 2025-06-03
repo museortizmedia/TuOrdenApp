@@ -44,7 +44,7 @@ export default function CartaLayout({ children }) {
   return (
     <div className={`${theme.colors.background.dark} relative min-h-screen`}>
       {/* Header */}
-      <header className={`${"bg-[#040404]"} fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-4 shadow-md`}>
+      <header className={`${theme.colors.background.dark} fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-4 shadow-md`}>
         <div className="flex items-center space-x-2">
           <img src={restaurant.logo} alt="Logo" className="h-8 w-auto" />
           <p>{restaurant.name}</p>
