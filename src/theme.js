@@ -22,7 +22,11 @@ const theme = {
     background: {
       primary: "bg-[#9d100f] hover:bg-[#b31312]",
       secondary: "bg-[#f6d926] hover:bg-yellow-400 text-black",
-      dark: "bg-black",
+      dark: "bg-[#050505] text-white",
+      darkLight: "bg-[#1a1a1a]",
+      darkMedium: "bg-[#121212]",
+      darkLighter: "bg-[#1f1f1f]",
+      backgroundGradient: "bg-gradient-to-b from-[#1a1a1a] to-[#050505]",
     },
     border: {
       primary: "border-2 border-[#9d100f] hover:border-[#b31312]",
@@ -33,6 +37,9 @@ const theme = {
     redHighlight: "bg-[#9d100f] text-white",
     redBorder: "border-2 border-[#9d100f]",
     burgerGlow: "ring-4 ring-[#f6d926]/30 rounded-xl",
+    headerBar: "bg-[#1a1a1a] text-white px-4 py-2",
+    labelBox: "bg-[#1f1f1f] text-white px-2 py-1 rounded",
+    section: "bg-gradient-to-b from-[#1a1a1a] to-[#050505] p-4 rounded",
   },
 
   buttons: {
