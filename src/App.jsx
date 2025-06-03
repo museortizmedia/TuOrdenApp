@@ -1,74 +1,52 @@
 import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// Services
+import firestoreService from "./servicies/firestoreService";
+// Providers
+import { RestaurantProvider } from "./contexts/RestaurantContext";
+import { AuthProvider } from "./contexts/AuthContext";
+// Others
 import domains from "./domains.json";
-import Index from "./pages/Index";
-import firestoreService from "./servicies/firestoreService"
 import theme from "./theme";
+// Pages
+import Index from "./pages/Index"
+import Carta from "./pages/client/Carta"
+import Dashboard from "./pages/admin/Dashboard"
 
 function App() {
-  // Definicion del restaurante por dominios
-  const id = domains[window.location.host.includes("localhost") ? "default" : window.location.host.toLowerCase()];
+  const id =
+    domains[
+    window.location.host.includes("localhost")
+      ? "default"
+      : window.location.host.toLowerCase()
+    ];
 
-  // Loading control state
-  const [isLoading, setIsLoading] = useState(true);
+  const [restaurant, setRestaurant] = useState(null);
 
-  // Find restaurant data
-  const [restaurantinfo, setRestaurantinfo] = useState({
-    logo: "https://images.rappi.com/restaurants_logo/22-1715892877747.png",
-    botons: []
-  });
-
-  // First useEffect
   useEffect(() => {
-    const fetchData = async () => {
-      const restaurant = await firestoreService.findById("restaurants", id);
-      console.log(restaurant)
+    firestoreService.findById("restaurants", id).then(setRestaurant);
+  }, [id]);
 
-      //const restauranteExpandido = await firestoreService.deepResolveReferences(restaurant, 2);
-      //console.log(restauranteExpandido)
-
-      // Crear botones solo cuando ya tenemos los datos
-      const botons = [
-        {
-          text: "Reservar",
-          onClick: () => { if (restaurant.whatsapp) { window.open(restaurant.whatsapp, "_blank", "noopener,noreferrer"); } },
-          style: "primary"
-        },
-        {
-          text: "Ver Carta",
-          onClick: () => console.log("Menú"),
-          style: "secondary"
-        }
-      ];
-
-      setRestaurantinfo({
-        ...restaurant,
-        logo: restaurant.logo,
-        botons
-      });
-
-      setIsLoading(false);
-    };
-
-    fetchData();
-  }, []);
-
-  if (isLoading) {
+  if (!restaurant) {
     return (
       <div className={`${theme.layout.darkBackground} min-h-screen flex items-center justify-center`}>
         <div className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-console.log(JSON.stringify(restaurantinfo));
+
   return (
-    <>
-    <Index
-      imageurl={restaurantinfo.logo}
-      buttons={restaurantinfo.botons}
-      title={restaurantinfo.name}
-      subtitle={restaurantinfo.subtitle}
-    />
-    </>
+    <RestaurantProvider value={{ id, restaurant }}>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Index/>} />
+            <Route path="/carta" element={<Carta />} />
+            <Route path="/admin" element={<Dashboard />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </RestaurantProvider>
   );
 }
 
