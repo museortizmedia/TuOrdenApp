@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // services
 import firestoreService from "./servicies/firestoreService";
 // contexts
-import { RestaurantProvider } from "./contexts/RestaurantContext";
+import { RestaurantProvider } from "./contexts/RestaurantContext.jsx";
+import { CartProvider } from "./contexts/CartContext.jsx"
 import { useAuth } from "./contexts/AuthContext";
 // others
 import domains from "./domains.json";
@@ -43,6 +44,7 @@ function App() {
 
   return (
     <RestaurantProvider value={{ id, restaurant }}>
+      <CartProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -50,6 +52,7 @@ function App() {
           <Route path="/admin" element={<AdminRoute />} />
         </Routes>
       </Router>
+      </CartProvider>
     </RestaurantProvider>
   );
 }

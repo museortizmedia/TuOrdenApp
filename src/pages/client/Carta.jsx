@@ -3,6 +3,7 @@ import CartaLayout from "../../components/CartaLayout";
 import { useRestaurant } from "../../contexts/RestaurantContext";
 import theme from "../../theme";
 import firestoreService from "../../servicies/firestoreService";
+import { useCart } from "../../contexts/CartContext";
 
 function Carta() {
     const { restaurant } = useRestaurant();
@@ -101,12 +102,22 @@ function Carta() {
     }, [activeCategory]);
 
 
+    // Cart
+    const { addToCart} = useCart();
+    const handleProductCart = (product) =>
+    {
+        console.log("Comprando "+product.name)
+        addToCart(product);
+    }
+
+
     return (
         <CartaLayout>
+            <>
             <div className={`${theme.layout.darkBackground} min-h-screen`}>
                 {/* Menú de categorías fijo */}
-                <div className="sticky top-0 pt-15 z-40 shadow-md">
-                    <nav className="flex overflow-x-auto whitespace-nowrap bg-black/95 p-2 space-x-2 scrollbar-hide touch-pan-x">
+                <div className="sticky top-16 z-40 shadow-md">
+                    <nav className={`${theme.colors.background.dark} flex overflow-x-auto whitespace-nowrap p-2 space-x-2 scrollbar-hide touch-pan-x`}>
                         {categories.map((cat) => (
                             <button
                                 key={cat}
@@ -136,11 +147,11 @@ function Carta() {
                             className="scroll-mt-[100px] md:scroll-mt-20"
                         >
                             <h2 className="text-xl font-bold mt-20 mb-10">{cat}</h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-10">
                                 {groupedProducts[cat].map((product) => (
                                     <div
                                         key={product.id}
-                                        className="flex flex-col md:flex-row items-stretch  rounded-lg overflow-hidden shadow-md"
+                                        className="flex flex-col md:flex-row items-stretch bg-[#101010] rounded-lg overflow-hidden shadow-md"
                                     >
                                         {/* Imagen cuadrada */}
                                         <div className="w-full md:w-32 aspect-square overflow-hidden">
@@ -157,17 +168,23 @@ function Carta() {
                                                 <h3 className="font-bold text-lg">{product.name}</h3>
                                                 <p className="text-sm">{product.desc}</p>
                                             </div>
-                                            <p className="mt-2 font-semibold">Precio: ${product.price}</p>
+                                            <p className="mt-2 font-semibold">${(product.price).toLocaleString('es-CL')}</p>
                                         </div>
 
                                         {/* Botones */}
                                         <div className="flex items-center p-4">
-                                            <button
-                                                className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-3 py-1 rounded"
-                                                onClick={() => { console.log("añadiendo a " + product.name) }}
-                                            >
-                                                Añadir
-                                            </button>
+                                            {product.state == true ?
+                                                <button
+                                                    className="bg-yellow-400 hover:bg-yellow-500 cursor-pointer text-black font-bold px-3 py-1 rounded"
+                                                    onClick={()=>handleProductCart(product)}
+                                                >
+                                                    Añadir
+                                                </button>
+                                                :
+                                                <span className="bg-red-400 text-black font-bold px-3 py-1 rounded">
+                                                    AGOTADO
+                                                </span>
+                                            }
                                         </div>
                                     </div>
                                 ))}
@@ -177,6 +194,7 @@ function Carta() {
                     ))}
                 </div>
             </div>
+            </>
         </CartaLayout>
     );
 }
