@@ -1,0 +1,26 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "monstersburger.com.co"
+        }
+      ],
+      "destination": "/?id=4GtG9cHGEc82yscL4vie",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "otrodominio.com"
+        }
+      ],
+      "destination": "/?id=OTROID1234567890",
+      "permanent": true
+    }
+  ]
+}
