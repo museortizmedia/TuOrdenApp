@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
+import domains from "./domains.json";
 import Index from "./pages/Index";
 import firestoreService from "./servicies/firestoreService"
 import theme from "./theme";
 
 function App() {
-  // Lectura url
-  const searchParams = new URLSearchParams(window.location.search);
-  const id = searchParams.get("id") || "001";
-  console.log(id)
+  // Definicion del restaurante por dominios
+  const id = domains[window.location.host.includes("localhost") ? "default" : window.location.host.toLowerCase()];
 
   // Set data
   const [isLoading, setIsLoading] = useState(true);
