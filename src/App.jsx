@@ -14,7 +14,7 @@ import Index from "./pages/Index";
 import Carta from "./pages/client/Carta";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
-import MyOrders from "./pages/client/MyOrders.jsx"
+import DynamicHead from "./components/DynamicHead.jsx";
 
 // Componente para mostrar Login o Dashboard según sesión
 function AdminRoute() {
@@ -45,17 +45,17 @@ function App() {
 
   return (
     <RestaurantProvider value={{ id, restaurant }}>
-      <CartProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/carta" element={<Carta />} />
-          <Route path="/orders" element={<MyOrders />} />
-          <Route path="/admin" element={<AdminRoute />} />
-        </Routes>
-      </Router>
-      </CartProvider>
-    </RestaurantProvider>
+  <CartProvider>
+    <Router>
+      <DynamicHead />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/carta" element={<Carta />} />
+        <Route path="/admin" element={<AdminRoute />} />
+      </Routes>
+    </Router>
+  </CartProvider>
+</RestaurantProvider>
   );
 }
 
