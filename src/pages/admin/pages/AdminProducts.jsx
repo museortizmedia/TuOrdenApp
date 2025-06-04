@@ -15,99 +15,102 @@ import {
     arrayMove,
     SortableContext,
     useSortable,
-    verticalListSortingStrategy,
+    verticalListSortingStrategy
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { doc } from "firebase/firestore";
+import { db } from "../../../firebase/firebase.js";
+import ToggleSwitch from "../../../components/ToogleSwitch.jsx"
 
 function SortableItem({ product, onUpdate, onDelete }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: product.id });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-    };
-
+    const style = { transform: CSS.Transform.toString(transform), transition };
     const [edit, setEdit] = useState(false);
     const [form, setForm] = useState({ ...product });
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setForm((prev) => ({
+        setForm(prev => ({
             ...prev,
-            [name]:
-                type === "checkbox"
-                    ? checked
-                    : name === "price"
-                        ? Number(value)
-                        : value,
+            [name]: type === "checkbox" ? checked : name === "price" ? Number(value) : value
         }));
     };
 
     const handleSave = async () => {
-        if (isNaN(form.price)) {
-            toast.error("El precio debe ser un número válido");
-            return;
-        }
+        if (isNaN(form.price)) return toast.error("Precio inválido");
         await onUpdate(product.id, form);
         setEdit(false);
     };
 
-    const handleDelete = async () => {
-        const confirm = window.confirm("¿Estás seguro de que deseas eliminar este producto?");
-        if (confirm) {
-            await onDelete(product.id);
-        }
+    const stopDrag = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
     };
 
     return (
         <div
             ref={setNodeRef}
+            {...attributes}
+            {...listeners}
             style={style}
-            className="bg-gray-700 p-4 rounded space-y-2 relative"
+            className="bg-[#151515] p-4 rounded shadow cursor-move border-2 border-[#202020] space-y-2 relative"
         >
-            <div
-                {...attributes}
-                {...listeners}
-                className="absolute top-2 right-2 p-1 z-10 text-gray-400 cursor-grab hover:text-white"
-                title="Arrastrar"
-            >
-                ☰
-            </div>
-
             {edit ? (
-                <div className="space-y-2">
-                    <input name="name" value={form.name} onChange={handleChange} className="w-full p-1 rounded bg-gray-600 text-white" placeholder="Nombre" />
-                    <textarea name="desc" value={form.desc} onChange={handleChange} className="w-full p-1 rounded bg-gray-600 text-white" placeholder="Descripción" />
-                    <input name="price" type="number" value={form.price} onChange={handleChange} className="w-full p-1 rounded bg-gray-600 text-white" placeholder="Precio" />
-                    <div className="flex items-center gap-2">
-                        <label>Activo:</label>
-                        <input type="checkbox" name="state" checked={form.state} onChange={handleChange} />
-                    </div>
+                <>
+                    <input
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        onPointerDownCapture={(e) => e.stopPropagation()}
+                        className="mt-1 w-full p-1 rounded bg-gray-600 text-white"
+                        placeholder="Nombre"
+                    />
+                    <textarea
+                        name="desc"
+                        value={form.desc}
+                        onChange={handleChange}
+                        onPointerDownCapture={(e) => e.stopPropagation()}
+                        className="w-full p-1 rounded bg-gray-600 text-white"
+                        placeholder="Descripción"
+                    />
+                    <input
+                        name="price"
+                        type="number"
+                        step={100}
+                        value={form.price}
+                        onChange={handleChange}
+                        onPointerDownCapture={(e) => e.stopPropagation()}
+                        className="w-full p-1 rounded bg-gray-600 text-white"
+                        placeholder="Precio"
+                    />
+
                     <div className="flex justify-between mt-2">
-                        <button onClick={handleDelete} className="bg-red-600 px-2 py-1 rounded">Eliminar</button>
-                        <button onClick={handleSave} className="bg-green-700 px-2 mx-2 py-1 rounded">Guardar</button>
-                        <button onClick={() => setEdit(false)} className="bg-blue-600 px-2 py-1 rounded">Salir</button>
+                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); if (window.confirm("Eliminar?")) onDelete(product.id); }} className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded">Eliminar</button>
+                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); handleSave(); }} className="bg-green-700 hover:bg-green-800 px-2 py-1 rounded">Guardar</button>
+                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); setEdit(false); }} className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">Volver</button>
                     </div>
-                </div>
+                </>
             ) : (
-                <div>
+                <>
                     <div className="flex justify-between items-start">
                         <div>
                             <h3 className="font-bold">{product.name}</h3>
-                            <p className="text-sm">{product.desc}</p>
-                            <p className="text-sm">Precio: ${product.price}</p>
+                            <p className="text-xs">{product.desc || ""}</p>
+                            <p className="text-sm mt-2">Precio: ${(product.price).toLocaleString('es-CL')}</p>
                         </div>
-                        <button onClick={() => setEdit(true)} className="text-xs underline mt-5 text-blue-400">Editar</button>
+                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); setEdit(true); }} className="text-xs underline mt-5 text-blue-400">Editar</button>
                     </div>
-                    <div className="mt-2">
-                        <label className="text-xs mr-2">Activo:</label>
-                        <input type="checkbox" checked={product.state} onChange={(e) => onUpdate(product.id, { ...product, state: e.target.checked })} />
-                    </div>
-                </div>
+                    <ToggleSwitch
+                        checked={product.state}
+                        onChange={e => onUpdate(product.id, { ...product, state: e.target.checked })}
+                        label="Activo:"
+                    />
+                </>
             )}
         </div>
     );
 }
+
 
 function AdminProducts() {
     const { restaurant } = useRestaurant();
@@ -116,146 +119,119 @@ function AdminProducts() {
     const [creatingCat, setCreatingCat] = useState(null);
     const [newProductName, setNewProductName] = useState("");
     const [activeProduct, setActiveProduct] = useState(null);
+    const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
     useEffect(() => {
-        if (restaurant?.id) {
-            firestoreService.findAll(`restaurants/${restaurant.id}/productos`).then((res) => {
-                setProducts(res);
-                const unique = Array.from(new Set(res.map((p) => p.id.slice(0, -3))));
-                setCategories(unique);
-            });
-        }
+        if (!restaurant?.id) return;
+        const unsub = firestoreService.listenAll(`restaurants/${restaurant.id}/productos`, setProducts);
+        return unsub;
     }, [restaurant]);
 
+    useEffect(() => {
+        const cats = Array.from(new Set(products.map(p => p.id.slice(0, -3))));
+        setCategories(cats);
+    }, [products]);
+
     const grouped = categories.reduce((acc, cat) => {
-        acc[cat] = products.filter((p) => p.id.startsWith(cat)).sort((a, b) => a.id.localeCompare(b.id));
+        acc[cat] = products.filter(p => p.id.startsWith(cat)).sort((a, b) => a.id.localeCompare(b.id));
         return acc;
     }, {});
-
-    const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
     const handleDragEnd = async ({ active, over }) => {
         setActiveProduct(null);
         if (!over || active.id === over.id) return;
 
-        const activeItem = products.find((p) => p.id === active.id);
-        const overItem = products.find((p) => p.id === over.id);
-        const oldCat = activeItem.id.slice(0, -3);
-
-        if (!overItem) return;
-
-        const newCat = categories.includes(over.id) ? over.id : overItem.id.slice(0, -3);
+        const itemA = products.find(p => p.id === active.id);
+        const itemB = products.find(p => p.id === over.id);
+        const oldCat = itemA.id.slice(0, -3);
+        const newCat = categories.includes(over.id) ? over.id : itemB.id.slice(0, -3);
 
         if (oldCat === newCat) {
-            const items = grouped[oldCat].map((p) => p.id);
-            const oldIndex = items.indexOf(active.id);
-            const newIndex = items.indexOf(over.id);
-            const newOrder = arrayMove(items, oldIndex, newIndex);
-
-            const updated = products.map((p) => {
-                if (p.id.startsWith(oldCat)) {
-                    const idx = newOrder.indexOf(p.id);
-                    const newId = `${oldCat}${String(idx + 1).padStart(3, "0")}`;
-                    return { ...p, id: newId };
-                }
-                return p;
-            });
-
-            for (const p of updated) {
-                await firestoreService.insertWithId(`restaurants/${restaurant.id}/productos`, p.id, p);
+            const ids = grouped[oldCat].map(p => p.id);
+            const newOrder = arrayMove(ids, ids.indexOf(active.id), ids.indexOf(over.id));
+            for (let i = 0; i < newOrder.length; i++) {
+                const id = newOrder[i];
+                const prod = products.find(p => p.id === id);
+                const newId = `${oldCat}${String(i + 1).padStart(3, "0")}`;
+                if (prod.id !== newId) await firestoreService.insertWithId(`restaurants/${restaurant.id}/productos`, newId, prod);
             }
-
-            setProducts(updated);
             toast.success("Reordenado");
             return;
         }
 
         const newId = `${newCat}${String(grouped[newCat]?.length + 1 || 1).padStart(3, "0")}`;
-        const { id, ...data } = activeItem;
-
-        await firestoreService.insertWithId(`restaurants/${restaurant.id}/productos`, newId, data);
-        await firestoreService.remove(`restaurants/${restaurant.id}/productos`, id);
-
-        const updated = await firestoreService.findAll(`restaurants/${restaurant.id}/productos`);
-        setProducts(updated);
-        toast.success("Producto movido de categoría");
+        const prodData = { ...itemA }; delete prodData.id;
+        await firestoreService.insertWithId(`restaurants/${restaurant.id}/productos`, newId, prodData);
+        await firestoreService.remove(`restaurants/${restaurant.id}/productos`, itemA.id);
+        toast.success("Movido categoría");
     };
 
     const handleAddCategory = () => {
-        const cat = prompt("Nombre de la nueva categoría:");
-        if (cat && !categories.includes(cat)) {
-            setCategories([...categories, cat]);
-        }
+        const cat = prompt("Nuevo nombre de categoría:");
+        if (cat && !categories.includes(cat)) setCategories([...categories, cat]);
     };
 
-    const handleCreateProduct = async (category) => {
+    const handleCreateProduct = async (cat) => {
         if (!newProductName.trim()) return toast.error("Nombre requerido");
-        const id = `${category}${String(grouped[category]?.length + 1 || 1).padStart(3, "0")}`;
-        const product = { name: newProductName, desc: "", price: 0, image: "", state: true };
-
-        await firestoreService.insertWithId(`restaurants/${restaurant.id}/productos`, id, product);
-        const updated = await firestoreService.findAll(`restaurants/${restaurant.id}/productos`);
-        setProducts(updated);
-        setCreatingCat(null);
+        const id = `${cat}${String(grouped[cat]?.length + 1 || 1).padStart(3, "00")}`;
+        await firestoreService.insertWithId(`restaurants/${restaurant.id}/productos`, id, { name: newProductName, desc: "", price: 0, image: "", state: true });
         setNewProductName("");
-        toast.success("Producto creado");
+        setCreatingCat(null);
+        toast.success("Creado");
     };
 
-    const handleUpdateProduct = async (id, updatedData) => {
-        await firestoreService.insertWithId(`restaurants/${restaurant.id}/productos`, id, updatedData);
-        const updated = await firestoreService.findAll(`restaurants/${restaurant.id}/productos`);
-        setProducts(updated);
-        toast.success("Producto actualizado");
+    const handleUpdateProduct = async (id, data) => {
+        await firestoreService.insertWithId(`restaurants/${restaurant.id}/productos`, id, data);
+        toast.success("Actualizado "+data.name);
     };
 
     const handleDeleteProduct = async (id) => {
         await firestoreService.remove(`restaurants/${restaurant.id}/productos`, id);
-        const updated = await firestoreService.findAll(`restaurants/${restaurant.id}/productos`);
-        setProducts(updated);
-        toast.success("Producto eliminado");
+        toast.success("Eliminado");
     };
 
     return (
         <div className="p-4 text-white">
-            <Toaster />
+            <Toaster
+                position="top-right"
+                reverseOrder={false}
+                toastOptions={{
+                    style: {
+                        marginTop: '60px'
+                    }
+                }}
+            />
             <h1 className="text-2xl font-bold mb-4">Administrador de Productos</h1>
-            <button onClick={handleAddCategory} className="bg-green-700 text-white px-4 py-2 rounded mb-6">+ Nueva Categoría</button>
 
-            <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-                onDragStart={({ active }) => setActiveProduct(products.find(p => p.id === active.id))}
-            >
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={({ active }) => setActiveProduct(products.find(p => p.id === active.id))} onDragEnd={handleDragEnd}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {categories.map((cat) => (
-                        <SortableContext key={cat} items={grouped[cat].map((p) => p.id)} strategy={verticalListSortingStrategy}>
-                            <div className="bg-gray-800 rounded p-4 flex flex-col">
+                    {categories.map(cat => (
+                        <SortableContext key={cat} items={grouped[cat].map(p => p.id)} strategy={verticalListSortingStrategy}>
+                            <div className="bg-[#111] rounded p-4 flex flex-col">
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="font-bold text-lg">{cat}</h2>
-                                    <button onClick={() => setCreatingCat(cat)} className="text-green-400 text-xl">+</button>
+                                    <button onClick={() => setCreatingCat(creatingCat === cat ? null : cat)}
+                                        className={`text-green-400 text-xl cursor-pointer transition-transform duration-300 transform origin-center ${creatingCat === cat ? "rotate-45" : "rotate-0"}`} title="Crear producto">+</button>
                                 </div>
 
                                 <div className="flex-1 overflow-y-auto space-y-3 max-h-[400px] pr-2">
-                                    {grouped[cat].map((p) => (
-                                        <SortableItem
-                                            key={p.id}
-                                            product={p}
-                                            onUpdate={handleUpdateProduct}
-                                            onDelete={handleDeleteProduct}
-                                        />
+                                    {grouped[cat].map((p, index) => (
+                                        <SortableItem key={`${p.id}-${index}`} product={p} onUpdate={handleUpdateProduct} onDelete={handleDeleteProduct} />
                                     ))}
                                 </div>
 
                                 {creatingCat === cat && (
                                     <div className="mt-4">
-                                        <input className="w-full p-2 rounded bg-gray-700 mb-2" placeholder="Nombre del producto" value={newProductName} onChange={(e) => setNewProductName(e.target.value)} />
+                                        <input className="w-full p-2 rounded bg-gray-700 mb-2 text-white" placeholder="Nombre del producto" value={newProductName} onChange={e => setNewProductName(e.target.value)} />
                                         <button onClick={() => handleCreateProduct(cat)} className="bg-blue-600 px-4 py-1 rounded text-white">Crear</button>
                                     </div>
                                 )}
                             </div>
                         </SortableContext>
                     ))}
+                    <div className="bg-[#111] rounded p-4 flex flex-col">
+                        <button onClick={handleAddCategory} className="bg-green-700 text-white px-4 py-2 rounded mb-6">+ Categoría</button>
+                    </div>
                 </div>
 
                 <DragOverlay>

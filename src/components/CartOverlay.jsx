@@ -1,9 +1,19 @@
 import React, { useEffect, useState, useRef } from "react";
 import { X, Trash2 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
+import { useRestaurant } from "../contexts/RestaurantContext";
+
+import { db } from "../firebase/firebase";
+import { doc, runTransaction } from "firebase/firestore";
 
 export default function CartOverlay({ onClose }) {
+  const { restaurant } = useRestaurant();
+
   const [isVisible, setIsVisible] = useState(false);
+  const [buyerName, setBuyerName] = useState("");
+  const [address, setAddress] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
+
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
 
@@ -13,6 +23,15 @@ export default function CartOverlay({ onClose }) {
     updateQuantity,
     clearCart
   } = useCart();
+
+  // Objeto de barrios y precios (editable)
+  const neighborhoodOptions = {
+    Centro: 2000,
+    Norte: 3000,
+    Sur: 2500,
+    Oriente: 3500,
+    Occidente: 3000,
+  };
 
   useEffect(() => {
     setTimeout(() => setIsVisible(true), 10);
@@ -38,7 +57,67 @@ export default function CartOverlay({ onClose }) {
     setTimeout(onClose, 300);
   };
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const deliveryFee = neighborhoodOptions[neighborhood] || 0;
+  const total = subtotal + deliveryFee;
+
+  const handleCheckout = async () => {
+    if (!buyerName || !address || !neighborhood) {
+      alert("Por favor completa los datos del comprador.");
+      return;
+    }
+
+    if (!restaurant?.id) {
+      alert("Restaurante no cargado.");
+      return;
+    }
+
+    const year = new Date().getFullYear();
+    const restaurantId = restaurant.id;
+    const counterDocRef = doc(db, `restaurants/${restaurantId}/counters/${year}`);
+
+    try {
+      const newOrderId = await runTransaction(db, async (transaction) => {
+        const counterDoc = await transaction.get(counterDocRef);
+        let current = 0;
+
+        if (counterDoc.exists()) {
+          current = counterDoc.data().count || 0;
+        }
+
+        const next = current + 1;
+        const padded = String(next).padStart(4, '0');
+        const orderId = `${year}${padded}`;
+
+        transaction.set(counterDocRef, { count: next }, { merge: true });
+
+        const orderRef = doc(db, `restaurants/${restaurantId}/ordenes/${orderId}`);
+        const orderData = {
+          createdAt: new Date(),
+          items: cart,
+          subtotal,
+          tax: 0, // Puedes calcular si aplica
+          deliveryFee,
+          total,
+          buyerName,
+          address,
+          neighborhood,
+          status: 'pendiente'
+        };
+
+        transaction.set(orderRef, orderData);
+        return orderId;
+      });
+
+      alert(`Orden enviada con éxito. ID: ${newOrderId}`);
+      clearCart();
+      handleClose();
+    } catch (error) {
+      console.error("Error al crear la orden:", error);
+      alert("Error al enviar la orden.");
+    }
+  };
+
 
   return (
     <div
@@ -55,7 +134,6 @@ export default function CartOverlay({ onClose }) {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Botón cerrar */}
         <button
           onClick={handleClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-black cursor-pointer"
@@ -65,8 +143,7 @@ export default function CartOverlay({ onClose }) {
 
         <h2 className="text-xl font-semibold mb-6">Tu carrito</h2>
 
-        {/* Listado de productos */}
-        <div className="space-y-6 overflow-y-auto max-h-[70vh] pr-1">
+        <div className="space-y-6 overflow-y-auto max-h-[60vh] pr-1">
           {cart.length === 0 ? (
             <p className="text-gray-500">Tu carrito está vacío.</p>
           ) : (
@@ -111,19 +188,61 @@ export default function CartOverlay({ onClose }) {
           )}
         </div>
 
-        {/* Total y pagar */}
         {cart.length > 0 && (
           <div className="mt-6 space-y-4">
+            {/* Inputs del comprador */}
+            <input
+              type="text"
+              placeholder="Nombre"
+              value={buyerName}
+              onChange={(e) => setBuyerName(e.target.value)}
+              className="w-full border px-3 py-2 rounded text-sm"
+            />
+            <input
+              type="text"
+              placeholder="Dirección"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="w-full border px-3 py-2 rounded text-sm"
+            />
+            <select
+              value={neighborhood}
+              onChange={(e) => setNeighborhood(e.target.value)}
+              className="w-full border px-3 py-2 rounded text-sm"
+            >
+              <option value="">Selecciona un barrio</option>
+              {Object.entries(neighborhoodOptions).map(([key, price]) => (
+                <option key={key} value={key}>
+                  {key} (${price})
+                </option>
+              ))}
+            </select>
+
+            {/* Totales */}
+            <div className="flex justify-between text-lg">
+              <span>Subtotal</span>
+              <span>${subtotal.toLocaleString('es-CL')}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>IVA</span>
+              <span>$0</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Domicilio</span>
+              <span>${deliveryFee.toLocaleString('es-CL')}</span>
+            </div>
             <div className="flex justify-between text-lg font-bold">
               <span>Total</span>
               <span>${total.toLocaleString('es-CL')}</span>
             </div>
+
             <button
               className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded"
-              onClick={() => alert("Implementar lógica de pago")}
+              onClick={handleCheckout}
             >
               Pagar
             </button>
+
             <button
               className="w-full text-sm text-gray-500 underline"
               onClick={clearCart}

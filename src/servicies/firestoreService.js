@@ -11,7 +11,8 @@ import {
   setDoc,
   updateDoc,
   deleteDoc,
-  DocumentReference 
+  DocumentReference,
+  onSnapshot 
 } from "firebase/firestore";
 
 /**
@@ -211,7 +212,52 @@ const firestoreService = {
     }
 
     return resolved;
+  },
+
+  // Real time
+
+  /**
+ * Escucha todos los documentos de una colección y ejecuta un callback en tiempo real.
+ * @param {string} collectionName - Nombre de la colección
+ * @param {function} callback - Función que recibe un array actualizado de documentos
+ * @returns {function} Función para cancelar la suscripción
+ */
+listenAll(collectionName, callback) {
+  try {
+    const ref = collection(db, collectionName);
+    const unsubscribe = onSnapshot(ref, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      callback(data);
+    });
+    return unsubscribe;
+  } catch (error) {
+    console.error(`Error en listenAll(${collectionName}):`, error);
+    throw error;
   }
+},
+
+/**
+ * Escucha en tiempo real una subcolección.
+ * @param {string} parentCollection
+ * @param {string} parentId
+ * @param {string} subcollectionName
+ * @param {function} callback - Función que recibe un array actualizado de documentos
+ * @returns {function} Función para cancelar la suscripción
+ */
+listenSubcollection(parentCollection, parentId, subcollectionName, callback) {
+  try {
+    const subRef = collection(db, parentCollection, parentId, subcollectionName);
+    const unsubscribe = onSnapshot(subRef, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      callback(data);
+    });
+    return unsubscribe;
+  } catch (error) {
+    console.error(`Error en listenSubcollection(${parentCollection}/${parentId}/${subcollectionName}):`, error);
+    throw error;
+  }
+}
+
 };
 
 export default firestoreService;
