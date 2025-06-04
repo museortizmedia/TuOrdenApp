@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRestaurant } from "../contexts/RestaurantContext";
 import { ShoppingCartIcon } from "lucide-react";
-import CartOverlay from "../components/CartOverlay";
+import CartOverlay from "./CartOverlay";
 import { useAuth } from "../contexts/AuthContext";
 import theme from "../theme";
 import { useCart } from "../contexts/CartContext";
 
-export default function CartaLayout({ children }) {
+export default function RestaurantLayout({ children }) {
   const { restaurant } = useRestaurant();
   const { user } = useAuth();
   const { justAdded } = useCart();
@@ -24,10 +24,9 @@ export default function CartaLayout({ children }) {
       touchEndX.current = e.changedTouches[0].clientX;
       const deltaX = touchStartX.current - touchEndX.current;
 
-      // Detectar swipe desde el borde derecho (inicio cerca del borde y movimiento hacia la izquierda)
       if (
-        touchStartX.current > window.innerWidth - 50 && // inicio cerca del borde derecho
-        deltaX > 50 && // movimiento hacia la izquierda
+        touchStartX.current > window.innerWidth - 50 &&
+        deltaX > 50 &&
         !isCartOpen
       ) {
         setIsCartOpen(true);
@@ -42,6 +41,33 @@ export default function CartaLayout({ children }) {
       window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [isCartOpen]);
+
+  // 🛒 Icono del carrito con badges y animaciones
+  const ShoppingIcon = () => {
+    const { cart, justAdded } = useCart();
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+    return (
+      <div className="relative">
+        {/* Icono principal */}
+        <ShoppingCartIcon className="w-6 h-6" />
+
+        {/* Badge de cantidad */}
+        {totalItems > 0 && (
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full leading-none">
+            {totalItems}
+          </span>
+        )}
+
+        {/* Toast animado "¡Añadido!" */}
+        {justAdded && (
+          <span className="absolute -top-8 right-0 bg-red-500 text-white text-[10px] px-2 py-1 rounded shadow animate-pulse">
+            ¡Añadido!
+          </span>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className={`${theme.colors.background.dark} relative min-h-screen`}>
@@ -62,16 +88,14 @@ export default function CartaLayout({ children }) {
           ${justAdded ? "animate-bounce" : ""}
         `}
       >
-        <ShoppingCartIcon className="w-6 h-6" />
+        <ShoppingIcon />
       </button>
 
-      {/* Contenido principal margin para no solapar el menu */}
+      {/* Contenido principal */}
       <main className="px-10 md:px-20 mt-15">{children}</main>
 
-      {/* Overlay del carrito */}
-      {isCartOpen && (
-        <CartOverlay onClose={() => setIsCartOpen(false)} />
-      )}
+      {/* Carrito Overlay */}
+      {isCartOpen && <CartOverlay onClose={() => setIsCartOpen(false)} />}
     </div>
   );
 }

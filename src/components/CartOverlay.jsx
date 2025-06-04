@@ -96,7 +96,7 @@ export default function CartOverlay({ onClose }) {
           createdAt: new Date(),
           items: cart,
           subtotal,
-          tax: 0, // Puedes calcular si aplica
+          tax: 0,
           deliveryFee,
           total,
           buyerName,

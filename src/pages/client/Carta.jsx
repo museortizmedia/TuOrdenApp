@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
-import CartaLayout from "../../components/CartaLayout";
+import RestaurantLayout from "../../components/RestaurantLayout";
 import { useRestaurant } from "../../contexts/RestaurantContext";
 import theme from "../../theme";
 import firestoreService from "../../servicies/firestoreService";
@@ -111,7 +111,7 @@ function Carta() {
 
 
     return (
-        <CartaLayout>
+        <RestaurantLayout>
             <>
                 <div className={`${theme.layout.darkBackground} min-h-screen`}>
                     {/* Menú de categorías fijo */}
@@ -197,7 +197,7 @@ function Carta() {
                     </div>
                 </div>
             </>
-        </CartaLayout>
+        </RestaurantLayout>
     );
 }
 
