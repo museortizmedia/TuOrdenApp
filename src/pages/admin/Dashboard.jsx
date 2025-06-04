@@ -5,6 +5,8 @@ import firestoreService from "../../servicies/firestoreService";
 import theme from "../../theme";
 import { Menu, X } from "lucide-react";
 import AdminProducts from "./pages/AdminProducts";
+import AdminOrdenes from "./pages/AdminOrdenes";
+import AdminStory from "./pages/AdminStory";
 
 function Dashboard() {
   const { user, logout } = useAuth();
@@ -45,9 +47,9 @@ function Dashboard() {
   }, [user]);
 
   const subPages = [
-    { name: "Inicio", content: <p className="text-lg">Panel principal</p> },
+    { name: "Inicio", content: <AdminOrdenes/> },
     { name: "Productos", content: <AdminProducts/> },
-    { name: "Categorías", content: <p>Gestión de categorías</p> },
+    { name: "Historial", content: <AdminStory/> },
   ];
 
   const currentPage = subPages.find((p) => p.name === activePage);
