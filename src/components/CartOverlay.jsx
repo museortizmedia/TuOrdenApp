@@ -2,9 +2,10 @@ import React, { useEffect, useState, useRef } from "react";
 import { X, Trash2 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import { useRestaurant } from "../contexts/RestaurantContext";
-
 import { db } from "../firebase/firebase";
 import { doc, runTransaction } from "firebase/firestore";
+import toast from "react-hot-toast";
+import MyOrders from "../pages/client/MyOrders";
 
 export default function CartOverlay({ onClose }) {
   const { restaurant } = useRestaurant();
@@ -21,10 +22,12 @@ export default function CartOverlay({ onClose }) {
     cart,
     removeFromCart,
     updateQuantity,
-    clearCart
+    clearCart,
+    addActiveOrder,
+    activeOrders,
+    clearActiveOrders
   } = useCart();
 
-  // Objeto de barrios y precios (editable)
   const neighborhoodOptions = {
     Centro: 2000,
     Norte: 3000,
@@ -57,7 +60,10 @@ export default function CartOverlay({ onClose }) {
     setTimeout(onClose, 300);
   };
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
   const deliveryFee = neighborhoodOptions[neighborhood] || 0;
   const total = subtotal + deliveryFee;
 
@@ -76,6 +82,20 @@ export default function CartOverlay({ onClose }) {
     const restaurantId = restaurant.id;
     const counterDocRef = doc(db, `restaurants/${restaurantId}/counters/${year}`);
 
+    // 👉 Declaramos orderData antes del runTransaction
+    const orderData = {
+      createdAt: new Date(),
+      items: cart,
+      subtotal,
+      tax: 0,
+      deliveryFee,
+      total,
+      buyerName,
+      address,
+      neighborhood,
+      status: "pendiente",
+    };
+
     try {
       const newOrderId = await runTransaction(db, async (transaction) => {
         const counterDoc = await transaction.get(counterDocRef);
@@ -86,30 +106,18 @@ export default function CartOverlay({ onClose }) {
         }
 
         const next = current + 1;
-        const padded = String(next).padStart(4, '0');
+        const padded = String(next).padStart(4, "0");
         const orderId = `${year}${padded}`;
 
         transaction.set(counterDocRef, { count: next }, { merge: true });
 
         const orderRef = doc(db, `restaurants/${restaurantId}/ordenes/${orderId}`);
-        const orderData = {
-          createdAt: new Date(),
-          items: cart,
-          subtotal,
-          tax: 0,
-          deliveryFee,
-          total,
-          buyerName,
-          address,
-          neighborhood,
-          status: 'pendiente'
-        };
-
         transaction.set(orderRef, orderData);
         return orderId;
       });
 
       alert(`Orden enviada con éxito. ID: ${newOrderId}`);
+      addActiveOrder({ id: newOrderId, ...orderData });
       clearCart();
       handleClose();
     } catch (error) {
@@ -165,7 +173,7 @@ export default function CartOverlay({ onClose }) {
                   <div className="flex items-center gap-2 mt-2">
                     <input
                       type="number"
-                      min="0"
+                      min="1"
                       value={item.quantity}
                       onChange={(e) => {
                         const value = Number(e.target.value);
@@ -190,7 +198,6 @@ export default function CartOverlay({ onClose }) {
 
         {cart.length > 0 && (
           <div className="mt-6 space-y-4">
-            {/* Inputs del comprador */}
             <input
               type="text"
               placeholder="Nombre"
@@ -218,10 +225,9 @@ export default function CartOverlay({ onClose }) {
               ))}
             </select>
 
-            {/* Totales */}
             <div className="flex justify-between text-lg">
               <span>Subtotal</span>
-              <span>${subtotal.toLocaleString('es-CL')}</span>
+              <span>${subtotal.toLocaleString("es-CL")}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span>IVA</span>
@@ -229,11 +235,11 @@ export default function CartOverlay({ onClose }) {
             </div>
             <div className="flex justify-between text-sm">
               <span>Domicilio</span>
-              <span>${deliveryFee.toLocaleString('es-CL')}</span>
+              <span>${deliveryFee.toLocaleString("es-CL")}</span>
             </div>
             <div className="flex justify-between text-lg font-bold">
               <span>Total</span>
-              <span>${total.toLocaleString('es-CL')}</span>
+              <span>${total.toLocaleString("es-CL")}</span>
             </div>
 
             <button
@@ -251,6 +257,23 @@ export default function CartOverlay({ onClose }) {
             </button>
           </div>
         )}
+
+        {/* LAS ORDENES ACTIVAS */}
+        {activeOrders.length > 0 && (
+          <>
+          <h2 className="text-xl font-semibold my-6">Tus pedidos</h2>
+          <div className="mb-6">
+            <MyOrders />
+            <button
+              className="w-full text-sm text-gray-500 underline"
+              onClick={clearActiveOrders}
+            >
+              Vaciar ordenes activas
+            </button>
+          </div>
+          </>
+        )}
+
       </div>
     </div>
   );

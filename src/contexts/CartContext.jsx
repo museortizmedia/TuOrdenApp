@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useRestaurant } from "./RestaurantContext";
+import firestoreService from "../servicies/firestoreService";
 
 const CartContext = createContext();
 
@@ -13,13 +15,51 @@ export function CartProvider({ children }) {
   });
 
   const [justAdded, setJustAdded] = useState(false);
+  const [activeOrders, setActiveOrders] = useState([]);
+  const { restaurant } = useRestaurant();
 
-  // Guardar en localStorage cuando cambie el carrito
+  // Guardar carrito en localStorage cuando cambie
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  // Añadir producto
+  // Escuchar en tiempo real las órdenes activas del cliente
+  useEffect(() => {
+    if (!restaurant?.id) return;
+
+    const unsub = firestoreService.listenSubcollection(
+      "restaurants",
+      restaurant.id,
+      "ordenes",
+      (allOrders) => {
+        const myOrderIds = JSON.parse(localStorage.getItem("myOrderIds") || "[]");
+        const myOrders = allOrders.filter((order) => myOrderIds.includes(order.id));
+        setActiveOrders(myOrders);
+      }
+    );
+
+    return () => unsub();
+  }, [restaurant?.id]);
+
+  // ✅ Añadir orden activa (memoria + localStorage)
+  const addActiveOrder = (order) => {
+    setActiveOrders((prev) => [...prev, order]);
+
+    const existingIds = JSON.parse(localStorage.getItem("myOrderIds") || "[]");
+
+    if (!existingIds.includes(order.id)) {
+      const updatedIds = [...existingIds, order.id];
+      localStorage.setItem("myOrderIds", JSON.stringify(updatedIds));
+    }
+  };
+
+  // ❌ Limpiar órdenes activas (memoria + localStorage)
+  const clearActiveOrders = () => {
+    setActiveOrders([]);
+    localStorage.removeItem("myOrderIds");
+  };
+
+  // Añadir producto al carrito
   const addToCart = (product) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
@@ -33,12 +73,11 @@ export function CartProvider({ children }) {
       return [...prev, { ...product, quantity: 1 }];
     });
 
-    // Activar animación
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1000);
   };
 
-  // Remover producto
+  // Remover producto del carrito
   const removeFromCart = (id) => {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
@@ -49,9 +88,7 @@ export function CartProvider({ children }) {
       removeFromCart(id);
     } else {
       setCart((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, quantity } : item
-        )
+        prev.map((item) => (item.id === id ? { ...item, quantity } : item))
       );
     }
   };
@@ -70,6 +107,9 @@ export function CartProvider({ children }) {
         updateQuantity,
         clearCart,
         justAdded,
+        activeOrders,
+        addActiveOrder,
+        clearActiveOrders,
       }}
     >
       {children}
