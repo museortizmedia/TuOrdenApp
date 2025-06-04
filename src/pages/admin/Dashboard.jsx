@@ -4,6 +4,7 @@ import { useRestaurant } from "../../contexts/RestaurantContext";
 import firestoreService from "../../servicies/firestoreService";
 import theme from "../../theme";
 import { Menu, X } from "lucide-react";
+import AdminProducts from "./pages/AdminProducts";
 
 function Dashboard() {
   const { user, logout } = useAuth();
@@ -45,7 +46,7 @@ function Dashboard() {
 
   const subPages = [
     { name: "Inicio", content: <p className="text-lg">Panel principal</p> },
-    { name: "Productos", content: <p>Gestión de productos</p> },
+    { name: "Productos", content: <AdminProducts/> },
     { name: "Categorías", content: <p>Gestión de categorías</p> },
   ];
 
