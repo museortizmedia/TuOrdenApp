@@ -103,10 +103,9 @@ function Carta() {
 
 
     // Cart
-    const { addToCart} = useCart();
-    const handleProductCart = (product) =>
-    {
-        console.log("Comprando "+product.name)
+    const { addToCart } = useCart();
+    const handleProductCart = (product) => {
+        console.log("Comprando " + product.name)
         addToCart(product);
     }
 
@@ -114,86 +113,89 @@ function Carta() {
     return (
         <CartaLayout>
             <>
-            <div className={`${theme.layout.darkBackground} min-h-screen`}>
-                {/* Menú de categorías fijo */}
-                <div className="sticky top-16 z-40 shadow-md">
-                    <nav className={`${theme.colors.background.dark} flex overflow-x-auto whitespace-nowrap p-2 space-x-2 scrollbar-hide touch-pan-x`}>
-                        {categories.map((cat) => (
-                            <button
-                                key={cat}
-                                ref={(el) => (buttonRefs.current[cat] = el)}
-                                onClick={() => handleCategoryClick(cat)}
-                                className={`pb-1 px-3 text-sm transition-colors shrink-0
+                <div className={`${theme.layout.darkBackground} min-h-screen`}>
+                    {/* Menú de categorías fijo */}
+                    <div className="sticky top-16 z-40 shadow-md">
+                        <nav className={`${theme.colors.background.dark} flex overflow-x-auto whitespace-nowrap p-2 space-x-2 scrollbar-hide touch-pan-x`}>
+                            {categories.map((cat) => (
+                                <button
+                                    key={cat}
+                                    ref={(el) => (buttonRefs.current[cat] = el)}
+                                    onClick={() => handleCategoryClick(cat)}
+                                    className={`pb-1 px-3 text-sm transition-colors shrink-0
                     ${activeCategory === cat
-                                        ? "border-b-2 border-yellow-400 text-yellow-400 font-bold"
-                                        : "text-white hover:text-yellow-300"
-                                    }`}
+                                            ? "border-b-2 border-yellow-400 text-yellow-400 font-bold"
+                                            : "text-white hover:text-yellow-300"
+                                        }`}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </nav>
+                    </div>
+
+
+
+                    {/* Listado de productos por categoría */}
+                    <div className="p-4 space-y-8">
+                        {categories.map((cat) => (
+                            <section
+                                key={cat}
+                                id={cat}
+                                ref={(el) => (sectionRefs.current[cat] = el)}
+                                className="scroll-mt-[100px] md:scroll-mt-20"
                             >
-                                {cat}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
-
-
-
-                {/* Listado de productos por categoría */}
-                <div className="p-4 space-y-8">
-                    {categories.map((cat) => (
-                        <section
-                            key={cat}
-                            id={cat}
-                            ref={(el) => (sectionRefs.current[cat] = el)}
-                            className="scroll-mt-[100px] md:scroll-mt-20"
-                        >
-                            <h2 className="text-xl font-bold mt-20 mb-10">{cat}</h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-10">
-                                {groupedProducts[cat].map((product) => (
-                                    <div
-                                        key={product.id}
-                                        className="flex flex-col md:flex-row items-stretch bg-[#101010] rounded-lg overflow-hidden shadow-md"
-                                    >
-                                        {/* Imagen cuadrada */}
-                                        <div className="w-full md:w-32 aspect-square overflow-hidden">
-                                            <img
-                                                src={product.image || "https://placehold.co/300"}
-                                                alt={product.name}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-
-                                        {/* Información del producto */}
-                                        <div className="flex-1 p-4 flex flex-col justify-between">
-                                            <div>
-                                                <h3 className="font-bold text-lg">{product.name}</h3>
-                                                <p className="text-sm">{product.desc}</p>
+                                <h2 className="text-xl font-bold mt-20 mb-10">{cat}</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-10">
+                                    {groupedProducts[cat].map((product) => (
+                                        <div
+                                            key={product.id}
+                                            className="flex flex-col md:flex-row items-stretch bg-[#101010] rounded-lg overflow-hidden shadow-md"
+                                        >
+                                            {/* Imagen cuadrada: 1/4 */}
+                                            <div className="w-full md:basis-1/4 aspect-square overflow-hidden">
+                                                <img
+                                                    src={product.image || "https://placehold.co/300"}
+                                                    alt={product.name}
+                                                    className="w-full h-full object-cover"
+                                                />
                                             </div>
-                                            <p className="mt-2 font-semibold">${(product.price).toLocaleString('es-CL')}</p>
-                                        </div>
 
-                                        {/* Botones */}
-                                        <div className="flex items-center p-4">
-                                            {product.state == true ?
-                                                <button
-                                                    className="bg-yellow-400 hover:bg-yellow-500 cursor-pointer text-black font-bold px-3 py-1 rounded"
-                                                    onClick={()=>handleProductCart(product)}
-                                                >
-                                                    Añadir
-                                                </button>
-                                                :
-                                                <span className="bg-red-400 text-black font-bold px-3 py-1 rounded">
-                                                    AGOTADO
-                                                </span>
-                                            }
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
+                                            {/* Información del producto: 2/4 */}
+                                            <div className="p-4 flex flex-col justify-between w-full md:basis-2/4">
+                                                <div>
+                                                    <h3 className="font-bold text-lg truncate">{product.name}</h3>
+                                                    <p className="text-sm max-h-16 overflow-y-auto">{product.desc}</p>
+                                                </div>
+                                                <p className="mt-2 font-semibold">
+                                                    ${(product.price).toLocaleString("es-CL")}
+                                                </p>
+                                            </div>
 
-                    ))}
+                                            {/* Botón: 1/4 */}
+                                            <div className="flex items-center justify-center p-4 w-full md:basis-1/4">
+                                                {product.state === true ? (
+                                                    <button
+                                                        className={`${theme.buttons.secondary} w-full`}
+                                                        onClick={() => handleProductCart(product)}
+                                                    >
+                                                        Añadir
+                                                    </button>
+                                                ) : (
+                                                    <span className="bg-[#9d100f] text-white font-extrabold px-4 py-2 rounded w-full text-center">
+                                                        AGOTADO
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                            </section>
+
+                        ))}
+                    </div>
                 </div>
-            </div>
             </>
         </CartaLayout>
     );

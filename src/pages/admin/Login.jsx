@@ -5,6 +5,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../firebase/firebase";
 import theme from "../../theme";
+import { useRestaurant } from "../../contexts/RestaurantContext";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -28,13 +29,18 @@ function Login() {
     setLoading(false);
   };
 
+  // Providers
+
+  const{restaurant}=useRestaurant();
+
   return (
     <div className={`${theme.layout.darkBackground} min-h-screen flex items-center justify-center`}>
       <form
         onSubmit={handleLogin}
-        className="bg-gray-900 p-6 rounded-xl w-full max-w-sm shadow-lg"
+        className={`${theme.colors.background.darkMedium} p-6 rounded-xl w-full max-w-sm shadow-lg`}
       >
-        <h2 className="text-xl text-white font-bold mb-4 text-center">Acceso Administrativo</h2>
+        <div className="mb-4"><h2 className="text-xl text-white font-bold text-center">Acceso Administrativo</h2>
+        <h3 className="text-xl text-white font-bold text-center">{restaurant.name}</h3></div>
 
         {error && <p className="text-red-500 text-sm mb-3 text-center">{error}</p>}
 
@@ -43,7 +49,7 @@ function Login() {
           placeholder="Correo"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 mb-3 rounded bg-gray-800 text-white border border-gray-700"
+          className={`${theme.colors.background.darkLight} w-full p-2 mb-3 rounded text-white border border-gray-700`}
           required
         />
 
@@ -52,7 +58,7 @@ function Login() {
           placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 mb-4 rounded bg-gray-800 text-white border border-gray-700"
+          className={`${theme.colors.background.darkLight} w-full p-2 mb-3 rounded text-white border border-gray-700`}
           required
         />
 

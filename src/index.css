@@ -1,26 +1,33 @@
 @import "tailwindcss";
 
-/* Scrollbar cuadrado global */
+/* Firefox */
 html, body {
-  scrollbar-width: thin;               /* Firefox */
-  scrollbar-color: #888 transparent;   /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #888 transparent;
 }
 
 /* WebKit (Chrome, Safari, Edge) */
 *::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 *::-webkit-scrollbar-track {
-  background: transparent;
+  background: transparent;         /* Oculta fondo */
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: #888;
-  border-radius: 0; /* Cuadrado */
+  background-color: #888;       /* Color del scroll */
+  border-radius: 4px;              /* Bordes más suaves */
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background-color: #555;
+  background-color: #6b6b6b;       /* Color al hacer hover */
+}
+
+/* Opcional: Ocultar las flechas (botones de scroll) */
+*::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
 }

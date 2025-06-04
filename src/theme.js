@@ -25,7 +25,6 @@ const theme = {
       dark: "bg-[#050505] text-white",
       darkLight: "bg-[#1a1a1a]",
       darkMedium: "bg-[#121212]",
-      darkLighter: "bg-[#1f1f1f]",
       backgroundGradient: "bg-gradient-to-b from-[#1a1a1a] to-[#050505]",
     },
     border: {
