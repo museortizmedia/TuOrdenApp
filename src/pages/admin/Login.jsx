@@ -60,6 +60,7 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
           className={`${theme.colors.background.darkLight} w-full p-2 mb-3 rounded text-white border border-gray-700`}
           required
+          autocomplete="current-password"
         />
 
         <button

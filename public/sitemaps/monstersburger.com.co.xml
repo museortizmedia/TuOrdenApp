@@ -2,24 +2,27 @@
 <urlset 
   xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
 >
+  <!-- Página principal -->
   <url>
-    <loc>https://tu-orden-app.vercel.app/</loc>
+    <loc>https://monstersburger.com.co/</loc>
     <lastmod>2025-06-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
+  <!-- Carta del restaurante -->
   <url>
-    <loc>https://tu-orden-app.vercel.app/carta</loc>
+    <loc>https://monstersburger.com.co/carta</loc>
     <lastmod>2025-06-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
+  <!-- Admin (de baja prioridad y cambio mensual) -->
   <url>
-    <loc>https://tu-orden-app.vercel.app/admin</loc>
+    <loc>https://monstersburger.com.co/admin</loc>
     <lastmod>2025-06-01</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
+    <priority>0.1</priority>
   </url>
 </urlset>
