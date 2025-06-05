@@ -45,17 +45,17 @@ function App() {
 
   return (
     <RestaurantProvider value={{ id, restaurant }}>
-  <CartProvider>
-    <Router>
-      <DynamicHead />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/carta" element={<Carta />} />
-        <Route path="/admin" element={<AdminRoute />} />
-      </Routes>
-    </Router>
-  </CartProvider>
-</RestaurantProvider>
+      <CartProvider>
+        <Router>
+          <DynamicHead />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/carta" element={<Carta />} />
+            <Route path="/admin" element={<AdminRoute />} />
+          </Routes>
+        </Router>
+      </CartProvider>
+    </RestaurantProvider>
   );
 }
 
