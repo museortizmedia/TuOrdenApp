@@ -80,6 +80,7 @@ export default function AdminOrdenes() {
                     buyerName: 'Test Cliente',
                     address: 'Calle Ficticia 123',
                     neighborhood: 'Centro',
+                    phoneNumber: 3001231234,
                     status: 'pendiente'
                 };
                 transaction.set(orderRef, dummyOrder);
@@ -88,9 +89,11 @@ export default function AdminOrdenes() {
             });
 
             toast.success(`Orden de prueba creada (#${newOrderId})`);
+            if (navigator.vibrate) { navigator.vibrate(100) }
         } catch (error) {
             console.error('Error al crear la orden de prueba:', error);
             toast.error('Error al crear orden de prueba');
+            if (navigator.vibrate) { navigator.vibrate(100, 50, 100) }
         }
     };
 
@@ -126,6 +129,11 @@ export default function AdminOrdenes() {
             success: 'Órdenes antiguas archivadas.',
             error: 'Error al mover órdenes',
         });
+
+        // Vibrar si se completó con éxito
+        if (navigator.vibrate) {
+            navigator.vibrate([150, 30, 150]);
+        }
     };
 
     const handleImpresion = (e, order) => {

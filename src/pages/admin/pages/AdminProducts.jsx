@@ -120,6 +120,7 @@ function AdminProducts() {
     const [newProductName, setNewProductName] = useState("");
     const [activeProduct, setActiveProduct] = useState(null);
     const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
+    const vibrate = (pattern = [100]) => navigator.vibrate?.(pattern);
 
     useEffect(() => {
         if (!restaurant?.id) return;
@@ -156,6 +157,7 @@ function AdminProducts() {
                 if (prod.id !== newId) await firestoreService.insertWithId(`restaurants/${restaurant.id}/productos`, newId, prod);
             }
             toast.success("Reordenado");
+            vibrate([40]);
             return;
         }
 
@@ -164,6 +166,7 @@ function AdminProducts() {
         await firestoreService.insertWithId(`restaurants/${restaurant.id}/productos`, newId, prodData);
         await firestoreService.remove(`restaurants/${restaurant.id}/productos`, itemA.id);
         toast.success("Movido categoría");
+        vibrate([50, 30, 50]);
     };
 
     const handleAddCategory = () => {
@@ -178,16 +181,19 @@ function AdminProducts() {
         setNewProductName("");
         setCreatingCat(null);
         toast.success("Creado");
+        vibrate([100, 50, 100]);
     };
 
     const handleUpdateProduct = async (id, data) => {
         await firestoreService.insertWithId(`restaurants/${restaurant.id}/productos`, id, data);
-        toast.success("Actualizado "+data.name);
+        toast.success("Actualizado " + data.name);
+        vibrate([100]);
     };
 
     const handleDeleteProduct = async (id) => {
         await firestoreService.remove(`restaurants/${restaurant.id}/productos`, id);
         toast.success("Eliminado");
+        vibrate([200, 50, 200]);
     };
 
     return (

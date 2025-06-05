@@ -24,6 +24,7 @@ function Login() {
     } catch (err) {
       setError("Credenciales incorrectas");
       console.error(err);
+      if(navigator.vibrate) { navigator.vibrate([100, 50, 100]); }
     }
 
     setLoading(false);

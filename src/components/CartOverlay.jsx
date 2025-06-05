@@ -11,9 +11,11 @@ export default function CartOverlay({ onClose }) {
   const { restaurant } = useRestaurant();
 
   const [isVisible, setIsVisible] = useState(false);
+
   const [buyerName, setBuyerName] = useState("");
   const [address, setAddress] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
@@ -68,13 +70,13 @@ export default function CartOverlay({ onClose }) {
   const total = subtotal + deliveryFee;
 
   const handleCheckout = async () => {
-    if (!buyerName || !address || !neighborhood) {
-      alert("Por favor completa los datos del comprador.");
+    if (!buyerName || !address || !neighborhood || !phoneNumber) {
+      //alert("Por favor completa todos los datos del comprador.");
       return;
     }
 
     if (!restaurant?.id) {
-      alert("Restaurante no cargado.");
+      //alert("Restaurante no cargado.");
       return;
     }
 
@@ -82,7 +84,6 @@ export default function CartOverlay({ onClose }) {
     const restaurantId = restaurant.id;
     const counterDocRef = doc(db, `restaurants/${restaurantId}/counters/${year}`);
 
-    // 👉 Declaramos orderData antes del runTransaction
     const orderData = {
       createdAt: new Date(),
       items: cart,
@@ -93,6 +94,7 @@ export default function CartOverlay({ onClose }) {
       buyerName,
       address,
       neighborhood,
+      phoneNumber,
       status: "pendiente",
     };
 
@@ -116,13 +118,14 @@ export default function CartOverlay({ onClose }) {
         return orderId;
       });
 
-      alert(`Orden enviada con éxito. ID: ${newOrderId}`);
+      //alert(`Orden enviada con éxito. ID: ${newOrderId}`);
+      if(navigator.vibrate) navigator.vibrate(150);
       addActiveOrder({ id: newOrderId, ...orderData });
       clearCart();
       handleClose();
     } catch (error) {
       console.error("Error al crear la orden:", error);
-      alert("Error al enviar la orden.");
+      //alert("Error al enviar la orden.");
     }
   };
 
@@ -182,7 +185,7 @@ export default function CartOverlay({ onClose }) {
                       }}
                       className="w-14 border rounded text-center text-sm"
                     />
-                    <button onClick={() => removeFromCart(item.id)}>
+                    <button onClick={() => { removeFromCart(item.id); if(navigator.vibrate){navigator.vibrate(100)} } }>
                       <Trash2 className="w-4 h-4 text-red-500" />
                     </button>
                   </div>
@@ -212,6 +215,20 @@ export default function CartOverlay({ onClose }) {
               onChange={(e) => setAddress(e.target.value)}
               className="w-full border px-3 py-2 rounded text-sm"
             />
+
+            <input
+              type="tel"
+              placeholder="Número de teléfono"
+              value={phoneNumber}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^3\d{0,9}$/.test(value) || value === "") {
+                  setPhoneNumber(value);
+                }
+              }}
+              className="w-full border px-3 py-2 rounded text-sm"
+            />
+
             <select
               value={neighborhood}
               onChange={(e) => setNeighborhood(e.target.value)}
@@ -261,16 +278,16 @@ export default function CartOverlay({ onClose }) {
         {/* LAS ORDENES ACTIVAS */}
         {activeOrders.length > 0 && (
           <>
-          <h2 className="text-xl font-semibold my-6">Tus pedidos</h2>
-          <div className="mb-6">
-            <MyOrders />
-            <button
-              className="w-full text-sm text-gray-500 underline"
-              onClick={clearActiveOrders}
-            >
-              Vaciar ordenes activas
-            </button>
-          </div>
+            <h2 className="text-xl font-semibold my-6">Tus pedidos</h2>
+            <div className="mb-6">
+              <MyOrders />
+              <button
+                className="w-full text-sm text-gray-500 underline"
+                onClick={clearActiveOrders}
+              >
+                Vaciar ordenes activas
+              </button>
+            </div>
           </>
         )}
 

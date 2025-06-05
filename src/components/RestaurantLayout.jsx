@@ -50,7 +50,7 @@ export default function RestaurantLayout({ children }) {
     return (
       <div className="relative">
         {/* Icono principal */}
-        <ShoppingCartIcon className="w-6 h-6" />
+        <ShoppingCartIcon className="w-6 h-6 hover:animate-pulse cursor-pointer" />
 
         {/* Badge de cantidad */}
         {totalItems > 0 && (
