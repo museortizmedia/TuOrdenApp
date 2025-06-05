@@ -40,8 +40,11 @@ export default function Index() {
       <div className="flex-grow flex flex-col items-center justify-center w-full max-w-screen-xl mx-auto px-[10%] md:px-[25%] text-center space-y-5 py-10">
         <img
           src={restaurant.logo}
-          alt="Promo"
+          alt={"Logo de "+restaurant.name}
+          width="1000" 
+          height="1000"
           className="w-50 max-w-xs rounded-xl shadow-lg"
+          loading="lazy"
         />
         <div className="space-y-1">
           <h1 className={`text-xl md:text-2xl ${theme.text.bold} ${theme.text.yellow}`}>
