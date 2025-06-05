@@ -74,7 +74,7 @@ export function CartProvider({ children }) {
     });
 
     setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 1000);
+    setTimeout(() => setJustAdded(false), 1500);
   };
 
   // Remover producto del carrito
@@ -84,6 +84,12 @@ export function CartProvider({ children }) {
 
   // Cambiar cantidad
   const updateQuantity = (id, quantity) => {
+
+    // Evita eliminar si es undefined, null, o cero temporal desde input vacío
+    if (quantity === "" || quantity === null || isNaN(quantity)) {
+      return;
+    }
+
     if (quantity <= 0) {
       removeFromCart(id);
     } else {

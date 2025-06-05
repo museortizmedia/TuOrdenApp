@@ -42,24 +42,18 @@ export default function RestaurantLayout({ children }) {
     };
   }, [isCartOpen]);
 
-  // 🛒 Icono del carrito con badges y animaciones
   const ShoppingIcon = () => {
     const { cart, justAdded } = useCart();
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
-      <div className="relative">
-        {/* Icono principal */}
-        <ShoppingCartIcon className="w-6 h-6 hover:animate-pulse cursor-pointer" />
-
-        {/* Badge de cantidad */}
+      <div className="relative w-6 h-6 sm:w-7 sm:h-7">
+        <ShoppingCartIcon className="w-full h-full" />
         {totalItems > 0 && (
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full leading-none">
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full leading-none">
             {totalItems}
           </span>
         )}
-
-        {/* Toast animado "¡Añadido!" */}
         {justAdded && (
           <span className="absolute -top-8 right-0 bg-red-500 text-white text-[10px] px-2 py-1 rounded shadow animate-pulse">
             ¡Añadido!
@@ -72,29 +66,31 @@ export default function RestaurantLayout({ children }) {
   return (
     <div className={`${theme.colors.background.dark} relative min-h-screen`}>
       {/* Header */}
-      <header className={`${theme.colors.background.dark} fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 py-4 shadow-md`}>
+      <header className={`${theme.colors.background.dark} fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-4 sm:px-6 py-4 shadow-md`}>
         <div className="flex items-center space-x-2">
           <img src={restaurant.logo} alt="Logo" className="h-8 w-auto" />
-          <p>{restaurant.name}</p>
+          <p className="text-white text-sm sm:text-base">{restaurant.name}</p>
         </div>
       </header>
 
-      {/* Botón flotante del carrito */}
+      {/* Floating cart button (always visible and responsive) */}
       <button
         onClick={() => setIsCartOpen(true)}
         className={`
-          fixed bottom-4 right-4 z-50 p-3 rounded-full shadow-lg transition-transform
+          fixed bottom-4 right-4 z-50 p-3 sm:p-4 rounded-full shadow-lg transition-transform
           bg-yellow-400 hover:bg-yellow-500 text-black
           ${justAdded ? "animate-bounce" : ""}
+          hover:animate-pulse cursor-pointer
         `}
+        aria-label="Abrir carrito"
       >
         <ShoppingIcon />
       </button>
 
-      {/* Contenido principal */}
-      <main className="px-10 md:px-20 mt-15">{children}</main>
+      {/* Main content (padding responsive) */}
+      <main className="pt-20 px-4 sm:px-6 md:px-10">{children}</main>
 
-      {/* Carrito Overlay */}
+      {/* Cart overlay */}
       {isCartOpen && <CartOverlay onClose={() => setIsCartOpen(false)} />}
     </div>
   );

@@ -118,16 +118,17 @@ function Carta() {
                 <div className={`${theme.layout.darkBackground} min-h-screen`}>
 
                     {/* Menú de categorías fijo */}
-                    <div className="sticky top-16 z-40 shadow-md">
-                        <nav className={`${theme.colors.background.dark} flex overflow-x-auto whitespace-nowrap p-2 space-x-2 scrollbar-hide touch-pan-x`}>
+                    <div className="sticky top-15 z-40 shadow-md">
+                        <nav
+                            className={`${theme.colors.background.dark} flex bottom-0 overflow-x-auto whitespace-nowrap p-2 space-x-2 touch-pan-x scrollbar-hide-sm sm:scrollbar-hide border-b border-neutral-800`}
+                        >
                             {categories.map((cat) => (
                                 <button
                                     key={cat}
                                     ref={(el) => (buttonRefs.current[cat] = el)}
                                     onClick={() => handleCategoryClick(cat)}
-                                    className={`pb-1 px-3 text-sm transition-colors shrink-0
-                    ${activeCategory === cat
-                                            ? "border-b-2 border-yellow-400 text-yellow-400 font-bold"
+                                    className={`pb-1 px-3 text-sm transition-colors shrink-0 ${activeCategory === cat
+                                            ? "border-b-4 border-yellow-400 text-yellow-400 font-bold"
                                             : "text-white hover:text-yellow-300 cursor-pointer hover:animate-pulse"
                                         }`}
                                 >
@@ -136,6 +137,7 @@ function Carta() {
                             ))}
                         </nav>
                     </div>
+
 
 
 
@@ -148,8 +150,8 @@ function Carta() {
                                 ref={(el) => (sectionRefs.current[cat] = el)}
                                 className="scroll-mt-[100px] md:scroll-mt-20"
                             >
-                                <h2 className="text-xl font-bold mt-20 mb-10">{cat}</h2>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-10">
+                                <h2 className={`text-4xl ${theme.text.yellow} font-bold mt-20 mb-10`}>{cat}</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-10">
                                     {groupedProducts[cat].map((product) => (
                                         <div
                                             key={product.id}
@@ -179,10 +181,10 @@ function Carta() {
                                             <div className="flex items-center justify-center w-full md:w-1/4 p-5">
                                                 {product.state === true ? (
                                                     <button
-                                                        className={`w-full ${theme.buttons.secondary} cursor-pointer text-white font-bold py-2 px-4 rounded-xl transition duration-300`}
+                                                        className={`w-full ${theme.buttons.secondary}  cursor-pointer text-white font-bold py-2 px-4 rounded-xl transition duration-300`}
                                                         onClick={() => handleProductCart(product)}
                                                     >
-                                                        Añadir al pedido
+                                                        Añadir al carrito
                                                     </button>
                                                 ) : (
                                                     <span className={`bg-[#9d100f] truncate cursor-not-allowed text-white font-extrabold px-4 py-2 rounded-xl w-full text-center`}>
