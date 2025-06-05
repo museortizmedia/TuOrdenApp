@@ -117,8 +117,8 @@ function Carta() {
             <>
                 <div className={`${theme.layout.darkBackground} min-h-screen`}>
 
-                    {/* Menú de categorías fijo */}
-                    <div className="sticky top-15 z-40 shadow-md">
+                    {/* Menú de categorías fijo justo debajo del header */}
+                    <div className="sticky top-20 z-40 shadow-md">
                         <nav
                             className={`${theme.colors.background.dark} flex bottom-0 overflow-x-auto whitespace-nowrap p-2 space-x-2 touch-pan-x scrollbar-hide-sm sm:scrollbar-hide border-b border-neutral-800`}
                         >
@@ -148,7 +148,7 @@ function Carta() {
                                 key={cat}
                                 id={cat}
                                 ref={(el) => (sectionRefs.current[cat] = el)}
-                                className="scroll-mt-[100px] md:scroll-mt-20"
+                                className="scroll-mt-28 md:scroll-mt-32"
                             >
                                 <h2 className={`text-4xl ${theme.text.yellow} font-bold mt-20 mb-10`}>{cat}</h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-10">
@@ -201,6 +201,7 @@ function Carta() {
 
                         ))}
                     </div>
+                    <div className="p-4 space-y-8 pb-40"></div>
                 </div>
             </>
         </RestaurantLayout>

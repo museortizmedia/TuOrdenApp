@@ -66,14 +66,14 @@ export default function RestaurantLayout({ children }) {
   return (
     <div className={`${theme.colors.background.dark} relative min-h-screen`}>
       {/* Header */}
-      <header className={`${theme.colors.background.dark} fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-4 sm:px-6 py-4 shadow-md`}>
+      <header className={`${theme.colors.background.dark} fixed top-0 left-0 right-0 z-50 flex items-center h-20 px-4 sm:px-6 shadow-md`}>
         <div className="flex items-center space-x-2">
           <img src={restaurant.logo} alt="Logo" className="h-8 w-auto" />
           <p className="text-white text-sm sm:text-base">{restaurant.name}</p>
         </div>
       </header>
 
-      {/* Floating cart button (always visible and responsive) */}
+      {/* Floating cart button (always visible) */}
       <button
         onClick={() => setIsCartOpen(true)}
         className={`
@@ -82,15 +82,18 @@ export default function RestaurantLayout({ children }) {
           ${justAdded ? "animate-bounce" : ""}
           hover:animate-pulse cursor-pointer
         `}
+        style={{ transform: "translateZ(0)" }} // Fix visual glitches in some mobile browsers
         aria-label="Abrir carrito"
       >
         <ShoppingIcon />
       </button>
 
-      {/* Main content (padding responsive) */}
-      <main className="pt-20 px-4 sm:px-6 md:px-10">{children}</main>
+      {/* Main content area with safe padding */}
+      <main className="pt-20 pb-28 px-4 sm:px-6 md:px-10">
+        {children}
+      </main>
 
-      {/* Cart overlay */}
+      {/* Cart Overlay */}
       {isCartOpen && <CartOverlay onClose={() => setIsCartOpen(false)} />}
     </div>
   );

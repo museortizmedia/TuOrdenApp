@@ -4,6 +4,7 @@
 html, body {
   scrollbar-width: thin;
   scrollbar-color: #888 transparent;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* WebKit (Chrome, Safari, Edge) */
