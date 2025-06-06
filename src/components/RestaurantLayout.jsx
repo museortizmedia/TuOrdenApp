@@ -95,6 +95,9 @@ export default function RestaurantLayout({ children }) {
 
       {/* Cart Overlay */}
       {isCartOpen && <CartOverlay onClose={() => setIsCartOpen(false)} />}
+
+      {/* FOOTER */}
+      <div className="bg-[#050505] h-80 w-full"></div>
     </div>
   );
 }

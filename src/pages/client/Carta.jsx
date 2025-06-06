@@ -149,25 +149,25 @@ function Carta() {
                                     className="scroll-mt-28 md:scroll-mt-32"
                                 >
                                     <h2 className={`text-4xl ${theme.text.yellow} font-bold mt-20 mb-10`}>{cat}</h2>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-10">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 2xl:grid-cols-3 gap-4 sm:gap-6 md:gap-8 xl:gap-10">
                                         {groupedProducts[cat].map((product) => (
                                             <div
                                                 key={product.id}
-                                                className="flex flex-col md:flex-row bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-lg transition-transform hover:scale-[1.02]"
+                                                className="flex flex-col lg:flex-row bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-lg transition-transform hover:scale-[1.02] mx-auto w-full min-w-[200px] max-w-[500px]"
                                             >
                                                 {/* Imagen del producto */}
-                                                <div className="w-full md:w-1/4 aspect-square overflow-hidden">
+                                                <div className="w-full lg:w-1/4 aspect-square overflow-hidden">
                                                     <img
-                                                        src={product.image || "https://placehold.co/300"}
+                                                        src={product.image || "/assets/defaultImage.jpg"}
                                                         alt={product.name}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 </div>
 
                                                 {/* Contenido principal */}
-                                                <div className="p-5 flex flex-col justify-between w-full md:w-2/4 gap-3">
+                                                <div className="p-5 flex flex-col justify-between w-full lg:w-2/4 gap-3">
                                                     <div>
-                                                        <h3 className="text-xl font-extrabold text-white truncate">{product.name}</h3>
+                                                        <h3 className="text-xl font-extrabold text-white truncate" title={product.name}>{product.name}</h3>
                                                         <p className="text-sm text-gray-300 line-clamp-3">{product.desc}</p>
                                                     </div>
                                                     <p className={`text-lg font-bold ${theme.text.yellow}`}>
@@ -176,10 +176,10 @@ function Carta() {
                                                 </div>
 
                                                 {/* Acción: botón o "Agotado" */}
-                                                <div className="flex items-center justify-center w-full md:w-1/4 p-5">
+                                                <div className="flex items-center justify-center w-full lg:w-1/4 p-5">
                                                     {product.state === true ? (
                                                         <button
-                                                            className={`w-full ${theme.buttons.secondary}  cursor-pointer text-white font-bold py-2 px-4 rounded-xl transition duration-300`}
+                                                            className={`w-full ${theme.buttons.secondary} hover:text-[#003366]  cursor-pointer font-bold py-2 px-4 rounded-xl transition duration-300`}
                                                             onClick={() => handleProductCart(product)}
                                                         >
                                                             Añadir al carrito
@@ -199,7 +199,6 @@ function Carta() {
 
                             ))}
                         </div>
-                        <div className="p-4 space-y-8 pb-40"></div>
                     </div>
                 </>
             </RestaurantLayout>
