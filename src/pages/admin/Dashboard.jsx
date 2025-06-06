@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import AdminProducts from "./pages/AdminProducts";
 import AdminOrdenes from "./pages/AdminOrdenes";
 import AdminStory from "./pages/AdminStory";
+import CategoryOrderManager from "../../components/CategoryOrderManager";
 
 function Dashboard() {
   const { user, logout } = useAuth();
@@ -49,6 +50,7 @@ function Dashboard() {
   const subPages = [
     { name: "Órdenes", content: <AdminOrdenes/> },
     { name: "Productos", content: <AdminProducts/> },
+    { name: "Orden Carta", content: <CategoryOrderManager/> },
     { name: "Historial", content: <AdminStory/> },
   ];
 

@@ -18,7 +18,7 @@ function Carta() {
         }
     }, [restaurant]);
 
-    const groupedProducts = useMemo(() => {
+    /*const groupedProducts = useMemo(() => {
         const groups = {};
         products.forEach((prod) => {
             const prodId = prod.id;
@@ -32,7 +32,48 @@ function Carta() {
         return groups;
     }, [products]);
 
-    const categories = useMemo(() => Object.keys(groupedProducts), [groupedProducts]);
+    // categorias por el orden
+    const [categoryMap, setCategoryMap] = useState({});
+
+    const categories = useMemo(() => {
+        const keys = Object.keys(groupedProducts);
+        return keys.sort(
+            (a, b) => (categoryMap[a]?.order ?? 999) - (categoryMap[b]?.order ?? 999)
+        );
+    }, [groupedProducts, categoryMap]);
+*/
+const [categoryMap, groupedProducts] = useMemo(() => {
+    const groups = {};
+    const map = {};
+
+    products.forEach((prod) => {
+        const category = prod.id.slice(0, prod.id.length - 3);
+
+        if (!groups[category]) groups[category] = [];
+        groups[category].push(prod);
+
+        // Toma el menor categoryOrder encontrado para la categoría
+        if (prod.categoryOrder !== undefined) {
+            if (map[category] === undefined || prod.categoryOrder < map[category]) {
+                map[category] = prod.categoryOrder;
+            }
+        }
+    });
+
+    // Ordena productos dentro de cada categoría
+    Object.keys(groups).forEach((cat) => {
+        groups[cat].sort((a, b) => Number(a.id.slice(-3)) - Number(b.id.slice(-3)));
+    });
+
+    return [map, groups];
+}, [products]);
+
+const categories = useMemo(() => {
+    const keys = Object.keys(groupedProducts);
+    return keys.sort((a, b) => (categoryMap[a] ?? 999) - (categoryMap[b] ?? 999));
+}, [groupedProducts, categoryMap]);
+
+
 
     const sectionRefs = useRef({});
 
@@ -152,7 +193,7 @@ function Carta() {
                                                 </div>
 
                                                 {/* Descripción */}
-                                                <div className={`p-5 flex flex-col justify-between w-full gap-3 ${isAvailable? "lg:w-2/4 xl:w-2/6" : "lg:w-3/4 xl:w-4/6"}`}>
+                                                <div className={`p-5 flex flex-col justify-between w-full gap-3 ${isAvailable ? "lg:w-2/4 xl:w-2/6" : "lg:w-3/4 xl:w-4/6"}`}>
                                                     <div>
                                                         <h3 className="text-xl font-extrabold text-white line-clamp-3 truncate lg:overflow-visible lg:whitespace-normal lg:text-clip">{product.name}</h3>
                                                         <p className="text-sm text-gray-300 line-clamp-3 overflow-y-auto">{product.desc}</p>
@@ -164,16 +205,16 @@ function Carta() {
 
                                                 {/* Acción */}
                                                 {isAvailable && (
-                                                <div className="flex items-center justify-center w-full lg:w-1/4 xl:w-2/6 p-5">
-                                                    
+                                                    <div className="flex items-center justify-center w-full lg:w-1/4 xl:w-2/6 p-5">
+
                                                         <button
                                                             className={`w-full ${theme.buttons.secondary} hover:text-[#003366] cursor-pointer font-bold py-2 px-4 rounded-xl transition duration-300 xl:text-2xl`}
                                                             onClick={() => handleProductCart(product)}
                                                         >
                                                             Añadir al carrito
                                                         </button>
-                                                    
-                                                </div>
+
+                                                    </div>
                                                 )}
                                             </div>
                                         );

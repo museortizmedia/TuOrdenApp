@@ -19,10 +19,10 @@ import {
     verticalListSortingStrategy
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { doc } from "firebase/firestore";
-import { db } from "../../../firebase/firebase.js";
 import ToggleSwitch from "../../../components/ToogleSwitch.jsx"
 import ImageUploader from "../../../components/ImageUploader";
+import { PenIcon } from "lucide-react";
+import CategoryOrderManager from "../../../components/CategoryOrderManager.jsx";
 
 function SortableItem({ product, onUpdate, onDelete }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: product.id });
@@ -38,12 +38,18 @@ function SortableItem({ product, onUpdate, onDelete }) {
         const { name, value, type, checked } = e.target;
         setForm(prev => ({
             ...prev,
-            [name]: type === "checkbox" ? checked : name === "price" ? Number(value) : value
+            [name]: type === "checkbox" ? checked
+                : name === "price" ? value // deja como string
+                    : value
         }));
     };
 
     const handleSave = async () => {
-        if (isNaN(form.price)) return toast.error("Precio inválido");
+        
+        // en la cadena de texto del input elimina los puntos (para convertir el numero completo) las , las convierte en . para usarlas como decimales.
+        const parsedPrice = Number((form.price || "0").replace(/\./g, "").replace(",", "."));
+
+        if (isNaN(parsedPrice)) return toast.error("Precio inválido");
 
         let imageUrl = form.image || "";
 
@@ -61,7 +67,7 @@ function SortableItem({ product, onUpdate, onDelete }) {
             }
         }
 
-        await onUpdate(product.id, { ...form, image: imageUrl });
+        await onUpdate(product.id, { ...form, price: parsedPrice, image: (imageUrl || "") });
         setEdit(false);
     };
 
@@ -115,6 +121,7 @@ function SortableItem({ product, onUpdate, onDelete }) {
                         name="price"
                         type="number"
                         step={100}
+                        min={0}
                         value={form.price}
                         onChange={handleChange}
                         onPointerDownCapture={(e) => e.stopPropagation()}
@@ -123,20 +130,30 @@ function SortableItem({ product, onUpdate, onDelete }) {
                     />
 
                     <div className="flex justify-between mt-2">
-                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); if (window.confirm("Eliminar?")) onDelete(product.id); }} className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded">Eliminar</button>
-                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); handleSave(); }} className="bg-green-700 hover:bg-green-800 px-2 py-1 rounded">Guardar</button>
-                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); setEdit(false); }} className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">Cerrar</button>
+                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); if (window.confirm("Eliminar?")) onDelete(product.id); }} className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded cursor-pointer">Eliminar</button>
+                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); handleSave(); }} className="bg-green-700 hover:bg-green-800 px-2 py-1 rounded cursor-pointer">Guardar</button>
+                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); setEdit(false); }} className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded cursor-pointer">Cerrar</button>
                     </div>
                 </>
             ) : (
                 <>
                     <div className="flex justify-between items-start">
-                        <div>
+                        <div className="max-w-80">
                             <h3 className="font-bold">{product.name}</h3>
-                            <p className="text-xs">{product.desc || ""}</p>
-                            <p className="text-sm mt-2">Precio: ${(product.price).toLocaleString('es-CL')}</p>
+                            <p className="text-xs overflow-y-auto max-h-8 pr-1">{product.desc || ""}</p>
+                            <p className="text-sm font-bold text-white mt-2">Precio: ${(product.price).toLocaleString('es-CL')}</p>
                         </div>
-                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); setEdit(true); }} className="text-xs underline mt-5 text-blue-400">Editar</button>
+                        <button
+                            onPointerDownCapture={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                                stopDrag(e);
+                                setEdit(true);
+                            }}
+                            className="p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
+                            title="Editar producto"
+                        >
+                            <PenIcon className="w-4 h-4 text-white" />
+                        </button>
                     </div>
                     <ToggleSwitch
                         checked={product.state}
@@ -149,7 +166,6 @@ function SortableItem({ product, onUpdate, onDelete }) {
     );
 }
 
-
 function AdminProducts() {
     const { restaurant } = useRestaurant();
     const [products, setProducts] = useState([]);
@@ -157,7 +173,7 @@ function AdminProducts() {
     const [creatingCat, setCreatingCat] = useState(null);
     const [newProductName, setNewProductName] = useState("");
     const [activeProduct, setActiveProduct] = useState(null);
-    const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
+    const sensors = useSensors(useSensor(PointerSensor)/*, useSensor(KeyboardSensor)*/);
     const vibrate = (pattern = [100]) => navigator.vibrate?.(pattern);
 
     useEffect(() => {
@@ -274,7 +290,7 @@ function AdminProducts() {
                         </SortableContext>
                     ))}
                     <div className="bg-[#111] rounded p-4 flex flex-col">
-                        <button onClick={handleAddCategory} className="bg-green-700 text-white px-4 py-2 rounded mb-6">+ Categoría</button>
+                        <button onClick={handleAddCategory} className="bg-green-700 hover:bg-green-800 cursor-pointer text-white px-4 py-2 rounded mb-6">+ Categoría</button>
                     </div>
                 </div>
 
