@@ -3,7 +3,7 @@ import { collection, onSnapshot, updateDoc, doc, runTransaction, getDocs, delete
 import { db } from "../../../firebase/firebase.js";
 import { useRestaurant } from '../../../contexts/RestaurantContext.jsx';
 import toast, { Toaster } from 'react-hot-toast';
-import { AlertCircle, DollarSign, PrinterIcon } from 'lucide-react';
+import { AlertCircle, Archive, CheckCircle, ClockIcon, CreditCardIcon, DollarSign, FlameIcon, PrinterIcon } from 'lucide-react';
 import ToggleSwitch from '../../../components/ToogleSwitch.jsx';
 
 export default function AdminOrdenes() {
@@ -252,12 +252,21 @@ export default function AdminOrdenes() {
                                         }
                                         <div className="flex items-center gap-2">
                                             {order.status === "por pagar" && <AlertCircle className="text-yellow-400 w-4 h-4" />}
-                                            <span className={`px-2 py-0.5 rounded text-xs font-semibold text-white
+                                            <span className={`px-2 py-0.5 rounded text-xs font-semibold text-white flex gap-2
                                                 ${order.status === "pendiente" ? "bg-red-600"
                                                     : order.status === "en preparación" ? "bg-orange-500"
                                                         : order.status === "lista" ? "bg-green-600"
                                                             : order.status === "por pagar" ? "bg-yellow-600"
                                                                 : "bg-gray-500"}`}>
+                                                {order.status === "por pagar" ?
+                                                <CreditCardIcon className='w-4 h-4' />
+                                                : order.status === "pendiente" ?
+                                                <ClockIcon className='w-4 h-4' />
+                                                : order.status === "en preparación" ?
+                                                <FlameIcon className='w-4 h-4' />
+                                                : order.status === "lista" ?
+                                                <CheckCircle className='w-4 h-4' />
+                                                :""}
                                                 {order.status}
                                             </span>
                                         </div>
@@ -271,8 +280,10 @@ export default function AdminOrdenes() {
                                         </button>
                                         {order.status === "lista" && <button
                                             onClick={() => archivarOrden(order)}
-                                            className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs px-2 py-1 rounded cursor-pointer"
+                                            className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs px-2 py-1 rounded flex gap-2 cursor-pointer"
+                                            title='Esta acción no se puede deshacer'
                                         >
+                                            <Archive className='w-4 h-4' />
                                             Archivar
                                         </button>}
                                     </div>

@@ -13,7 +13,7 @@ function Dashboard() {
   const { restaurant } = useRestaurant();
   const [userBD, setUserBD] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activePage, setActivePage] = useState("Inicio");
+  const [activePage, setActivePage] = useState("Órdenes");
 
   const menuRef = useRef();
 
@@ -47,7 +47,7 @@ function Dashboard() {
   }, [user]);
 
   const subPages = [
-    { name: "Inicio", content: <AdminOrdenes/> },
+    { name: "Órdenes", content: <AdminOrdenes/> },
     { name: "Productos", content: <AdminProducts/> },
     { name: "Historial", content: <AdminStory/> },
   ];
@@ -84,7 +84,7 @@ function Dashboard() {
           <span className="text-sm hidden sm:inline">
             {userBD?.name ? `Hola, ${userBD.name}` : "Cargando..."}
           </span>
-          <button onClick={logout} className="text-sm bg-red-500 hover:bg-red-600 px-3 py-1 rounded">
+          <button onClick={logout} className="text-sm bg-red-500 hover:bg-red-600 px-3 py-1 rounded cursor-pointer">
             Cerrar sesión
           </button>
 

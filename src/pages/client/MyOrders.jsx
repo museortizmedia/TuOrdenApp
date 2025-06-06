@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useCart } from "../../contexts/CartContext";
-import { CheckCircle, Clock, AlertCircle, Loader2, DollarSign } from "lucide-react";
+import { CheckCircle, Loader2, DollarSign, Clock10Icon, AlertCircleIcon } from "lucide-react";
 
 export default function MyOrders() {
   const { activeOrders } = useCart();
@@ -14,10 +14,15 @@ export default function MyOrders() {
 
   const getStatusStyle = (status) => {
     switch (status) {
+      case "por pagar":
+        return {
+          color: "bg-yellow-100 text-yellow-800",
+          icon: <DollarSign className="w-4 h-4 mr-1" />,
+        };
       case "pendiente":
         return {
           color: "bg-red-100 text-red-800",
-          icon: <AlertCircle className="w-4 h-4 mr-1" />,
+          icon: <Clock10Icon className="w-4 h-4 mr-1" />,
         };
       case "en preparación":
         return {
@@ -29,15 +34,10 @@ export default function MyOrders() {
           color: "bg-green-100 text-green-800",
           icon: <CheckCircle className="w-4 h-4 mr-1" />,
         };
-      case "por pagar":
-        return {
-          color: "bg-yellow-100 text-yellow-800",
-          icon: <DollarSign className="w-4 h-4 mr-1" />,
-        };
       default:
         return {
           color: "bg-gray-200 text-gray-700",
-          icon: <Clock className="w-4 h-4 mr-1" />,
+          icon: <AlertCircleIcon className="w-4 h-4 mr-1" />,
         };
     }
   };

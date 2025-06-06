@@ -115,7 +115,7 @@ function Carta() {
     return (
         <>
             {/* Menú de categorías fijo justo debajo del header */}
-            <div className="sticky top-20 z-50 shadow-md">
+            <div className="sticky top-[4.8rem] z-50 shadow-md">
                 <nav
                     className={`${theme.colors.background.dark} flex bottom-0 overflow-x-auto whitespace-nowrap p-2 space-x-2 touch-pan-x scrollbar-hide-sm sm:scrollbar-hide border-b border-neutral-800 w-full max-w-full`}
                 >
