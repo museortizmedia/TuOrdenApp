@@ -40,6 +40,20 @@ const supabaseService = {
 
         return this.getPublicUrlOf(data);
     },
+    /*
+    const handleFileUpload = async (e) => {
+    const file = e.target.files[0]
+    const url = await supabaseService.uploadProductImage(
+      file,
+      restaurant.id,
+      'prod456'
+    );
+
+        console.log('URL pública:', url);
+
+    }
+        <input type="file" accept="image/*" onChange={handleFileUpload} />
+    */
 
     // Iniciar sesión con email y contraseña
     async login(email, password) {

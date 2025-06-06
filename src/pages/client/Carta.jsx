@@ -154,9 +154,10 @@ function Carta() {
                                             <div
                                                 key={product.id}
                                                 className="flex flex-col lg:flex-row bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-lg transition-transform hover:scale-[1.02] mx-auto w-full min-w-[200px] max-w-[500px]"
+                                                title={product.name}
                                             >
                                                 {/* Imagen del producto */}
-                                                <div className="w-full lg:w-1/4 aspect-square overflow-hidden">
+                                                <div className="aspect-square overflow-hidden w-full lg:w-1/4 xl:w-2/6">
                                                     <img
                                                         src={product.image || "/assets/defaultImage.jpg"}
                                                         alt={product.name}
@@ -165,21 +166,21 @@ function Carta() {
                                                 </div>
 
                                                 {/* Contenido principal */}
-                                                <div className="p-5 flex flex-col justify-between w-full lg:w-2/4 gap-3">
+                                                <div className="p-5 flex flex-col justify-between w-full lg:w-2/4 xl:w-2/6 gap-3">
                                                     <div>
-                                                        <h3 className="text-xl font-extrabold text-white truncate" title={product.name}>{product.name}</h3>
-                                                        <p className="text-sm text-gray-300 line-clamp-3">{product.desc}</p>
+                                                        <h3 className="text-xl font-extrabold text-white line-clamp-3 truncate lg:overflow-visible lg:whitespace-normal lg:text-clip">{product.name}</h3>
+                                                        <p className="text-sm text-gray-300 line-clamp-3 overflow-y-auto">{product.desc}</p>
                                                     </div>
-                                                    <p className={`text-lg font-bold ${theme.text.yellow}`}>
+                                                    <p className={`text-xl font-extrabold ${theme.text.yellow}`}>
                                                         ${(product.price).toLocaleString("es-CL")}
                                                     </p>
                                                 </div>
 
                                                 {/* Acción: botón o "Agotado" */}
-                                                <div className="flex items-center justify-center w-full lg:w-1/4 p-5">
+                                                <div className="flex items-center justify-center w-full lg:w-1/4 xl:w-2/6 p-5">
                                                     {product.state === true ? (
                                                         <button
-                                                            className={`w-full ${theme.buttons.secondary} hover:text-[#003366]  cursor-pointer font-bold py-2 px-4 rounded-xl transition duration-300`}
+                                                            className={`w-full ${theme.buttons.secondary} hover:text-[#003366] cursor-pointer font-bold py-2 px-4 rounded-xl transition duration-300 xl:text-2xl`}
                                                             onClick={() => handleProductCart(product)}
                                                         >
                                                             Añadir al carrito

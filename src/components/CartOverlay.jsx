@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { X, Trash2 } from "lucide-react";
+import { X, Trash2, AlertCircle, Banknote, ArrowLeft, Send } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import { useRestaurant } from "../contexts/RestaurantContext";
 import { db } from "../firebase/firebase";
@@ -104,9 +104,9 @@ export default function CartOverlay({ onClose }) {
   };
 
   const handleCheckout = async () => {
-    if (!buyerName || !phoneNumber || !orderType || !paymentMethod) { console.log(buyerName, phoneNumber, orderType, paymentMethod); return;}
-    if (orderType === "Domicilio" && (!address || !neighborhood)) { console.log(address, neighborhood); return;}
-    if (orderType === "Recoger" && !selectedSede) { console.log(selectedSede); return;}
+    if (!buyerName || !phoneNumber || !orderType || !paymentMethod) { console.log(buyerName, phoneNumber, orderType, paymentMethod); return; }
+    if (orderType === "Domicilio" && (!address || !neighborhood)) { console.log(address, neighborhood); return; }
+    if (orderType === "Recoger" && !selectedSede) { console.log(selectedSede); return; }
 
     if (paymentMethod === "Transferencia") {
       setShowTransferModal(true);
@@ -336,13 +336,54 @@ export default function CartOverlay({ onClose }) {
 
       {showTransferModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[999]">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm text-center space-y-4 mx-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold">Transferencia pendiente</h3>
-            <p className="text-sm text-gray-700">Tu pedido será enviado, pero no se preparará hasta que realices la transferencia.</p>
+          <div
+            className="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center w-full justify-center text-yellow-500 mb-4">
+              <AlertCircle className=" w-6 h-6 mr-2" />
+              <h3 className="text-lg font-bold text-center">Transferencia pendiente</h3>
+            </div>
+
+            <p className="text-sm text-gray-700 mb-4 text-center">
+              Tu pedido ha sido recibido, pero <span className="font-semibold">no se preparará</span> hasta que completes la transferencia bancaria.
+            </p>
+
+            <div className="bg-gray-100 p-4 rounded-lg text-left text-sm text-gray-800 h-40 mb-4 overflow-y-auto">
+              <p className="mb-2 font-semibold flex items-center">
+                <Banknote className="w-4 h-4 mr-2 text-green-600 " />
+                Métodos de pago disponibles:
+              </p>
+
+              {restaurant.transferencias.map((cuenta, index) => (
+                <div key={index} className="mb-3 border-b pb-2">
+                  <p className="font-medium">{cuenta.name}</p>
+                  <p className="text-xs text-gray-600">Cuenta/Número: <span className="font-semibold">{cuenta.value}</span></p>
+                  {cuenta.titular && (
+                    <p className="text-xs text-gray-600">Titular: <span className="font-semibold">{cuenta.titular}</span></p>
+                  )}
+                  {cuenta.cedula && (
+                    <p className="text-xs text-gray-600">Cédula: <span className="font-semibold">{cuenta.cedula}</span></p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="text-sm text-gray-700 mb-4 text-center">
+              Luego de hacer la transferencia, deberás enviarnos el comprobante por WhatsApp.
+            </div>
+
             <div className="flex flex-col space-y-2">
-              <button className="bg-gray-200 hover:bg-gray-300 text-black py-2 rounded" onClick={() => setShowTransferModal(false)}>Cambiar tipo de orden</button>
               <button
-                className="bg-green-500 hover:bg-green-600 text-white py-2 rounded"
+                className="flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-black py-2 rounded font-medium"
+                onClick={() => setShowTransferModal(false)}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Cambiar tipo de orden
+              </button>
+
+              <button
+                className="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white py-2 rounded font-medium"
                 onClick={async (e) => {
                   e.stopPropagation();
                   setShowTransferModal(false);
@@ -354,12 +395,15 @@ export default function CartOverlay({ onClose }) {
                   }
                 }}
               >
-                Pagar por transferencia
+                <Send className="w-4 h-4 mr-2" />
+                Enviar comprobante por WhatsApp
               </button>
             </div>
           </div>
         </div>
       )}
+
+
     </div>
   );
 }

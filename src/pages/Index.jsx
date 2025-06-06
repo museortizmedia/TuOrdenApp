@@ -25,57 +25,8 @@ export default function Index() {
     },
   ];
 
-  ///////////////////////////
-  /*const handleFileUpload = async (e) => {
-      const file = e.target.files[0];
-      const email = 'alejandrolondoo@hotmail.com';
-      const password = 'monstersburger2025';
-      const productId = 'prod456';
-  
-      const imageUrl = await supabaseService.uploadProductImageWithLogin(email, password, file, restaurant.id, productId);
-      
-      if (imageUrl) {
-          console.log('Imagen subida con éxito:', imageUrl);
-      }
-  };*/
-
-  /*const handleFileUpload = async () => {
-    const email = 'alejandrolondoo@hotmail.com';
-    const password = 'monstersburger2025';
-  
-    const user = await supabaseService.login(email, password);
-  
-    if (user) {
-      console.log('🟢 Login exitoso:', user);
-    } else {
-      console.error('🔴 Login fallido');
-    }
-  };*/
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0]
-    /*
-    const url = await supabaseService.uploadProductImage(
-  file,
-  restaurant.id,
-  'prod456'
-);
-
-console.log('URL pública:', url);
-
-    */
-    supabaseService.uploadProductImage(file, restaurant.id, 'prod456')
-      .then((url) => {
-        console.log('URL pública:', url);
-      });
-
-  }
-  //////////////////////////
-
   return (
     <div className={`${theme.layout.darkBackground} min-h-screen flex flex-col`}>
-
-      <input type="file" accept="image/*" onChange={handleFileUpload} />
 
       {/* Header sesión */}
       <div className="flex justify-end p-2 pr-4 text-xs text-gray-400 invisible md:visible">
