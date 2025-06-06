@@ -18,62 +18,36 @@ function Carta() {
         }
     }, [restaurant]);
 
-    /*const groupedProducts = useMemo(() => {
+    const [categoryMap, groupedProducts] = useMemo(() => {
         const groups = {};
+        const map = {};
+
         products.forEach((prod) => {
-            const prodId = prod.id;
-            const category = prodId.slice(0, prodId.length - 3);
+            const category = prod.id.slice(0, prod.id.length - 3);
+
             if (!groups[category]) groups[category] = [];
             groups[category].push(prod);
+
+            // Toma el menor categoryOrder encontrado para la categoría
+            if (prod.categoryOrder !== undefined) {
+                if (map[category] === undefined || prod.categoryOrder < map[category]) {
+                    map[category] = prod.categoryOrder;
+                }
+            }
         });
+
+        // Ordena productos dentro de cada categoría
         Object.keys(groups).forEach((cat) => {
             groups[cat].sort((a, b) => Number(a.id.slice(-3)) - Number(b.id.slice(-3)));
         });
-        return groups;
-    }, [products]);
 
-    // categorias por el orden
-    const [categoryMap, setCategoryMap] = useState({});
+        return [map, groups];
+    }, [products]);
 
     const categories = useMemo(() => {
         const keys = Object.keys(groupedProducts);
-        return keys.sort(
-            (a, b) => (categoryMap[a]?.order ?? 999) - (categoryMap[b]?.order ?? 999)
-        );
+        return keys.sort((a, b) => (categoryMap[a] ?? 999) - (categoryMap[b] ?? 999));
     }, [groupedProducts, categoryMap]);
-*/
-const [categoryMap, groupedProducts] = useMemo(() => {
-    const groups = {};
-    const map = {};
-
-    products.forEach((prod) => {
-        const category = prod.id.slice(0, prod.id.length - 3);
-
-        if (!groups[category]) groups[category] = [];
-        groups[category].push(prod);
-
-        // Toma el menor categoryOrder encontrado para la categoría
-        if (prod.categoryOrder !== undefined) {
-            if (map[category] === undefined || prod.categoryOrder < map[category]) {
-                map[category] = prod.categoryOrder;
-            }
-        }
-    });
-
-    // Ordena productos dentro de cada categoría
-    Object.keys(groups).forEach((cat) => {
-        groups[cat].sort((a, b) => Number(a.id.slice(-3)) - Number(b.id.slice(-3)));
-    });
-
-    return [map, groups];
-}, [products]);
-
-const categories = useMemo(() => {
-    const keys = Object.keys(groupedProducts);
-    return keys.sort((a, b) => (categoryMap[a] ?? 999) - (categoryMap[b] ?? 999));
-}, [groupedProducts, categoryMap]);
-
-
 
     const sectionRefs = useRef({});
 

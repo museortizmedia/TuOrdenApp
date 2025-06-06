@@ -20,13 +20,18 @@ export default function DynamicHead() {
   return (
     <Helmet>
       <title>{title}</title>
+      {/* SEO básico */}
       <meta name="description" content={restaurant.desc} />
       <meta name="robots" content="index, follow" />
+      {/* SEO para redes sociales */}
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:type" content="website" />
       <meta property="og:url" content={canonical} />
+      <meta property="og:image" content={restaurant.logo} />
+       {/* Canonical URL */}
       <link rel="canonical" href={canonical} />
+      {/* Favicon */}
       <link rel="icon" type="image/png" href={favicon} />
     </Helmet>
   );
