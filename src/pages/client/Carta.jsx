@@ -10,7 +10,6 @@ function Carta() {
     const [products, setProducts] = useState([]);
     const [activeCategory, setActiveCategory] = useState(null);
 
-    // Obtenemos los productos desde Firestore
     useEffect(() => {
         if (restaurant?.id) {
             firestoreService
@@ -19,34 +18,24 @@ function Carta() {
         }
     }, [restaurant]);
 
-    // Agrupar productos por categoría:
-    // Se asume que el id de cada producto tiene la forma [categoria][numero de producto],
-    // donde los últimos 3 caracteres corresponden al número.
     const groupedProducts = useMemo(() => {
         const groups = {};
         products.forEach((prod) => {
-            // Extraer la categoría: suponemos que es la parte del id antes de los 3 últimos caracteres
             const prodId = prod.id;
             const category = prodId.slice(0, prodId.length - 3);
             if (!groups[category]) groups[category] = [];
             groups[category].push(prod);
         });
-        // Ordenamos cada grupo según el número (los últimos 3 dígitos numéricos)
         Object.keys(groups).forEach((cat) => {
-            groups[cat].sort((a, b) => {
-                return Number(a.id.slice(-3)) - Number(b.id.slice(-3));
-            });
+            groups[cat].sort((a, b) => Number(a.id.slice(-3)) - Number(b.id.slice(-3)));
         });
         return groups;
     }, [products]);
 
-    // Obtenemos la lista de categorías
     const categories = useMemo(() => Object.keys(groupedProducts), [groupedProducts]);
 
-    // Referencias para cada sección
     const sectionRefs = useRef({});
 
-    // Detecta version mobile
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     useEffect(() => {
         const handleResize = () => {
@@ -56,7 +45,6 @@ function Carta() {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // Actualizar la categoría activa utilizando Intersection Observer
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
@@ -66,10 +54,9 @@ function Carta() {
                     }
                 });
             },
-            // Se ajusta para determinar cuándo consideramos la sección visible
             isMobile
-                ? { rootMargin: "-50% 0px -30% 0px", threshold: 0.05 } // Para mobile
-                : { rootMargin: "-30% 0px -60% 0px", threshold: 0.1 } // Para pc
+                ? { rootMargin: "-50% 0px -30% 0px", threshold: 0.05 }
+                : { rootMargin: "-30% 0px -60% 0px", threshold: 0.1 }
         );
         categories.forEach((cat) => {
             if (sectionRefs.current[cat]) {
@@ -79,7 +66,6 @@ function Carta() {
         return () => observer.disconnect();
     }, [categories]);
 
-    // Scroll suave al hacer clic en una categoría del menú
     const handleCategoryClick = (cat) => {
         const el = sectionRefs.current[cat];
         if (el) {
@@ -88,7 +74,6 @@ function Carta() {
         }
     };
 
-    // AutoMove menu
     const buttonRefs = useRef({});
     useEffect(() => {
         if (activeCategory && buttonRefs.current[activeCategory]) {
@@ -101,24 +86,18 @@ function Carta() {
         }
     }, [activeCategory]);
 
-
-    // Cart
     const { addToCart } = useCart();
     const handleProductCart = (product) => {
         if (navigator.vibrate) {
             navigator.vibrate(100);
         }
         addToCart(product);
-    }
-
+    };
 
     return (
         <>
-            {/* Menú de categorías fijo justo debajo del header */}
             <div className="sticky top-[4.8rem] z-50 shadow-md">
-                <nav
-                    className={`${theme.colors.background.dark} flex bottom-0 overflow-x-auto whitespace-nowrap p-2 space-x-2 touch-pan-x scrollbar-hide-sm sm:scrollbar-hide border-b border-neutral-800 w-full max-w-full`}
-                >
+                <nav className={`${theme.colors.background.dark} flex bottom-0 overflow-x-auto whitespace-nowrap p-2 space-x-2 touch-pan-x scrollbar-hide-sm sm:scrollbar-hide border-b border-neutral-800 w-full max-w-full`}>
                     {categories.map((cat) => (
                         <button
                             key={cat}
@@ -135,38 +114,45 @@ function Carta() {
                 </nav>
             </div>
 
-            {/* Header y boton de carrito envolvente */}
             <RestaurantLayout>
-                <>
-                    <div className={`${theme.layout.darkBackground} min-h-screen`}>
-                        {/* Listado de productos por categoría */}
-                        <div className="p-4 space-y-8">
-                            {categories.map((cat) => (
-                                <section
-                                    key={cat}
-                                    id={cat}
-                                    ref={(el) => (sectionRefs.current[cat] = el)}
-                                    className="scroll-mt-28 md:scroll-mt-32"
-                                >
-                                    <h2 className={`text-4xl ${theme.text.yellow} font-bold mt-20 mb-10`}>{cat}</h2>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 2xl:grid-cols-3 gap-4 sm:gap-6 md:gap-8 xl:gap-10">
-                                        {groupedProducts[cat].map((product) => (
+                <div className={`${theme.layout.darkBackground} min-h-screen`}>
+                    <div className="p-4 space-y-8">
+                        {categories.map((cat) => (
+                            <section
+                                key={cat}
+                                id={cat}
+                                ref={(el) => (sectionRefs.current[cat] = el)}
+                                className="scroll-mt-28 md:scroll-mt-32"
+                            >
+                                <h2 className={`text-4xl ${theme.text.yellow} font-bold mt-20 mb-10`}>{cat}</h2>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 2xl:grid-cols-3 gap-4 sm:gap-6 md:gap-8 xl:gap-10">
+                                    {groupedProducts[cat].map((product) => {
+                                        const isAvailable = product.state === true;
+
+                                        return (
                                             <div
                                                 key={product.id}
-                                                className="flex flex-col lg:flex-row bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-lg transition-transform hover:scale-[1.02] mx-auto w-full min-w-[200px] max-w-[500px]"
+                                                className={`flex flex-col lg:flex-row bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-lg mx-auto w-full min-w-[200px] max-w-[500px] ${isAvailable ? "hover:scale-[1.02] transition-transform" : "opacity-60 grayscale cursor-not-allowed"}`}
                                                 title={product.name}
                                             >
-                                                {/* Imagen del producto */}
-                                                <div className="aspect-square overflow-hidden w-full lg:w-1/4 xl:w-2/6">
+                                                {/* Imagen */}
+                                                <div className="relative aspect-square overflow-hidden w-full lg:w-1/4 xl:w-2/6">
                                                     <img
                                                         src={product.image || "/assets/defaultImage.jpg"}
                                                         alt={product.name}
                                                         className="w-full h-full object-cover"
                                                     />
+                                                    {!isAvailable && (
+                                                        <div className="absolute inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center">
+                                                            <span className="text-white font-extrabold text-xl bg-red-600 px-4 py-2 rounded-xl">
+                                                                AGOTADO
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                 </div>
 
-                                                {/* Contenido principal */}
-                                                <div className="p-5 flex flex-col justify-between w-full lg:w-2/4 xl:w-2/6 gap-3">
+                                                {/* Descripción */}
+                                                <div className={`p-5 flex flex-col justify-between w-full gap-3 ${isAvailable? "lg:w-2/4 xl:w-2/6" : "lg:w-3/4 xl:w-4/6"}`}>
                                                     <div>
                                                         <h3 className="text-xl font-extrabold text-white line-clamp-3 truncate lg:overflow-visible lg:whitespace-normal lg:text-clip">{product.name}</h3>
                                                         <p className="text-sm text-gray-300 line-clamp-3 overflow-y-auto">{product.desc}</p>
@@ -176,32 +162,27 @@ function Carta() {
                                                     </p>
                                                 </div>
 
-                                                {/* Acción: botón o "Agotado" */}
+                                                {/* Acción */}
+                                                {isAvailable && (
                                                 <div className="flex items-center justify-center w-full lg:w-1/4 xl:w-2/6 p-5">
-                                                    {product.state === true ? (
+                                                    
                                                         <button
                                                             className={`w-full ${theme.buttons.secondary} hover:text-[#003366] cursor-pointer font-bold py-2 px-4 rounded-xl transition duration-300 xl:text-2xl`}
                                                             onClick={() => handleProductCart(product)}
                                                         >
                                                             Añadir al carrito
                                                         </button>
-                                                    ) : (
-                                                        <span className={`bg-[#9d100f] truncate cursor-not-allowed text-white font-extrabold px-4 py-2 rounded-xl w-full text-center`}>
-                                                            AGOTADO
-                                                        </span>
-                                                    )}
+                                                    
                                                 </div>
+                                                )}
                                             </div>
-
-                                        ))}
-                                    </div>
-
-                                </section>
-
-                            ))}
-                        </div>
+                                        );
+                                    })}
+                                </div>
+                            </section>
+                        ))}
                     </div>
-                </>
+                </div>
             </RestaurantLayout>
         </>
     );

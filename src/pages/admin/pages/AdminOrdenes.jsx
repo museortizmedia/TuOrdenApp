@@ -223,15 +223,15 @@ export default function AdminOrdenes() {
     return (
         <>
             <Toaster position="top-right" reverseOrder={false} toastOptions={{ style: { marginTop: '60px' } }} />
-            <div className="flex gap-4 p-4">
+            <div className="flex flex-col lg:flex-row gap-4 p-4">
                 {statusColumns.map(status => (
                     <div
                         key={status}
                         onDrop={(e) => handleDrop(e, status)}
                         onDragOver={allowDrop}
-                        className="flex-1 bg-[#111] p-4 rounded-lg min-h-[400px]"
+                        className="flex-1 bg-[#111] p-4 rounded-lg min-h-[27.5vh] lg:min-h-[70vh]"
                     >
-                        <h2 className="text-xl font-semibold mb-4 capitalize">{status}</h2>
+                        <h2 className="text-xl font-semibold mb-4 capitalize">{status} ({orders.filter(order => status === "pendiente" ? (order.status === "pendiente" || order.status === "por pagar") : order.status === status).length})</h2>
                         {orders
                             .filter(order => status === "pendiente" ? (order.status === "pendiente" || order.status === "por pagar") : order.status === status)
                             .map(order => (
@@ -259,14 +259,14 @@ export default function AdminOrdenes() {
                                                             : order.status === "por pagar" ? "bg-yellow-600"
                                                                 : "bg-gray-500"}`}>
                                                 {order.status === "por pagar" ?
-                                                <CreditCardIcon className='w-4 h-4' />
-                                                : order.status === "pendiente" ?
-                                                <ClockIcon className='w-4 h-4' />
-                                                : order.status === "en preparación" ?
-                                                <FlameIcon className='w-4 h-4' />
-                                                : order.status === "lista" ?
-                                                <CheckCircle className='w-4 h-4' />
-                                                :""}
+                                                    <CreditCardIcon className='w-4 h-4' />
+                                                    : order.status === "pendiente" ?
+                                                        <ClockIcon className='w-4 h-4' />
+                                                        : order.status === "en preparación" ?
+                                                            <FlameIcon className='w-4 h-4' />
+                                                            : order.status === "lista" ?
+                                                                <CheckCircle className='w-4 h-4' />
+                                                                : ""}
                                                 {order.status}
                                             </span>
                                         </div>
@@ -297,7 +297,7 @@ export default function AdminOrdenes() {
                                     </div>}
 
                                     {order.orderType == "Domicilio" && <div className='p-2'>
-                                    <p className="text-sm text-gray-500">Direccion: {order.address}, {order.neighborhood} </p>
+                                        <p className="text-sm text-gray-500">Direccion: {order.address}, {order.neighborhood} </p>
                                     </div>}
                                     <a className="text-sm text-gray-400 hover:text-white hover:underline" href={'https://wa.me/57' + order.phoneNumber} target="_blank">{order.phoneNumber}</a>
 
@@ -365,15 +365,17 @@ export default function AdminOrdenes() {
 
             {/* Opciones de Administrador */}
             <div className="flex-1 p-4 mx-4 rounded bg-[#111]">
-                <div className="flex flex-wrap gap-4">
+                <h3 className='text-center text-xl font-semibold'>Acciones Globales</h3>
+                <div className="flex flex-row border-t gap-4 mt-2 p-2">
 
-                    <button
-                        onClick={moverOrdenesAntiguas}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-                        title=''
-                    >
-                        Limpiar Ordenes De Ayer
-                    </button>
+                        <button
+                            onClick={moverOrdenesAntiguas}
+                            className="bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium px-4 py-2 rounded cursor-pointer flex items-center gap-2"
+                            title='Envia las órdenes de ayer al archivo'
+                        >
+                            <Archive className='w-4 h-4' />
+                            Archivar órdenes del día anterior
+                        </button>
 
                 </div>
             </div>

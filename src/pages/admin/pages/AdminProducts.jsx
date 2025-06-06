@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useRestaurant } from "../../../contexts/RestaurantContext.jsx";
 import firestoreService from "../../../servicies/firestoreService.js";
+import supabaseService from "../../../servicies/supabaseService.js";
 import toast, { Toaster } from "react-hot-toast";
 import {
     DndContext,
@@ -21,12 +22,17 @@ import { CSS } from "@dnd-kit/utilities";
 import { doc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase.js";
 import ToggleSwitch from "../../../components/ToogleSwitch.jsx"
+import ImageUploader from "../../../components/ImageUploader";
 
 function SortableItem({ product, onUpdate, onDelete }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: product.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
     const [edit, setEdit] = useState(false);
     const [form, setForm] = useState({ ...product });
+    const [selectedImage, setSelectedImage] = useState(null);
+
+    const { restaurant } = useRestaurant();
+
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -38,9 +44,32 @@ function SortableItem({ product, onUpdate, onDelete }) {
 
     const handleSave = async () => {
         if (isNaN(form.price)) return toast.error("Precio inválido");
-        await onUpdate(product.id, form);
+
+        let imageUrl = form.image || "";
+
+        if (selectedImage) {
+            const uploadedUrl = await supabaseService.uploadProductImage(
+                selectedImage,
+                restaurant.id,
+                product.id
+            );
+            if (uploadedUrl) {
+                imageUrl = uploadedUrl;
+            } else {
+                toast.error("No se pudo subir la imagen");
+                return;
+            }
+        }
+
+        await onUpdate(product.id, { ...form, image: imageUrl });
         setEdit(false);
     };
+
+    useEffect(() => {
+        if (edit) {
+            setForm({ ...product });
+        }
+    }, [edit, product]);
 
     const stopDrag = (e) => {
         e.stopPropagation();
@@ -53,10 +82,19 @@ function SortableItem({ product, onUpdate, onDelete }) {
             {...attributes}
             {...listeners}
             style={style}
-            className="bg-[#151515] p-4 rounded shadow cursor-move border-2 border-[#202020] space-y-2 relative"
+            className="bg-[#151515] p-4 rounded shadow cursor-move border-2 border-[#202020] space-y-2 relative hover:shadow-gray-300/5 hover:shadow-sm"
         >
             {edit ? (
                 <>
+                    {form.image && !selectedImage && (
+                        <img src={form.image} alt="Producto" className="rounded-lg mb-2 w-full h-auto" />
+                    )}
+
+                    <div className="p-6" onPointerDownCapture={(e) => e.stopPropagation()}>
+                        <h3 className="text-xl font-bold mb-4">Subir una imagen</h3>
+                        <ImageUploader onImageSelect={(file) => setSelectedImage(file)} />
+                    </div>
+
                     <input
                         name="name"
                         value={form.name}
@@ -87,7 +125,7 @@ function SortableItem({ product, onUpdate, onDelete }) {
                     <div className="flex justify-between mt-2">
                         <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); if (window.confirm("Eliminar?")) onDelete(product.id); }} className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded">Eliminar</button>
                         <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); handleSave(); }} className="bg-green-700 hover:bg-green-800 px-2 py-1 rounded">Guardar</button>
-                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); setEdit(false); }} className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">Volver</button>
+                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); setEdit(false); }} className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded">Cerrar</button>
                     </div>
                 </>
             ) : (
