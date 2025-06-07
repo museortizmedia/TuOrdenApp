@@ -235,9 +235,10 @@ export default function CartOverlay({ onClose }) {
             cart.map((item) => (
               <div key={item.id} className="flex items-start gap-4 border-b pb-4 pr-2">
                 <img
-                  src={item.image || "https://placehold.co/100"}
+                  src={item.image || "public/assets/defaultImage.jpg" }
                   alt={item.name}
-                  className="w-20 h-20 object-cover rounded"
+                  title={item.name}
+                  className="w-20 h-20 object-cover shadow-lg rounded"
                 />
                 <div className="flex-1 space-y-1">
                   <h3 className="font-bold text-sm">{item.name}</h3>
@@ -263,8 +264,8 @@ export default function CartOverlay({ onClose }) {
                       }}
                       className="w-14 border rounded text-center text-sm"
                     />
-                    <button onClick={() => { removeFromCart(item.id); navigator.vibrate?.(100); }}>
-                      <Trash2 className="w-4 h-4 text-red-500" />
+                    <button className="cursor-pointer" onClick={() => { removeFromCart(item.id); navigator.vibrate?.(100); }}>
+                      <Trash2 className="w-4 h-4 text-red-500 hover:text-red-600" />
                     </button>
                   </div>
                 </div>
