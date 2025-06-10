@@ -159,9 +159,6 @@ export default function AdminOrdenes() {
         win.document.close();
     };
 
-
-
-
     // Archivar
     const archivarOrden = async (order) => {
         const añoActual = new Date().getFullYear();
@@ -217,7 +214,6 @@ export default function AdminOrdenes() {
         }
     };
 
-
     const statusColumns = ['pendiente', 'en preparación', 'lista'];
 
     return (
@@ -234,6 +230,8 @@ export default function AdminOrdenes() {
                         <h2 className="text-xl font-semibold mb-4 capitalize">{status} ({orders.filter(order => status === "pendiente" ? (order.status === "pendiente" || order.status === "por pagar") : order.status === status).length})</h2>
                         {orders
                             .filter(order => status === "pendiente" ? (order.status === "pendiente" || order.status === "por pagar") : order.status === status)
+                            .slice()
+                            .reverse()
                             .map(order => (
                                 <div
                                     key={order.id}
@@ -314,6 +312,16 @@ export default function AdminOrdenes() {
                                         </li>
                                         {openDetails[order.id] && (
                                             <>
+                                                {order.observaciones && (
+                                                    <li className="mt-3 my-2 p-4 border border-yellow-600 bg-yellow-900/20 text-sm text-yellow-100 rounded">
+                                                        <div className="flex items-center mb-1 font-semibold">
+                                                            <AlertCircle className="w-4 h-4 mr-2" />
+                                                            Observaciones
+                                                        </div>
+                                                        <div className="font-normal">{order.observaciones}</div>
+                                                    </li>
+                                                )}
+
                                                 {order.items?.map((item, idx) => {
                                                     const quantity = item.quantity || 1;
                                                     const unitPrice = item.price || 0;
@@ -347,6 +355,7 @@ export default function AdminOrdenes() {
                                                 </li>
                                             </>
                                         )}
+
                                         <li className="mt-2 pt-2 border-t border-yellow-500 flex justify-between items-center text-sm font-bold text-yellow-300">
                                             <div className="flex items-center gap-1">
                                                 <DollarSign className="w-4 h-4" />
@@ -356,6 +365,8 @@ export default function AdminOrdenes() {
                                                 ${order.total?.toLocaleString("es-CL") || "0"}
                                             </span>
                                         </li>
+
+
                                     </ul>
 
                                 </div>
@@ -369,14 +380,14 @@ export default function AdminOrdenes() {
                 <h3 className='text-center text-xl font-semibold'>Acciones Globales</h3>
                 <div className="flex flex-row border-t gap-4 mt-2 p-2">
 
-                        <button
-                            onClick={moverOrdenesAntiguas}
-                            className="bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium px-4 py-2 rounded cursor-pointer flex items-center gap-2"
-                            title='Envia las órdenes de ayer al archivo'
-                        >
-                            <Archive className='w-4 h-4' />
-                            Archivar órdenes del día anterior
-                        </button>
+                    <button
+                        onClick={moverOrdenesAntiguas}
+                        className="bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium px-4 py-2 rounded cursor-pointer flex items-center gap-2"
+                        title='Envia las órdenes de ayer al archivo'
+                    >
+                        <Archive className='w-4 h-4' />
+                        Archivar órdenes del día anterior
+                    </button>
 
                 </div>
             </div>

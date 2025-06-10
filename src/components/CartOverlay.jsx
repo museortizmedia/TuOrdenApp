@@ -26,6 +26,7 @@ export default function CartOverlay({ onClose }) {
   const [orderType, setOrderType] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [selectedSede, setSelectedSede] = useState("");
+  const [observaciones, setObservaciones] = useState("");
   const [sedes, setSedes] = useState([]);
   const [inputQuantities, setInputQuantities] = useState({});
   const [showTransferModal, setShowTransferModal] = useState(false);
@@ -80,6 +81,7 @@ export default function CartOverlay({ onClose }) {
       phoneNumber,
       orderType,
       paymentMethod,
+      observaciones,
       status,
       sede: orderType === "Recoger" ? selectedSede : "",
     };
@@ -151,6 +153,7 @@ export default function CartOverlay({ onClose }) {
     setOrderType(savedBuyer.orderType || "");
     setPaymentMethod(savedBuyer.paymentMethod || "");
     setSelectedSede(savedBuyer.selectedSede || "");
+    setObservaciones(savedBuyer.observaciones || "");
     setIsInitialized(true);
   }, []);
 
@@ -166,9 +169,10 @@ export default function CartOverlay({ onClose }) {
         orderType,
         paymentMethod,
         selectedSede,
+        observaciones
       })
     );
-  }, [buyerName, address, neighborhood, phoneNumber, orderType, paymentMethod, selectedSede, isInitialized]);
+  }, [buyerName, address, neighborhood, phoneNumber, orderType, paymentMethod, selectedSede, observaciones, isInitialized]);
 
   useEffect(() => {
     const initial = {};
@@ -235,7 +239,7 @@ export default function CartOverlay({ onClose }) {
             cart.map((item) => (
               <div key={item.id} className="flex items-start gap-4 border-b pb-4 pr-2">
                 <img
-                  src={item.image || "public/assets/defaultImage.jpg" }
+                  src={item.image || "public/assets/defaultImage.jpg"}
                   alt={item.name}
                   title={item.name}
                   className="w-20 h-20 object-cover shadow-lg rounded"
@@ -315,6 +319,13 @@ export default function CartOverlay({ onClose }) {
               <option value="">Método de pago</option>
               {Object.entries(paymentOptions).map(([key, val]) => <option key={key} value={key}>{key}: {val}</option>)}
             </select>
+
+            <textarea
+              placeholder="Detalles (opcionales)"
+              value={observaciones}
+              onChange={(e) => setObservaciones(e.target.value)}
+              className="w-full border px-3 py-2 rounded text-sm resize-none h-24"
+            />
 
             <div className="flex justify-between text-lg"><span>Subtotal</span><span>${subtotal.toLocaleString("es-CL")}</span></div>
             <div className="flex justify-between text-sm"><span>IVA</span><span>$0</span></div>

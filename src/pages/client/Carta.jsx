@@ -182,7 +182,7 @@ function Carta() {
                                                     <div className="flex items-center justify-center w-full lg:w-1/4 xl:w-2/6 p-5">
 
                                                         <button
-                                                            className={`w-full ${theme.buttons.secondary} hover:text-[#003366] cursor-pointer font-bold py-2 px-4 rounded-xl transition duration-300 xl:text-2xl`}
+                                                            className={`w-full ${theme.buttons.secondary} hover:text-[#003366] cursor-pointer font-bold py-2 px-4 rounded-xl transition duration-300 xl:text-xl`}
                                                             onClick={() => handleProductCart(product)}
                                                         >
                                                             Añadir al carrito
