@@ -4,6 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tu Order App</title>
+
+    <!-- Script para ajustar SEO dinámicamente antes de React -->
+    <script>
+      if (window.location.hostname.includes("monstersburger.com.co")) {
+        document.title = "Monsters Burger Jamundí | Comida rápida a domicilio";
+
+        const metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) {
+          metaDescription.setAttribute("content", "Disfruta de las mejores hamburguesas, alitas, asados en Monsters Burger Jamundí. Ordena en línea y recibe en casa.");
+        } else {
+          const meta = document.createElement("meta");
+          meta.name = "description";
+          meta.content = "Disfruta de las mejores hamburguesas, alitas, asados en Monsters Burger Jamundí. Ordena en línea y recibe en casa.";
+          document.head.appendChild(meta);
+        }
+
+        const canonical = document.createElement("link");
+        canonical.rel = "canonical";
+        canonical.href = "https://monstersburger.com.co/";
+        document.head.appendChild(canonical);
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
