@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCWK5-fi9G1dXwcpeN3gD5XjgY75m0EbLA",
+  apiKey: import.meta.env.VITE_FIRE_KEY,
   authDomain: "tu-orden-app-6e39c.firebaseapp.com",
   projectId: "tu-orden-app-6e39c",
   storageBucket: "tu-orden-app-6e39c.firebasestorage.app",

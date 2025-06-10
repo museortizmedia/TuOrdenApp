@@ -3,12 +3,12 @@
     {
       "source": "/",
       "has": [{ "type": "host", "value": "monstersburger.com.co" }],
-      "destination": "/domains/monstersburger.html"
+      "destination": "/monstersburger.html"
     },
     {
       "source": "/",
       "has": [{ "type": "host", "value": "www.monstersburger.com.co" }],
-      "destination": "/domains/monstersburger.html"
+      "destination": "/monstersburger.html"
     },
     {
       "source": "/",
