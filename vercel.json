@@ -1,16 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/",
-      "has": [{ "type": "host", "value": "monstersburger.com.co" }],
-      "destination": "/monstersburger.html"
-    },
-    {
-      "source": "/",
-      "has": [{ "type": "host", "value": "www.monstersburger.com.co" }],
-      "destination": "/monstersburger.html"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

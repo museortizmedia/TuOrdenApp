@@ -5,25 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tu Order App</title>
 
-    <!-- Script para ajustar SEO dinámicamente antes de React -->
     <script>
-      if (window.location.hostname.includes("monstersburger.com.co")) {
-        document.title = "Monsters Burger Jamundí | Comida rápida a domicilio";
+      const host = window.location.hostname;
 
-        const metaDescription = document.querySelector('meta[name="description"]');
-        if (metaDescription) {
-          metaDescription.setAttribute("content", "Disfruta de las mejores hamburguesas, alitas, asados en Monsters Burger Jamundí. Ordena en línea y recibe en casa.");
-        } else {
-          const meta = document.createElement("meta");
-          meta.name = "description";
-          meta.content = "Disfruta de las mejores hamburguesas, alitas, asados en Monsters Burger Jamundí. Ordena en línea y recibe en casa.";
-          document.head.appendChild(meta);
+      const seoConfig = 
+      {
+        "monstersburger.com.co": {
+          title: "Monsters Burger Jamundí | Comida rápida a domicilio",
+          description: "Disfruta de las mejores hamburguesas, alitas, asados en Monsters Burger Jamundí. Ordena en línea y recibe en casa.",
+          canonical: "https://monstersburger.com.co/",
+          image: "https://lh3.googleusercontent.com/p/AF1QipMoRH3IbdN0L33W7rws7CDHhYfHvQmS74w9F6pG=s680-w680-h510-rw",
+          geo: {
+            region: "CO",
+            placename: "Jamundí",
+            position: "3.26289;-76.5384"
+          }
+        },
+
+        /*"tudominio2.com": {
+          title: "Negocio 2 | Algo genial",
+          description: "La mejor experiencia en línea desde Negocio 2.",
+          canonical: "https://tudominio2.com/",
+          image: "https://tudominio2.com/logo.jpg",
+          geo: {
+            region: "CO",
+            placename: "Jamundí",
+            position: "3.26289;-76.5384"
+          }
+        },*/
+
+      };
+
+      const config = seoConfig[host] || seoConfig["www." + host];
+
+      if (config) {
+        document.title = config.title;
+
+        const appendMeta = (name, content, prop = false) => {
+          const selector = prop ? `meta[property="${name}"]` : `meta[name="${name}"]`;
+          let meta = document.querySelector(selector);
+          if (!meta) {
+            meta = document.createElement("meta");
+            if (prop) meta.setAttribute("property", name);
+            else meta.setAttribute("name", name);
+            document.head.appendChild(meta);
+          }
+          meta.setAttribute("content", content);
+        };
+
+        // Meta descripción
+        appendMeta("description", config.description);
+
+        // Canonical
+        const linkCanonical = document.createElement("link");
+        linkCanonical.setAttribute("rel", "canonical");
+        linkCanonical.setAttribute("href", config.canonical);
+        document.head.appendChild(linkCanonical);
+
+        // Open Graph
+        appendMeta("og:title", config.title, true);
+        appendMeta("og:description", config.description, true);
+        appendMeta("og:type", "website", true);
+        appendMeta("og:url", config.canonical, true);
+        appendMeta("og:image", config.image, true);
+
+        // Twitter
+        appendMeta("twitter:card", "summary_large_image");
+        appendMeta("twitter:title", config.title);
+        appendMeta("twitter:description", config.description);
+        appendMeta("twitter:image", config.image);
+
+        // SEO Local (opcional)
+        if (config.geo) {
+          appendMeta("geo.region", config.geo.region);
+          appendMeta("geo.placename", config.geo.placename);
+          appendMeta("geo.position", config.geo.position);
+          appendMeta("ICBM", config.geo.position);
         }
-
-        const canonical = document.createElement("link");
-        canonical.rel = "canonical";
-        canonical.href = "https://monstersburger.com.co/";
-        document.head.appendChild(canonical);
       }
     </script>
   </head>
