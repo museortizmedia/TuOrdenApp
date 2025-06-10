@@ -1,5 +1,24 @@
 {
+  "_comment": "Reescribe para dominios específicos",
+
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "monstersburger.com.co" }],
+      "destination": "domains/monstersburger.html"
+    },
+    
+
+    {
+      "_comment": "Fallback para otros dominios",
+      "source": "/",
+      "destination": "/index.html"
+    },
+
+    {
+      "_comment": "Permitir rutas SPA como /carta, /admin, etc.",
+      "source": "/(.*)",
+      "destination": "/"
+    }
   ]
 }
