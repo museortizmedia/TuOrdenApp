@@ -9,6 +9,8 @@ import AdminOrdenes from "./pages/AdminOrdenes";
 import AdminStory from "./pages/AdminStory";
 import CategoryOrderManager from "../../components/CategoryOrderManager";
 import supabaseService from "../../servicies/supabaseService.js"
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase/firebase.js";
 
 function Dashboard() {
   const { user, logout } = useAuth();
@@ -127,7 +129,7 @@ function Dashboard() {
                   setActivePage(page.name);
                   setMenuOpen(false); // Cierra en móvil
                 }}
-                className={`text-left px-3 py-2 rounded hover:bg-neutral-700 transition ${activePage === page.name ? "bg-neutral-700 font-bold" : ""
+                className={`text-left px-3 py-2 rounded hover:bg-neutral-700 transition ${activePage === page.name ? "bg-neutral-700 font-bold cursor-auto" : "cursor-pointer"
                   }`}
               >
                 {page.name}
@@ -135,68 +137,75 @@ function Dashboard() {
             ))}
 
             {/* Toggle de información de sesión */}
-<div className="border-t-1 border-t-white/50">
-  <button
-    onClick={() => setShowSessionInfo(prev => !prev)}
-    className="text-xs text-white/50 font-medium underline cursor-pointer"
-  >
-    {showSessionInfo ? "Ocultar información de servicios" : "Ver información de servicios"}
-  </button>
+            <div className="border-t-1 border-t-white/50">
+              <button
+                onClick={() => setShowSessionInfo(prev => !prev)}
+                className="text-xs text-white/50 font-medium underline cursor-pointer"
+              >
+                {showSessionInfo ? "Ocultar información de servicios" : "Ver información de servicios"}
+              </button>
 
-  {showSessionInfo && (
-    <div className="mt-3 rounded-lg bg-neutral-900 border border-neutral-700 p-4 text-sm text-white shadow-md space-y-4">
-      <p className="text-sm font-semibold ">Estado de servicios</p>
+              {showSessionInfo && (
+                <div className="mt-3 rounded-lg bg-neutral-900 border border-neutral-700 p-4 text-sm text-white shadow-md space-y-4">
+                  <p className="text-sm font-semibold ">Estado de servicios</p>
 
-      {/* Firebase */}
-      <div className="flex flex-col gap-1 border border-neutral-800 p-3 rounded-md bg-neutral-800">
-        <div className="flex justify-between items-center">
-          <p className={`font-medium ${user ? "text-green-400" : "text-red-400"}`}>
-            Base de datos (documentos - FB): {user ? "✔️ Activa" : "❌ Inactiva"}
-          </p>
-          <button
-            onClick={() => {
-              logout();
-              window.location.reload();
-            }}
-            className="text-xs bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md cursor-pointer"
-          >
-            Cerrar sesión
-          </button>
-        </div>
-        {user?.email && (
-          <p className="text-xs text-neutral-400">Email: {user.email}</p>
-        )}
-      </div>
+                  {/* Firebase */}
+                  <div className="flex flex-col gap-1 border border-neutral-800 p-3 rounded-md bg-neutral-800">
+                    <div className="flex justify-between items-center">
+                      <p className={`font-medium ${user ? "text-green-400" : "text-red-400"}`}>
+                        Base de datos (documentos - FB): {user ? "✔️ Activa" : "❌ Inactiva"}
+                      </p>
+                      <button
+                        onClick={async () => {
+                          await logout();
+                          setUserBD(null);
+                        }}
+                        className="text-xs bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md cursor-pointer"
+                      >
+                        Cerrar sesión
+                      </button>
+                    </div>
+                    {user?.email && (
+                      <p className="text-xs text-neutral-400">Email: {user.email}</p>
+                    )}
+                  </div>
 
-      {/* Supabase */}
-      <div className="flex flex-col gap-1 border border-neutral-800 p-3 rounded-md bg-neutral-800">
-        <div className="flex justify-between items-center">
-          <p className={`font-medium ${supabaseUser ? "text-green-400" : "text-red-400"}`}>
-            Base de datos (storage - SB): {supabaseUser ? "✔️ Activa" : "❌ Inactiva"}
-          </p>
-          <button
-            onClick={() => {
-              supabaseService.logout();
-              window.location.reload();
-            }}
-            className="text-xs bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md cursor-pointer"
-          >
-            Cerrar sesión
-          </button>
-        </div>
-        {supabaseUser?.email && (
-          <p className="text-xs text-neutral-400">Email: {supabaseUser.email}</p>
-        )}
-      </div>
-    </div>
-  )}
-</div>
+                  {/* Supabase */}
+                  <div className="flex flex-col gap-1 border border-neutral-800 p-3 rounded-md bg-neutral-800">
+                    <div className="flex justify-between items-center">
+                      <p className={`font-medium ${supabaseUser ? "text-green-400" : "text-red-400"}`}>
+                        Base de datos (storage - SB): {supabaseUser ? "✔️ Activa" : "❌ Inactiva"}
+                      </p>
+                      <button
+                        onClick={async () => {
+                          if (supabaseUser === null && userBD != null) {
+                            // iniciar sesion
+                            await supabaseService.login(userBD.email, userBD.psw);
+                            const newUser = await supabaseService.getCurrentUser();
+                            setSupabaseUser(newUser);
+                          } else {
+                            await supabaseService.logout();
+                            setSupabaseUser(null);
+                          }
+                        }}
+                        className="text-xs bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md cursor-pointer"
+                      >
+                        {supabaseUser === null ? "Iniciar Sesión" : "Cerrar sesión"}
+                      </button>
+                    </div>
+                    {supabaseUser?.email && (
+                      <p className="text-xs text-neutral-400">Email: {supabaseUser.email}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
 
 
           </nav>
 
-          
+
 
 
         </aside>

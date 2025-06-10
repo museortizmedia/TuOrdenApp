@@ -40,7 +40,6 @@ export default function DynamicHead() {
       <meta name="geo.position" content="3.26289;-76.5384" />
       <meta name="ICBM" content="3.26289, -76.5384" />
 
-
       {/* SEO para redes sociales */}
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />

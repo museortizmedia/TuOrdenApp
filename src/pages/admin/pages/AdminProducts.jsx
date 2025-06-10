@@ -45,27 +45,33 @@ function SortableItem({ product, onUpdate, onDelete }) {
     };
 
     const handleSave = async () => {
-        
-        // en la cadena de texto del input elimina los puntos (para convertir el numero completo) las , las convierte en . para usarlas como decimales.
-        const parsedPrice = Number((form.price || "0").replace(/\./g, "").replace(",", "."));
-
-        if (isNaN(parsedPrice)) return toast.error("Precio inválido");
+        const currentSupabaseUser = await supabaseService.getCurrentUser();
 
         let imageUrl = form.image || "";
-
-        if (selectedImage) {
-            const uploadedUrl = await supabaseService.uploadProductImage(
-                selectedImage,
-                restaurant.id,
-                product.id
-            );
-            if (uploadedUrl) {
-                imageUrl = uploadedUrl;
-            } else {
-                toast.error("No se pudo subir la imagen");
-                return;
+        if (currentSupabaseUser != null) {
+            if (selectedImage) {
+                const uploadedUrl = await supabaseService.uploadProductImage(
+                    selectedImage,
+                    restaurant.id,
+                    product.id
+                );
+                if (uploadedUrl != null) {
+                    imageUrl = uploadedUrl;
+                } else {
+                    toast.error("No se pudo subir la imagen.");
+                    return;
+                }
             }
+        } else {
+            toast.error("Imagen no subida. Inicia sesión en storage para subir imágenes.");
         }
+
+        // en la cadena de texto del input elimina los puntos (para convertir el numero completo) las , las convierte en . para usarlas como decimales.
+        const rawPrice = form.price ?? "0";
+        const cleaned = String(rawPrice).replace(/\./g, "").replace(",", ".");
+        const parsedPrice = isNaN(Number(cleaned)) ? 0 : Number(cleaned);
+
+        if (isNaN(parsedPrice)) return toast.error("Precio inválido");
 
         await onUpdate(product.id, { ...form, price: parsedPrice, image: (imageUrl || "") });
         setEdit(false);
@@ -270,8 +276,12 @@ function AdminProducts() {
                             <div className="bg-[#111] rounded p-4 flex flex-col">
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="font-bold text-lg">{cat}</h2>
-                                    <button onClick={() => setCreatingCat(creatingCat === cat ? null : cat)}
-                                        className={`text-green-400 text-xl cursor-pointer transition-transform duration-300 transform origin-center ${creatingCat === cat ? "rotate-45" : "rotate-0"}`} title="Crear producto">+</button>
+                                    <button
+                                        onClick={() => setCreatingCat(creatingCat === cat ? null : cat)}
+                                        className={`text-green-400 text-xl cursor-pointer transition-transform duration-300 transform origin-center ${creatingCat === cat ? "rotate-45" : "rotate-0"}`}
+                                        title={creatingCat === cat ? "Cancelar" : "Crear producto"}>
+                                        +
+                                    </button>
                                 </div>
 
                                 <div className="flex-1 overflow-y-auto space-y-3 max-h-[400px] pr-2">

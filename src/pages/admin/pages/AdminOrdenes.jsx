@@ -248,7 +248,8 @@ export default function AdminOrdenes() {
                                                 onChange={order.status == "pendiente"
                                                     ? (e) => handlePagosTransferencias(e, order, false)
                                                     : (e) => handlePagosTransferencias(e, order, true)}
-                                                label={order.status === "por pagar" ? "Sin pagar" : "Pagado"} />
+                                                label={order.status === "por pagar" ? "Sin pagar" : "Pagado"}
+                                            />
                                         }
                                         <div className="flex items-center gap-2">
                                             {order.status === "por pagar" && <AlertCircle className="text-yellow-400 w-4 h-4" />}
