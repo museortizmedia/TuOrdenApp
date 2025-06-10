@@ -1,19 +1,15 @@
 {
-  "redirects": [
+  "rewrites": [
     {
       "source": "/",
       "has": [{ "type": "host", "value": "monstersburger.com.co" }],
-      "destination": "/monstersburger.html",
-      "statusCode": 301
+      "destination": "/monstersburger.html"
     },
     {
       "source": "/",
       "has": [{ "type": "host", "value": "www.monstersburger.com.co" }],
-      "destination": "/monstersburger.html",
-      "statusCode": 301
-    }
-  ],
-  "rewrites": [
+      "destination": "/monstersburger.html"
+    },
     {
       "source": "/(.*)",
       "destination": "/"
