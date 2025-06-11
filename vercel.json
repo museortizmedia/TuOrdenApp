@@ -2,6 +2,14 @@
   "rewrites": [
     {
       "source": "/(.*)",
+      "has": [
+        { "type": "header", "key": "user-agent", "value": ".*(googlebot|bingbot|facebook|twitterbot|yandex).*" },
+        { "type": "host", "value": "monstersburger.com.co" }
+      ],
+      "destination": "/monstersburger.com.co.html"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
