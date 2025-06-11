@@ -99,3 +99,11 @@ Permite a restaurantes gestionar sus órdenes, gestionar la carta, y a los usuar
 ├── tailwind.config.js
 ├── firebase-config.js      # (solo si decides no usar un wrapper)
 └── README.md
+
+
+# Verificar prerender
+https://metatags.io/
+
+abrir poweshell
+Linux, Git bash: curl -A "Googlebot" https://www.monstersburger.com.co/
+Windows: Invoke-WebRequest -Uri "https://www.monstersburger.com.co/" -Headers @{ "User-Agent" = "Googlebot" } | Select-Object -ExpandProperty Content

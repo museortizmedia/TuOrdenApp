@@ -1,9 +1,9 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/",
       "has": [
-        { "type": "header", "key": "user-agent", "value": ".*(googlebot|bingbot|facebook|twitterbot|yandex).*" },
+        { "type": "header", "key": "user-agent", "value": ".*(Googlebot|bingbot|facebookexternalhit|Twitterbot).*" },
         { "type": "host", "value": "monstersburger.com.co" }
       ],
       "destination": "/monstersburger.com.co.html"
