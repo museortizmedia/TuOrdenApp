@@ -7,7 +7,7 @@ export default function DynamicHead() {
   const { restaurant } = useRestaurant();
 
   // Evitar aplicar en la ruta raíz
-  if (!restaurant || location.pathname === "/") return null;
+  //if (!restaurant || location.pathname === "/") return null;
 
   let title = restaurant.name;
   if (location.pathname === "/admin") title += " | Admin";
@@ -16,9 +16,11 @@ export default function DynamicHead() {
   const baseDescription = restaurant.description || `Descubre ${restaurant.name}.`;
 
   const description =
-    location.pathname === "/carta"
-      ? `Consulta la carta de ${restaurant.name}. ${baseDescription}`
-      : `Panel administrativo de ${restaurant.name}. ${baseDescription}`;
+    location.pathname === "/"
+      ? `${restaurant.name}. ${baseDescription}`
+      : location.pathname === "/carta"
+        ? `Consulta la carta de ${restaurant.name}. ${baseDescription}`
+        : `Panel administrativo de ${restaurant.name}. ${baseDescription}`;
 
   const canonical = `https://${window.location.host}${location.pathname}`;
   const shouldIndex = location.pathname !== "/admin";
