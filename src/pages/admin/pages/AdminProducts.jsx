@@ -143,29 +143,50 @@ function SortableItem({ product, onUpdate, onDelete }) {
                 </>
             ) : (
                 <>
-                    <div className="flex justify-between items-start">
-                        <div className="max-w-80">
-                            <h3 className="font-bold">{product.name}</h3>
-                            <p className="text-xs overflow-y-auto max-h-8 pr-1">{product.desc || ""}</p>
-                            <p className="text-sm font-bold text-white mt-2">Precio: ${(product.price).toLocaleString('es-CL')}</p>
+                    <div className="flex gap-4 items-start">
+                        {/* Imagen del producto */}
+                        <img
+                            src={product.image || "https://placehold.co/400?text=Default+Image&font=roboto"}
+                            alt={product.name}
+                            className="w-20 h-20 object-cover rounded"
+                        />
+
+                        {/* Contenido del producto + botón de editar */}
+                        <div className="flex justify-between items-start w-full">
+                            <div className="max-w-80">
+                                <h3 className="font-bold">{product.name}</h3>
+                                <p className="text-xs overflow-y-auto max-h-12 pr-1">
+                                    {product.desc || ""}
+                                </p>
+                                <p className="text-sm font-bold text-white mt-2">
+                                    Precio: ${product.price.toLocaleString("es-CL")}
+                                </p>
+                            </div>
+
+                            <button
+                                onPointerDownCapture={(e) => e.stopPropagation()}
+                                onClick={(e) => {
+                                    stopDrag(e);
+                                    setEdit(true);
+                                }}
+                                className="p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
+                                title="Editar producto"
+                            >
+                                <PenIcon className="w-4 h-4 text-white" />
+                            </button>
                         </div>
-                        <button
-                            onPointerDownCapture={(e) => e.stopPropagation()}
-                            onClick={(e) => {
-                                stopDrag(e);
-                                setEdit(true);
-                            }}
-                            className="p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
-                            title="Editar producto"
-                        >
-                            <PenIcon className="w-4 h-4 text-white" />
-                        </button>
+
+                        {/* ToggleSwitch fijo abajo a la derecha */}
+                        <div className="absolute bottom-4 right-4">
+                            <ToggleSwitch
+                                checked={product.state}
+                                onChange={(e) =>
+                                    onUpdate(product.id, { ...product, state: e.target.checked })
+                                }
+                                label="Activo:"
+                            />
+                        </div>
                     </div>
-                    <ToggleSwitch
-                        checked={product.state}
-                        onChange={e => onUpdate(product.id, { ...product, state: e.target.checked })}
-                        label="Activo:"
-                    />
                 </>
             )}
         </div>
