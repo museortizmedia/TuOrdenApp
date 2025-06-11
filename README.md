@@ -104,6 +104,10 @@ Permite a restaurantes gestionar sus órdenes, gestionar la carta, y a los usuar
 # Verificar prerender
 https://metatags.io/
 
+# Verificar que trae robots
+
+https://reqbin.com/
+
 abrir poweshell
 Linux, Git bash: curl -A "Googlebot" https://www.monstersburger.com.co/
 Windows: Invoke-WebRequest -Uri "https://www.monstersburger.com.co/" -Headers @{ "User-Agent" = "Googlebot" } | Select-Object -ExpandProperty Content

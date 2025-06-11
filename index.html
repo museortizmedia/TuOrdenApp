@@ -4,75 +4,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tu Order App</title>
+  <title>Monsters Burger Jamundí | Comida rápida y a domicilio</title>
 
-  <script>
-    const rawHost = window.location.hostname;
-    const host = rawHost.replace(/^www\./, "");
+  <!-- SEO General -->
+  <meta name="description" content="Disfruta de las mejores hamburguesas, alitas, asados en Monsters Burger Jamundí en sus sede Ciudad Sur o Belalcazar. Ordena en línea y recibe en casa.">
+  <link rel="canonical" href="https://monstersburger.com.co/" />
 
-    const seoConfig = {
-      "monstersburger.com.co": {
-        title: "Monsters Burger Jamundí | Comida rápida a domicilio",
-        description: "Disfruta de las mejores hamburguesas, alitas, asados en Monsters Burger Jamundí. Ordena en línea y recibe en casa.",
-        canonical: "https://www.monstersburger.com.co/",
-        image: "https://lh3.googleusercontent.com/p/AF1QipMoRH3IbdN0L33W7rws7CDHhYfHvQmS74w9F6pG=s680-w680-h510-rw",
-        geo: {
-          region: "CO",
-          placename: "Jamundí",
-          position: "3.26289;-76.5384"
-        }
-      }
-      // más dominios aquí
-    };
+  <!-- Open Graph -->
+  <meta property="og:title" content="Monsters Burger Jamundí | Comida rápida y a domicilio" />
+  <meta property="og:description" content="Disfruta de las mejores hamburguesas, alitas, asados en Monsters Burger Jamundí en sus sede Ciudad Sur o Belalcazar. Ordena en línea y recibe en casa." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://monstersburger.com.co/" />
+  <meta property="og:image" content="https://lh3.googleusercontent.com/p/AF1QipMoRH3IbdN0L33W7rws7CDHhYfHvQmS74w9F6pG=s680-w680-h510-rw" />
 
-    const config = seoConfig[host];
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Monsters Burger Jamundí | Comida rápida y a domicilio" />
+  <meta name="twitter:description" content="Disfruta de las mejores hamburguesas, alitas, asados en Monsters Burger Jamundí en sus sede Ciudad Sur o Belalcazar. Ordena en línea y recibe en casa." />
+  <meta name="twitter:image" content="https://lh3.googleusercontent.com/p/AF1QipMoRH3IbdN0L33W7rws7CDHhYfHvQmS74w9F6pG=s680-w680-h510-rw" />
 
-    if (config) {
-      document.title = config.title;
-
-      const appendMeta = (name, content, prop = false) => {
-        const selector = prop ? `meta[property="${name}"]` : `meta[name="${name}"]`;
-        let meta = document.querySelector(selector);
-        if (!meta) {
-          meta = document.createElement("meta");
-          if (prop) meta.setAttribute("property", name);
-          else meta.setAttribute("name", name);
-          document.head.appendChild(meta);
-        }
-        meta.setAttribute("content", content);
-      };
-
-      // Meta descripción
-      appendMeta("description", config.description);
-
-      // Canonical
-      const linkCanonical = document.createElement("link");
-      linkCanonical.setAttribute("rel", "canonical");
-      linkCanonical.setAttribute("href", config.canonical);
-      document.head.appendChild(linkCanonical);
-
-      // Open Graph
-      appendMeta("og:title", config.title, true);
-      appendMeta("og:description", config.description, true);
-      appendMeta("og:type", "website", true);
-      appendMeta("og:url", config.canonical, true);
-      appendMeta("og:image", config.image, true);
-
-      // Twitter
-      appendMeta("twitter:card", "summary_large_image");
-      appendMeta("twitter:title", config.title);
-      appendMeta("twitter:description", config.description);
-      appendMeta("twitter:image", config.image);
-
-      // SEO Local (opcional)
-      if (config.geo) {
-        appendMeta("geo.region", config.geo.region);
-        appendMeta("geo.placename", config.geo.placename);
-        appendMeta("geo.position", config.geo.position);
-        appendMeta("ICBM", config.geo.position);
-      }
-    }
-  </script>
+  <!-- SEO Local -->
+  <meta name="geo.region" content="CO" />
+  <meta name="geo.placename" content="Jamundí" />
+  <meta name="geo.position" content="3.26289;-76.5384" />
+  <meta name="ICBM" content="3.26289;-76.5384" />
 
 </head>
 
