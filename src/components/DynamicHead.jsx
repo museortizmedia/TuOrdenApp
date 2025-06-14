@@ -40,7 +40,7 @@ export default function DynamicHead() {
     ? isAdmin
       ? `${config.title} | Admin`
       : isCarta
-        ? `${config.title} | Carta`
+        ? `${config.title} | Carta | Menú`
         : config.title
     : fallbackTitle;
 
@@ -48,7 +48,7 @@ export default function DynamicHead() {
     ? isAdmin
       ? `Panel administrativo de ${restaurant.name || host}. ${config.description}`
       : isCarta
-        ? `Consulta la carta de ${restaurant.name || host}. ${config.description}`
+        ? `Consulta la carta de ${restaurant.name || host}. ${config.description} menu menú`
         : config.description
     : fallbackDescription;
 
