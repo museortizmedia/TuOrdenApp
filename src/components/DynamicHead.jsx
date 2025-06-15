@@ -108,18 +108,16 @@ export default function DynamicHead() {
                 "name": "Monsters Burger",
                 "url": "https://monstersburger.com.co",
                 "inLanguage": "es-CO",
-                "potentialAction": [
-                  {
-                    "@type": "ViewAction",
-                    "target": "https://monstersburger.com.co/carta",
-                    "name": "Ver el menú"
-                  },
-                  {
-                    "@type": "ContactAction",
-                    "target": "https://wa.me/573243590591?text=%C2%A1Hola!%20Quiero%20hacer%20una%20reserva",
-                    "name": "Chatear por WhatsApp Reservar Monsters Burger"
-                  }
-                ],
+                "potentialAction": [{
+                  "@type": "ViewAction",
+                  "target": "https://monstersburger.com.co/carta",
+                  "name": "Ver el menú"
+                },
+                {
+                  "@type": "CommunicateAction",
+                  "target": "https://wa.me/573243590591?text=¡Hola!%20Quiero%20hacer%20una%20reserva",
+                  "name": "Reservar por WhatsApp"
+                }],
 
                 "mainEntityOfPage": {
                   "@type": "WebPage",
@@ -134,11 +132,10 @@ export default function DynamicHead() {
               {
                 "@context": "https://schema.org",
                 "@type": "Restaurant",
-                "@id": "https://monstersburger.com.co#restaurant",
                 "name": "Monsters Burger",
                 "url": "https://monstersburger.com.co",
                 "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGF636aFKyKV_2Kq4oxwaCGYb0EK50VwOOXQ&s",
-                "telephone": "+57-324-3590591",
+                "telephone": "+573243590591",
                 "address": {
                   "@type": "PostalAddress",
                   "addressLocality": "Jamundí",
