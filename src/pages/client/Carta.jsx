@@ -1,15 +1,24 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
-import RestaurantLayout from "../../components/RestaurantLayout";
+// React import
+import React, { useEffect, useState, useMemo, useRef, Suspense, lazy } from "react";
+// Contexts
 import { useRestaurant } from "../../contexts/RestaurantContext";
-import theme from "../../theme";
+// Services
 import firestoreService from "../../servicies/firestoreService";
-import { useCart } from "../../contexts/CartContext";
+// Styles
+import theme from "../../theme";
+// Components
+import RestaurantLayout from "../../components/RestaurantLayout";
+
+// Componentes de carga diferida
+const ProductCard = lazy(() => import("./components/ProductCard.jsx"));
 
 function Carta() {
-    const { restaurant } = useRestaurant();
-    const [products, setProducts] = useState([]);
-    const [activeCategory, setActiveCategory] = useState(null);
+    const { restaurant } = useRestaurant(); // Contexto de informacion del restaurante
+    const [products, setProducts] = useState([]); // Estado con todos los productos
+    const [activeCategory, setActiveCategory] = useState(null); // Estado con la categoria visible
+    const [visibleProductIds, setVisibleProductIds] = useState(new Set()); // IDs de productos visibles (cargas diferidas)
 
+    // Una vez cargado el contexto de restaurante, cargaremos los prodcutos
     useEffect(() => {
         if (restaurant?.id) {
             firestoreService
@@ -18,6 +27,7 @@ function Carta() {
         }
     }, [restaurant]);
 
+    // Agrupar productos por categoría y ordenar
     const [categoryMap, groupedProducts] = useMemo(() => {
         const groups = {};
         const map = {};
@@ -28,7 +38,6 @@ function Carta() {
             if (!groups[category]) groups[category] = [];
             groups[category].push(prod);
 
-            // Toma el menor categoryOrder encontrado para la categoría
             if (prod.categoryOrder !== undefined) {
                 if (map[category] === undefined || prod.categoryOrder < map[category]) {
                     map[category] = prod.categoryOrder;
@@ -44,27 +53,31 @@ function Carta() {
         return [map, groups];
     }, [products]);
 
+    // Obtener las categorías ordenadas (segun su valor de orden)
     const categories = useMemo(() => {
         const keys = Object.keys(groupedProducts);
         return keys.sort((a, b) => (categoryMap[a] ?? 999) - (categoryMap[b] ?? 999));
     }, [groupedProducts, categoryMap]);
 
-    const sectionRefs = useRef({});
+    const sectionRefs = useRef({}); // Referencias por categorias
+    const productRefs = useRef({}); // Referencias por producto
 
+    // Estado dinámico si la página está en versión movil
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
+    const isScrollingByClick = useRef(false); // Flag para saber si el scroll fue manual
+    
+    // Detectar qué categoría está visible para resaltar el botón (mientras sea scroll manual)
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
+                    if (entry.isIntersecting && !isScrollingByClick.current) {
                         setActiveCategory(entry.target.id);
                     }
                 });
@@ -73,22 +86,33 @@ function Carta() {
                 ? { rootMargin: "-50% 0px -30% 0px", threshold: 0.05 }
                 : { rootMargin: "-30% 0px -60% 0px", threshold: 0.1 }
         );
+
         categories.forEach((cat) => {
             if (sectionRefs.current[cat]) {
                 observer.observe(sectionRefs.current[cat]);
             }
         });
-        return () => observer.disconnect();
-    }, [categories]);
 
+        return () => observer.disconnect();
+    }, [categories, isMobile]);
+
+    // Click en categoría: scroll suave + prevenir intersección temporal
     const handleCategoryClick = (cat) => {
         const el = sectionRefs.current[cat];
         if (el) {
+            isScrollingByClick.current = true; // Flag activado
+
             el.scrollIntoView({ behavior: "smooth", block: "start" });
-            setActiveCategory(cat);
+            setActiveCategory(cat); // Lo seteamos directamente
+
+            // Apagamos el flag después de un tiempo razonable (~1s)
+            setTimeout(() => {
+                isScrollingByClick.current = false;
+            }, 1000);
         }
     };
 
+    // Referencias para botones de categoría
     const buttonRefs = useRef({});
     useEffect(() => {
         if (activeCategory && buttonRefs.current[activeCategory]) {
@@ -101,26 +125,43 @@ function Carta() {
         }
     }, [activeCategory]);
 
-    const { addToCart } = useCart();
-    const handleProductCart = (product) => {
-        if (navigator.vibrate) {
-            navigator.vibrate(100);
-        }
-        addToCart(product);
-    };
+    // IntersectionObserver para productos individuales
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    const id = entry.target.dataset.id;
+                    if (entry.isIntersecting && id) {
+                        setVisibleProductIds((prev) => new Set(prev).add(id));
+                        observer.unobserve(entry.target);
+                    }
+                });
+            },
+            { rootMargin: "200px 0px", threshold: 0.1 }
+        );
+
+        Object.entries(productRefs.current).forEach(([id, el]) => {
+            if (el && !visibleProductIds.has(id)) {
+                observer.observe(el);
+            }
+        });
+
+        return () => observer.disconnect();
+    }, [products, visibleProductIds]);
 
     return (
         <>
-            <div className="sticky top-[4.8rem] z-50 shadow-md">
-                <nav className={`${theme.colors.background.dark} flex bottom-0 overflow-x-auto whitespace-nowrap p-2 space-x-2 touch-pan-x scrollbar-hide-sm sm:scrollbar-hide border-b border-neutral-800 w-full max-w-full`}>
+            {/* Navegación por categorías */}
+            <div className="sticky top-[4.8rem] z-50 shadow-md px-10">
+                <nav className={`${theme.colors.background.dark} flex overflow-x-auto whitespace-nowrap p-2 space-x-2 border-b border-neutral-800 w-full max-w-full`}>
                     {categories.map((cat) => (
                         <button
                             key={cat}
                             ref={(el) => (buttonRefs.current[cat] = el)}
                             onClick={() => handleCategoryClick(cat)}
                             className={`pb-1 px-3 text-sm transition-colors shrink-0 ${activeCategory === cat
-                                ? "border-b-4 border-yellow-400 text-yellow-400 font-bold"
-                                : "text-white hover:text-yellow-300 cursor-pointer hover:animate-pulse"
+                                    ? "border-b-4 border-yellow-400 text-yellow-400 font-bold"
+                                    : "text-white hover:text-yellow-300 cursor-pointer"
                                 }`}
                         >
                             {cat}
@@ -129,6 +170,7 @@ function Carta() {
                 </nav>
             </div>
 
+            {/* Contenido principal */}
             <RestaurantLayout>
                 <div className={`${theme.layout.darkBackground} min-h-screen`}>
                     <div className="p-4 space-y-8">
@@ -139,56 +181,29 @@ function Carta() {
                                 ref={(el) => (sectionRefs.current[cat] = el)}
                                 className="scroll-mt-28 md:scroll-mt-32"
                             >
-                                <h2 className={`text-4xl ${theme.text.yellow} font-bold mt-20 mb-10`}>{cat}</h2>
+                                <h2 className={`text-2xl md:text-3xl lg:text-4xl ${theme.text.yellow} font-bold mt-20 mb-10`}>{cat}</h2>
+
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 2xl:grid-cols-3 gap-4 sm:gap-6 md:gap-8 xl:gap-10">
-                                    {groupedProducts[cat].map((product) => {
-                                        const isAvailable = product.state === true;
+                                    {groupedProducts[cat].map((product, idx) => {
+                                        const isVisible = visibleProductIds.has(product.id);
+                                        const isValidImage = product.image && product.image !== "/assets/defaultImage.jpg";
+                                        const isFirstImage = idx === 0 && isValidImage;
 
                                         return (
                                             <div
                                                 key={product.id}
-                                                className={`flex flex-col lg:flex-row bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-lg mx-auto w-full min-w-[200px] max-w-[500px] ${isAvailable ? "hover:scale-[1.02] transition-transform" : "opacity-60 grayscale cursor-not-allowed"}`}
-                                                title={product.name}
+                                                data-id={product.id}
+                                                ref={(el) => (productRefs.current[product.id] = el)}
                                             >
-                                                {/* Imagen */}
-                                                <div className="relative aspect-square overflow-hidden w-full lg:w-1/4 xl:w-2/6">
-                                                    <img
-                                                        src={product.image || "/assets/defaultImage.jpg"}
-                                                        alt={product.name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                    {!isAvailable && (
-                                                        <div className="absolute inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center">
-                                                            <span className="text-white font-extrabold text-xl bg-red-600 px-4 py-2 rounded-xl">
-                                                                AGOTADO
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Descripción */}
-                                                <div className={`p-5 flex flex-col justify-between w-full gap-3 ${isAvailable ? "lg:w-2/4 xl:w-2/6" : "lg:w-3/4 xl:w-4/6"}`}>
-                                                    <div>
-                                                        <h3 className="text-xl font-extrabold text-white line-clamp-3 truncate lg:overflow-visible lg:whitespace-normal lg:text-clip">{product.name}</h3>
-                                                        <p className="text-sm text-gray-300 line-clamp-3 overflow-y-auto">{product.desc}</p>
-                                                    </div>
-                                                    <p className={`text-xl font-extrabold ${theme.text.yellow}`}>
-                                                        ${(product.price).toLocaleString("es-CL")}
-                                                    </p>
-                                                </div>
-
-                                                {/* Acción */}
-                                                {isAvailable && (
-                                                    <div className="flex items-center justify-center w-full lg:w-1/4 xl:w-2/6 p-5">
-
-                                                        <button
-                                                            className={`w-full ${theme.buttons.secondary} hover:text-[#003366] cursor-pointer font-bold py-2 px-4 rounded-xl transition duration-300 xl:text-xl`}
-                                                            onClick={() => handleProductCart(product)}
-                                                        >
-                                                            Añadir al carrito
-                                                        </button>
-
-                                                    </div>
+                                                {isVisible ? (
+                                                    <Suspense fallback={<div className="h-[300px] bg-neutral-900 rounded-xl animate-pulse" />}>
+                                                        <ProductCard
+                                                            product={product}
+                                                            isFirstImage={isFirstImage}
+                                                        />
+                                                    </Suspense>
+                                                ) : (
+                                                    <div className="h-[300px] bg-neutral-800 rounded-xl animate-pulse" />
                                                 )}
                                             </div>
                                         );
