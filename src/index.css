@@ -1,34 +1,134 @@
 @import "tailwindcss";
 
-/* Firefox */
-html, body {
-  scrollbar-width: thin;
-  scrollbar-color: #888 transparent;
-  -webkit-overflow-scrolling: touch;
+@layer utilities {
+  /* Ocultar Scroll - Y */
+  .noscrollbar-y {
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .noscrollbar-y::-webkit-scrollbar {
+    width: 0 !important;
+    display: none !important;
+    background: transparent !important;
+  }
+
+  /* Ocultar Scroll - X */
+  .noscrollbar-x {
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .noscrollbar-x::-webkit-scrollbar {
+    height: 0 !important;
+    display: none !important;
+    background: transparent !important;
+  }
+
+  /* Ocultar Scroll - Ambos */
+  .noscrollbar {
+    overflow: auto !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .noscrollbar::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    background: transparent !important;
+  }
+
+  /* Mostrar Scroll - Y */
+  .scrollbar-y {
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-y::-webkit-scrollbar {
+    width: 6px;
+    background: transparent;
+  }
+
+  .scrollbar-y::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 0;
+  }
+
+  .scrollbar-y::-webkit-scrollbar-thumb:hover {
+    background-color: #777;
+  }
+
+  /* Mostrar Scroll - X */
+  .scrollbar-x {
+    overflow-x: auto !important;
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-x::-webkit-scrollbar {
+    height: 6px;
+    background: transparent;
+  }
+
+  .scrollbar-x::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 0;
+  }
+
+  .scrollbar-x::-webkit-scrollbar-thumb:hover {
+    background-color: #777;
+  }
+
+  /* Mostrar Scroll - Ambos */
+  .scrollbar {
+    overflow: auto !important;
+    scrollbar-width: thin;
+  }
+
+  .scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    background: transparent;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 0;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #777;
+  }
 }
 
-/* WebKit (Chrome, Safari, Edge) */
-*::-webkit-scrollbar {
+/* Ancho y alto de la scrollbar */
+::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-*::-webkit-scrollbar-track {
-  background: transparent;         /* Oculta fondo */
+/* Fondo (track) transparente */
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-*::-webkit-scrollbar-thumb {
-  background-color: #888;       /* Color del scroll */
-  border-radius: 4px;              /* Bordes más suaves */
+/* Barra de desplazamiento (handle) gris oscuro y cuadrada */
+::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 0;
+  /* ← cuadrada */
 }
 
-*::-webkit-scrollbar-thumb:hover {
-  background-color: #6b6b6b;       /* Color al hacer hover */
+/* Hover más claro */
+::-webkit-scrollbar-thumb:hover {
+  background: #777;
 }
 
-/* Opcional: Ocultar las flechas (botones de scroll) */
-*::-webkit-scrollbar-button {
+/* Elimina las flechas laterales (botones) */
+::-webkit-scrollbar-button {
   display: none;
-  height: 0;
   width: 0;
+  height: 0;
 }

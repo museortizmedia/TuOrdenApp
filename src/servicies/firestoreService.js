@@ -163,6 +163,22 @@ const firestoreService = {
     }
   },
 
+  /**
+   * 
+   * 
+   *
+   */
+  async findSubdoc(parentCollection, parentId, subcollectionName, docId) {
+  try {
+    const ref = doc(db, parentCollection, parentId, subcollectionName, docId);
+    const snapshot = await getDoc(ref);
+    return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
+  } catch (error) {
+    console.error(`Error en findSubdoc(${parentCollection}/${parentId}/${subcollectionName}/${docId}):`, error);
+    throw error;
+  }
+},
+
   // Auxiliares
 
   /**

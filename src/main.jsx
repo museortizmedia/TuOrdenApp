@@ -89,7 +89,7 @@ function AppWrapper() {
 
   if (!restaurant) {
     return (
-      <div className={`${theme.layout.darkBackground} min-h-screen flex items-center justify-center`}>
+      <div className={`${theme.layout.darkBackground} [min-height:100dvh] flex items-center justify-center`}>
         <div className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );

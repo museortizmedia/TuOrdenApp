@@ -64,7 +64,7 @@ export default function RestaurantLayout({ children }) {
   };
 
   return (
-    <div className={`${theme.colors.background.dark} relative min-h-screen w-full max-w-[100vw] overflow-x-hidden`}>
+    <div className={`${theme.colors.background.dark} relative [min-height:100dvh] w-full max-w-[100vw] overflow-x-hidden`}>
       {/* Header */}
       <header className={`${theme.colors.background.dark} fixed top-0 left-0 right-0 z-50 flex items-center h-20 px-4 sm:px-6 shadow-md`}>
         <div className="flex items-center space-x-2" title={restaurant.desc}>

@@ -42,16 +42,36 @@ export function CartProvider({ children }) {
   }, [restaurant?.id]);
 
   // ✅ Añadir orden activa (memoria + localStorage)
-  const addActiveOrder = (order) => {
-    setActiveOrders((prev) => [...prev, order]);
+const addActiveOrder = async (order) => {
+  const existingIds = JSON.parse(localStorage.getItem("myOrderIds") || "[]");
 
-    const existingIds = JSON.parse(localStorage.getItem("myOrderIds") || "[]");
+  if (existingIds.includes(order.id)) {
+    throw new Error("Order already exists");
+  }
 
-    if (!existingIds.includes(order.id)) {
-      const updatedIds = [...existingIds, order.id];
-      localStorage.setItem("myOrderIds", JSON.stringify(updatedIds));
+  let fullOrder = order;
+
+  if (Object.keys(order).length === 1 && order.id) {
+    fullOrder = await firestoreService.findSubdoc(
+      "restaurants",
+      restaurant.id,
+      "ordenes",
+      order.id
+    );
+
+    if (!fullOrder) {
+      throw new Error("Order not found in Firebase");
     }
-  };
+  }
+
+  setActiveOrders((prev) => [...prev, fullOrder]);
+
+  const updatedIds = [...existingIds, fullOrder.id];
+  localStorage.setItem("myOrderIds", JSON.stringify(updatedIds));
+
+  return fullOrder; // Devuelves la orden completa
+};
+
 
   // ❌ Limpiar órdenes activas (memoria + localStorage)
   const clearActiveOrders = () => {

@@ -172,7 +172,7 @@ function Carta() {
 
             {/* Contenido principal */}
             <RestaurantLayout>
-                <div className={`${theme.layout.darkBackground} min-h-screen`}>
+                <div className={`${theme.layout.darkBackground} [min-height:100dvh]`}>
                     <div className="p-4 space-y-8">
                         {categories.map((cat) => (
                             <section
@@ -183,7 +183,7 @@ function Carta() {
                             >
                                 <h2 className={`text-2xl md:text-3xl lg:text-4xl ${theme.text.yellow} font-bold mt-20 mb-10`}>{cat}</h2>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 2xl:grid-cols-3 gap-4 sm:gap-6 md:gap-8 xl:gap-10">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 2xl:grid-cols-3 gap-20 sm:gap-8 md:gap-8 xl:gap-8">
                                     {groupedProducts[cat].map((product, idx) => {
                                         const isVisible = visibleProductIds.has(product.id);
                                         const isValidImage = product.image && product.image !== "/assets/defaultImage.jpg";
@@ -194,6 +194,7 @@ function Carta() {
                                                 key={product.id}
                                                 data-id={product.id}
                                                 ref={(el) => (productRefs.current[product.id] = el)}
+                                                className="px-10 sm:px-0"
                                             >
                                                 {isVisible ? (
                                                     <Suspense fallback={<div className="h-[300px] bg-neutral-900 rounded-xl animate-pulse" />}>

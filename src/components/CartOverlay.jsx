@@ -5,6 +5,7 @@ import { useRestaurant } from "../contexts/RestaurantContext";
 import { db } from "../firebase/firebase";
 import { doc, runTransaction, collection, getDocs } from "firebase/firestore";
 import MyOrders from "../pages/client/MyOrders";
+import { Toaster, toast } from "react-hot-toast";
 
 export default function CartOverlay({ onClose }) {
   const { restaurant } = useRestaurant();
@@ -201,13 +202,36 @@ export default function CartOverlay({ onClose }) {
     if (touchEndX.current - touchStartX.current > 50) handleClose();
   };
 
+  // Ordenes Activas manuales
+  const [manualOrderId, setManualOrderId] = useState("");
+
+  const handleManualOrderAdd = () => {
+    if (!manualOrderId.trim()) return alert("Debes ingresar un ID válido.");
+
+    addActiveOrder({ id: manualOrderId.trim() })
+      .then((order) => {
+        console.log("✅ Orden añadida", order);
+        toast.success("✅ Orden añadida al seguimiento");
+      })
+      .catch((error) => {
+        console.warn("⚠️ Error al añadir la orden:", error.message);
+        toast.error("⚠️ No encontramos esta orden. Puede ya estar archivada.");
+      });
+
+    setManualOrderId("");
+  };
+
+
   return (
     <div className="fixed inset-0 bg-black/50 z-[500] flex justify-end" onClick={handleClose}>
+      <Toaster position="top-right" toastOptions={{ duration: 5000 }} />
       <a
         href={restaurant.whatsapp.slice(0, 26)}
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute bottom-6 left-6 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full shadow-lg z-50 animate-pulse"
+        title="Abrir Soporte por Chat"
+        onClick={(e) => e.stopPropagation()}
+        className="fixed bottom-4 left-4 z-[9999] flex items-center gap-2 text-lg font-bold bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-full shadow-2xl border-2 border-white hover:scale-105 transition-transform duration-200"
       >
         💬 Asesoría
       </a>
@@ -237,46 +261,66 @@ export default function CartOverlay({ onClose }) {
             <p className="text-gray-500">Tu carrito está vacío.</p>
           ) : (
             cart.map((item) => (
-              <div key={item.id} className="flex items-start gap-4 border-b pb-4 pr-2">
+              <div key={item.id} className="flex items-start gap-3 border-b pb-4 pr-2">
+                {/* Imagen a la izquierda */}
                 <img
                   src={item.image || "public/assets/defaultImage.jpg"}
                   alt={item.name}
                   title={item.name}
-                  className="w-20 h-20 object-cover shadow-lg rounded"
+                  className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded shadow-lg flex-shrink-0"
                 />
-                <div className="flex-1 space-y-1">
-                  <h3 className="font-bold text-sm">{item.name}</h3>
-                  <p className="text-xs text-gray-600">{item.desc}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <input
-                      type="number"
-                      min="1"
-                      value={inputQuantities[item.id] ?? item.quantity}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setInputQuantities((prev) => ({ ...prev, [item.id]: value }));
-                      }}
-                      onBlur={() => {
-                        const raw = inputQuantities[item.id];
-                        const num = Number(raw);
-                        if (raw === "0") return removeFromCart(item.id);
-                        if (!raw || isNaN(num) || num <= 0) {
-                          setInputQuantities((prev) => ({ ...prev, [item.id]: "1" }));
-                          return updateQuantity(item.id, 1);
-                        }
-                        updateQuantity(item.id, num);
-                      }}
-                      className="w-14 border rounded text-center text-sm"
-                    />
-                    <button className="cursor-pointer" onClick={() => { removeFromCart(item.id); navigator.vibrate?.(100); }}>
-                      <Trash2 className="w-4 h-4 text-red-500 hover:text-red-600" />
-                    </button>
+
+                {/* Contenido */}
+                <div className="flex flex-col justify-between flex-1 min-w-0">
+                  {/* Nombre y Descripción */}
+                  <div className="mb-1">
+                    <h3 className="font-bold text-sm line-clamp-1">{item.name}</h3>
+                    <p className="text-xs text-gray-600 line-clamp-2 overflow-y-auto noscrollbar-x">{item.desc}</p>
+                  </div>
+
+                  {/* Controles e información */}
+                  <div className="flex justify-between items-center mt-1 flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="1"
+                        value={inputQuantities[item.id] ?? item.quantity}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setInputQuantities((prev) => ({ ...prev, [item.id]: value }));
+                        }}
+                        onBlur={() => {
+                          const raw = inputQuantities[item.id];
+                          const num = Number(raw);
+                          if (raw === "0") return removeFromCart(item.id);
+                          if (!raw || isNaN(num) || num <= 0) {
+                            setInputQuantities((prev) => ({ ...prev, [item.id]: "1" }));
+                            return updateQuantity(item.id, 1);
+                          }
+                          updateQuantity(item.id, num);
+                        }}
+                        className="w-14 border rounded text-center text-sm"
+                      />
+
+                      <button
+                        onClick={() => {
+                          removeFromCart(item.id);
+                          navigator.vibrate?.(100);
+                        }}
+                        className="text-red-500 hover:text-red-600 hover:scale-105"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Precio */}
+                    <div className="text-right text-md font-bold whitespace-nowrap ml-auto">
+                      ${(item.price * item.quantity).toLocaleString("es-CL")}
+                    </div>
                   </div>
                 </div>
-                <div className="text-right font-semibold text-sm whitespace-nowrap">
-                  ${(item.price * item.quantity).toLocaleString("es-CL")}
-                </div>
               </div>
+
             ))
           )}
         </div>
@@ -332,18 +376,40 @@ export default function CartOverlay({ onClose }) {
             <div className="flex justify-between text-sm"><span>Domicilio</span><span>${deliveryFee.toLocaleString("es-CL")}</span></div>
             <div className="flex justify-between text-lg font-bold"><span>Total</span><span>${total.toLocaleString("es-CL")}</span></div>
 
-            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded" onClick={handleCheckout}>Pagar</button>
-            <button className="w-full text-sm text-gray-500 underline" onClick={clearCart}>Vaciar carrito</button>
+            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded-lg hover:scale-105 cursor-pointer" onClick={handleCheckout}>Pagar</button>
+            <button className="w-full text-sm text-gray-500 underline cursor-pointer" title="borra todos los elementos del carrito" onClick={clearCart}>vaciar carrito</button>
           </div>
         )}
 
         {activeOrders.length > 0 && (
-          <div className="w-full max-h-96 overflow-y-auto p-4 my-2 bg-white/90 rounded-xl shadow space-y-5">
-            <h3 className="text-xl font-bold text-gray-800">Órdenes Activas</h3>
+          <>
+            <h3 className="text-xl font-bold text-gray-800 mt-20">Órdenes en seguimiento</h3>
             <div className="mb-6"><MyOrders /></div>
-            <button className="w-full text-sm text-gray-500 underline" onClick={clearActiveOrders}>Vaciar órdenes activas</button>
-          </div>
+            <button className="w-full text-sm text-gray-500 underline" onClick={clearActiveOrders}>Quitar todas las órdenes en seguimiento</button>
+          </>
         )}
+
+        <div className="mt-10 pt-6 mb-10 pb-10 border-t border-gray-200">
+          <span className="text-sm text-gray-600 mb-1 block">¿Tienes el número de una orden?</span>
+          <h4 className="text-lg font-semibold text-gray-800 mb-3">Agrega una orden manualmente</h4>
+
+          <input
+            type="text"
+            placeholder="Ej: 20250001"
+            value={manualOrderId}
+            onChange={(e) => setManualOrderId(e.target.value)}
+            className="w-full border border-gray-300 px-4 py-2 rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+          />
+
+          <button
+            onClick={handleManualOrderAdd}
+            className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded-lg text-sm cursor-pointer"
+          >
+            Añadir orden a seguimiento
+          </button>
+        </div>
+
+
       </div>
 
       {showTransferModal && (

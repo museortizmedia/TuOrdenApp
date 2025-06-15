@@ -3,7 +3,7 @@ import React from "react";
 import { useRestaurant } from "../contexts/RestaurantContext";
 import { useAuth } from "../contexts/AuthContext";
 // Servicios
-import supabaseService from "../servicies/supabaseService.js"
+//import supabaseService from "../servicies/supabaseService.js"
 // others
 import theme from "../theme";
 
@@ -26,7 +26,7 @@ export default function Index() {
   ];
 
   return (
-    <div className={`${theme.layout.darkBackground} min-h-screen flex flex-col`}>
+    <div className={`${theme.layout.darkBackground} [min-height:100dvh] flex flex-col`}>
 
       {/* Header sesión */}
       <div className="flex justify-end p-2 pr-4 text-xs text-gray-400 invisible md:visible">
