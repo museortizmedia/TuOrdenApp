@@ -19,7 +19,7 @@ import theme from "./theme";
 import "./index.css";
 
 // Páginas
-import Index from "./pages/Index";
+import Index from "./pages/Index.jsx";
 import Carta from "./pages/client/Carta";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";

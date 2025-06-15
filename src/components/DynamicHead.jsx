@@ -97,6 +97,89 @@ export default function DynamicHead() {
           href={restaurant.logo}
         />
       )}
+
+      <script type="application/ld+json">
+        {isCarta ?
+          (
+            JSON.stringify(
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": "Monsters Burger",
+                "url": "https://monstersburger.com.co",
+                "inLanguage": "es-CO",
+                "potentialAction": [
+                  {
+                    "@type": "ViewAction",
+                    "target": "https://monstersburger.com.co/carta",
+                    "name": "Ver el menú"
+                  },
+                  {
+                    "@type": "ContactAction",
+                    "target": "https://wa.me/573243590591?text=%C2%A1Hola!%20Quiero%20hacer%20una%20reserva",
+                    "name": "Chatear por WhatsApp Reservar Monsters Burger"
+                  }
+                ],
+
+                "mainEntityOfPage": {
+                  "@type": "WebPage",
+                  "@id": "https://monstersburger.com.co"
+                }
+              }
+            )
+          )
+          :
+          (
+            JSON.stringify(
+              {
+                "@context": "https://schema.org",
+                "@type": "Restaurant",
+                "@id": "https://monstersburger.com.co#restaurant",
+                "name": "Monsters Burger",
+                "url": "https://monstersburger.com.co",
+                "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGF636aFKyKV_2Kq4oxwaCGYb0EK50VwOOXQ&s",
+                "telephone": "+57-324-3590591",
+                "address": {
+                  "@type": "PostalAddress",
+                  "addressLocality": "Jamundí",
+                  "addressRegion": "Valle del Cauca",
+                  "addressCountry": "CO"
+                },
+                "geo": {
+                  "@type": "GeoCoordinates",
+                  "latitude": 3.26289,
+                  "longitude": -76.5384
+                },
+                "location": {
+                  "@type": "Place",
+                  "geo": {
+                    "@type": "GeoCoordinates",
+                    "latitude": 3.26289,
+                    "longitude": -76.5384
+                  },
+                  "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "Jamundí",
+                    "addressRegion": "Valle del Cauca",
+                    "addressCountry": "CO"
+                  }
+                },
+                "priceRange": "$$",
+                "servesCuisine": ["Comida rápida", "Hamburguesas", "Alitas", "Perros", "Asados", "Cocteles", "Domicilios"],
+                "sameAs": [
+                  "https://www.instagram.com/monstersburgers/",
+                  "https://www.facebook.com/MontersBurgers/"
+                ],
+                "mainEntityOfPage": {
+                  "@type": "WebPage",
+                  "@id": "https://monstersburger.com.co/carta"
+                }
+              }
+
+            )
+          )
+        }
+      </script>
     </Helmet>
   );
 }

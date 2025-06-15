@@ -26,7 +26,7 @@ function ProductCard({ product, isFirstImage }) {
                 <img
                     src={imageSrc}
                     alt={product.name}
-                    width={500} // Tamaño máximo estimado
+                    width={500}
                     height={500}
                     className="w-full h-full object-cover"
                     loading={isFirstImage ? "eager" : "lazy"}

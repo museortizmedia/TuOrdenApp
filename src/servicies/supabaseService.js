@@ -13,7 +13,7 @@ const supabaseService = {
     },
 
     // async functions
-    async uploadProductImage(file, restaurantId, productId) {
+    async uploadProductImage(file, restaurantId, productId, cacheDuration = 3600) {
         if (!file || file.size > MAX_SIZE_BYTES) {
             console.warn('Archivo no válido')
             return null
@@ -27,7 +27,7 @@ const supabaseService = {
             .storage
             .from(BUCKET_NAME)
             .upload(filePath, file, {
-                cacheControl: '3600',
+                cacheControl: `${cacheDuration}`,
                 upsert: false,
             })
 

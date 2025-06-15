@@ -53,7 +53,8 @@ function SortableItem({ product, onUpdate, onDelete }) {
                 const uploadedUrl = await supabaseService.uploadProductImage(
                     selectedImage,
                     restaurant.id,
-                    product.id
+                    product.id,
+                    31536000
                 );
                 if (uploadedUrl != null) {
                     imageUrl = uploadedUrl;
