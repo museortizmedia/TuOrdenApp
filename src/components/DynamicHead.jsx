@@ -136,10 +136,23 @@ export default function DynamicHead() {
                 "url": "https://monstersburger.com.co",
                 "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGF636aFKyKV_2Kq4oxwaCGYb0EK50VwOOXQ&s",
                 "telephone": "+573243590591",
+                "menu": "https://monstersburger.com.co/carta",
+                "priceRange": "$$",
+                "servesCuisine": [
+                  "Comida rápida",
+                  "Hamburguesas",
+                  "Alitas",
+                  "Perros",
+                  "Asados",
+                  "Cocteles",
+                  "Domicilios"
+                ],
                 "address": {
                   "@type": "PostalAddress",
+                  "streetAddress": "Cra. 4 #12-42",
                   "addressLocality": "Jamundí",
                   "addressRegion": "Valle del Cauca",
+                  "postalCode": "763561",
                   "addressCountry": "CO"
                 },
                 "geo": {
@@ -147,22 +160,41 @@ export default function DynamicHead() {
                   "latitude": 3.26289,
                   "longitude": -76.5384
                 },
-                "location": {
-                  "@type": "Place",
-                  "geo": {
-                    "@type": "GeoCoordinates",
-                    "latitude": 3.26289,
-                    "longitude": -76.5384
+                "openingHoursSpecification": [
+                  {
+                    "@type": "OpeningHoursSpecification",
+                    "dayOfWeek": [
+                      "Monday",
+                      "Tuesday",
+                      "Wednesday",
+                      "Thursday"
+                    ],
+                    "opens": "17:00",
+                    "closes": "23:00"
                   },
-                  "address": {
-                    "@type": "PostalAddress",
-                    "addressLocality": "Jamundí",
-                    "addressRegion": "Valle del Cauca",
-                    "addressCountry": "CO"
+                  {
+                    "@type": "OpeningHoursSpecification",
+                    "dayOfWeek": [
+                      "Friday",
+                      "Saturday",
+                      "Sunday"
+                    ],
+                    "opens": "17:00",
+                    "closes": "00:00"
+                  }
+                ],
+                "review": {
+                  "@type": "Review",
+                  "reviewRating": {
+                    "@type": "Rating",
+                    "ratingValue": 4.4,
+                    "bestRating": 5
+                  },
+                  "author": {
+                    "@type": "Organization",
+                    "name": "Clientes Monsters Burger"
                   }
                 },
-                "priceRange": "$$",
-                "servesCuisine": ["Comida rápida", "Hamburguesas", "Alitas", "Perros", "Asados", "Cocteles", "Domicilios"],
                 "sameAs": [
                   "https://www.instagram.com/monstersburgers/",
                   "https://www.facebook.com/MontersBurgers/"
@@ -172,7 +204,6 @@ export default function DynamicHead() {
                   "@id": "https://monstersburger.com.co/carta"
                 }
               }
-
             )
           )
         }
