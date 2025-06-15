@@ -67,8 +67,12 @@ export default function RestaurantLayout({ children }) {
     <div className={`${theme.colors.background.dark} relative min-h-screen w-full max-w-[100vw] overflow-x-hidden`}>
       {/* Header */}
       <header className={`${theme.colors.background.dark} fixed top-0 left-0 right-0 z-50 flex items-center h-20 px-4 sm:px-6 shadow-md`}>
-        <div className="flex items-center space-x-2">
-          <img src={restaurant.logo} alt="Logo" className="h-8 w-auto" />
+        <div className="flex items-center space-x-2" title={restaurant.desc}>
+          <img
+            src={restaurant.logo}
+            alt={"Logo de "+restaurant.name}
+            className="w-[32px] h-[32px] object-cover rounded"
+          />
           <p className="text-white text-sm sm:text-base">{restaurant.name}</p>
         </div>
       </header>

@@ -88,6 +88,15 @@ export default function DynamicHead() {
           <meta name="ICBM" content={config.geo.position} />
         </>
       )}
+
+      {/* PRELOAD */}
+      {restaurant.logo && (
+        <link
+          rel="preload"
+          as="image"
+          href={restaurant.logo}
+        />
+      )}
     </Helmet>
   );
 }

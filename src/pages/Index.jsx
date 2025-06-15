@@ -48,6 +48,7 @@ export default function Index() {
           height="1000"
           className="w-50 max-w-xs rounded-xl shadow-lg"
           loading="lazy"
+          fetchPriority="high"
         />
         <div className="space-y-1">
           <h1 className={`text-xl md:text-2xl ${theme.text.bold} ${theme.text.yellow}`}>

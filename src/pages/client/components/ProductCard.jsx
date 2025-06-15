@@ -6,6 +6,7 @@ function ProductCard({ product, isFirstImage }) {
     const { addToCart } = useCart();
     const isAvailable = product.state === true;
     const isValidImage = product.image && product.image !== "/assets/defaultImage.jpg";
+    const imageSrc = isValidImage ? product.image : "/assets/defaultImage.jpg";
 
     const handleProductCart = () => {
         if (navigator.vibrate) navigator.vibrate(100);
@@ -20,14 +21,17 @@ function ProductCard({ product, isFirstImage }) {
             }`}
             title={product.name}
         >
-            {/* Imagen */}
-            <div className="relative aspect-square overflow-hidden w-full lg:w-1/4 xl:w-2/6">
+            {/* Imagen con tamaño reservado */}
+            <div className="relative w-full lg:w-1/4 xl:w-2/6" style={{ aspectRatio: "1 / 1" }}>
                 <img
-                    src={product.image || "/assets/defaultImage.jpg"}
+                    src={imageSrc}
                     alt={product.name}
+                    width={500} // Tamaño máximo estimado
+                    height={500}
                     className="w-full h-full object-cover"
-                    fetchPriority={isFirstImage ? "high" : undefined}
-                    type="image/webp"
+                    loading={isFirstImage ? "eager" : "lazy"}
+                    fetchPriority={isFirstImage ? "high" : "auto"}
+                    decoding="async"
                 />
                 {!isAvailable && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -39,13 +43,19 @@ function ProductCard({ product, isFirstImage }) {
             </div>
 
             {/* Descripción */}
-            <div className={`p-5 flex flex-col justify-between w-full gap-3 ${isAvailable ? "lg:w-2/4 xl:w-2/6" : "lg:w-3/4 xl:w-4/6"}`}>
+            <div
+                className={`p-5 flex flex-col justify-between w-full gap-3 ${
+                    isAvailable ? "lg:w-2/4 xl:w-2/6" : "lg:w-3/4 xl:w-4/6"
+                }`}
+            >
                 <div>
-                    <h3 className="text-xl font-extrabold text-white line-clamp-3 truncate lg:overflow-visible lg:whitespace-normal lg:text-clip">{product.name}</h3>
+                    <h3 className="text-xl font-extrabold text-white line-clamp-3 truncate lg:overflow-visible lg:whitespace-normal lg:text-clip">
+                        {product.name}
+                    </h3>
                     <p className="text-sm text-gray-300 line-clamp-3 overflow-y-auto">{product.desc}</p>
                 </div>
                 <p className={`text-xl font-extrabold ${theme.text.yellow}`}>
-                    ${(product.price).toLocaleString("es-CL")}
+                    ${product.price.toLocaleString("es-CL")}
                 </p>
             </div>
 

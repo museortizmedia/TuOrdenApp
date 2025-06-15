@@ -152,7 +152,7 @@ function Carta() {
     return (
         <>
             {/* Navegación por categorías */}
-            <div className="sticky top-[4.8rem] z-50 shadow-md px-10">
+            <div className="sticky top-[4.8rem] z-50 shadow-md">
                 <nav className={`${theme.colors.background.dark} flex overflow-x-auto whitespace-nowrap p-2 space-x-2 border-b border-neutral-800 w-full max-w-full`}>
                     {categories.map((cat) => (
                         <button
