@@ -111,3 +111,18 @@ https://reqbin.com/
 abrir poweshell
 Linux, Git bash: curl -A "Googlebot" https://www.monstersburger.com.co/
 Windows: Invoke-WebRequest -Uri "https://www.monstersburger.com.co/" -Headers @{ "User-Agent" = "Googlebot" } | Select-Object -ExpandProperty Content
+
+
+# Domains
+## Verificar redirecciones de dominio
+### Lo ideal es que http -> 308 no 307
+### Vercel dará un https obligatorio -> 308
+### La página se sirve en -> 200
+### Busca -> 200 para dominio principal (usado en seo) y -> 308 200 en https, -> 308 308 200 en http
+https://httpstatus.io/
+
+- https://www.monstersburger.com.co
+
+#SEO
+##Google Rich Results Test
+https://search.google.com/test/rich-results

@@ -106,11 +106,11 @@ export default function DynamicHead() {
                 "@context": "https://schema.org",
                 "@type": "WebSite",
                 "name": "Monsters Burger",
-                "url": "https://monstersburger.com.co",
+                "url": "https://www.monstersburger.com.co",
                 "inLanguage": "es-CO",
                 "potentialAction": [{
                   "@type": "ViewAction",
-                  "target": "https://monstersburger.com.co/carta",
+                  "target": "https://www.monstersburger.com.co/carta",
                   "name": "Ver el menú"
                 },
                 {
@@ -121,7 +121,7 @@ export default function DynamicHead() {
 
                 "mainEntityOfPage": {
                   "@type": "WebPage",
-                  "@id": "https://monstersburger.com.co"
+                  "@id": "https://www.monstersburger.com.co"
                 }
               }
             )
@@ -133,10 +133,10 @@ export default function DynamicHead() {
                 "@context": "https://schema.org",
                 "@type": "Restaurant",
                 "name": "Monsters Burger",
-                "url": "https://monstersburger.com.co",
+                "url": "https://www.monstersburger.com.co",
                 "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGF636aFKyKV_2Kq4oxwaCGYb0EK50VwOOXQ&s",
                 "telephone": "+573243590591",
-                "menu": "https://monstersburger.com.co/carta",
+                "menu": "https://www.monstersburger.com.co/carta",
                 "priceRange": "$$",
                 "servesCuisine": [
                   "Comida rápida",
@@ -201,7 +201,7 @@ export default function DynamicHead() {
                 ],
                 "mainEntityOfPage": {
                   "@type": "WebPage",
-                  "@id": "https://monstersburger.com.co/carta"
+                  "@id": "https://www.monstersburger.com.co/carta"
                 }
               }
             )

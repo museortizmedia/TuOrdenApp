@@ -2,4 +2,4 @@ User-agent: *
 Disallow: /admin
 Allow: /
 
-Sitemap: https://monstersburger.com.co/sitemaps/monstersburger.com.co.xml
+Sitemap: https://www.monstersburger.com.co/sitemaps/monstersburger.com.co.xml
