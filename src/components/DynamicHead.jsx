@@ -95,6 +95,8 @@ export default function DynamicHead() {
           rel="preload"
           as="image"
           href={restaurant.logo}
+          type="image/png"
+          fetchpriority="high"
         />
       )}
 

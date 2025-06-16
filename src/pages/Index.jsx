@@ -90,8 +90,8 @@ export default function Index() {
       </div>
 
       {/* Footer */}
-      <footer className="text-[0.6rem] text-gray-300 opacity-60 text-center px-4 pb-4">
-        © 2025. Todos los derechos reservados. *Aplican condiciones. Promociones válidas solo en canales seleccionados. Imágenes de referencia. Los precios, productos y disponibilidad pueden variar. Esta plataforma actúa como intermediario entre el cliente y el restaurante. Para cualquier inconveniente, por favor comuníquese directamente con el establecimiento.
+      <footer className="text-[12px] text-gray-300 opacity-60 text-center px-4 pb-4">
+        © 2025. Todos los derechos reservados. *Aplican condiciones. Promociones válidas solo en canales seleccionados. Imágenes de referencia. Los precios, productos y disponibilidad pueden variar. Esta plataforma actúa como intermediario entre el cliente y el restaurante. Para cualquier inconveniente, por favor comuníquese directamente con el establecimiento <a className="text-white" href={restaurant.whatsapp}>aquí</a>.
       </footer>
     </div>
   );

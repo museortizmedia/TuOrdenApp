@@ -115,12 +115,19 @@ Windows: Invoke-WebRequest -Uri "https://www.monstersburger.com.co/" -Headers @{
 
 # Domains
 ## Verificar redirecciones de dominio
+https://httpstatus.io/
 ### Lo ideal es que http -> 308 no 307
 ### Vercel dará un https obligatorio -> 308
 ### La página se sirve en -> 200
 ### Busca -> 200 para dominio principal (usado en seo) y -> 308 200 en https, -> 308 308 200 en http
-https://httpstatus.io/
 
+## Ver el resultado de tu sitio
+site:[domains]
+- site:https://www.monstersburger.com.co
+- site:https://www.monstersburger.com.co/carta
+### verifica que google ve el sitio como quieres que se vea
+
+# Dominios incorporados
 - https://www.monstersburger.com.co
 
 #SEO
