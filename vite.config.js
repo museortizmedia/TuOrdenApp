@@ -8,6 +8,6 @@ export default defineConfig({
     tailwindcss(),
   ],
   build: {
-    sourcemap: hidden, // o 'true'
+    sourcemap: 'hidden', // o 'true'
   }
 });
