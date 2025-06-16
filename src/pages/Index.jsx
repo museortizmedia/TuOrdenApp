@@ -27,7 +27,7 @@ export default function Index() {
   ];
 
   return (
-    <div className={`${theme.layout.darkBackground} [min-height:100dvh] flex flex-col`}>
+    <div className={`${theme.layout.darkBackground} [min-height:120dvh] flex flex-col`}>
       {/* Header sesión */}
       <div className="flex justify-end p-2 pr-4 text-xs text-gray-400 invisible md:visible">
         {loading ? (
@@ -90,8 +90,14 @@ export default function Index() {
       </div>
 
       {/* Footer */}
-      <footer className="text-[12px] text-gray-300 opacity-60 text-center px-4 pb-4">
-        © 2025. Todos los derechos reservados. *Aplican condiciones. Promociones válidas solo en canales seleccionados. Imágenes de referencia. Los precios, productos y disponibilidad pueden variar. Esta plataforma actúa como intermediario entre el cliente y el restaurante. Para cualquier inconveniente, por favor comuníquese directamente con el establecimiento <a className="text-white" href={restaurant.whatsapp}>aquí</a>.
+      <footer className="text-xs text-gray-400 text-center px-4 pb-6 leading-snug opacity-60 hover:opacity-80 transition-opacity duration-300">
+        <div className="max-w-xl mx-auto">
+          © 2025. Todos los derechos reservados. <br className="hidden md:inline" />
+          *Aplican condiciones. Promociones válidas solo en canales seleccionados. <br className="hidden md:inline" />
+          Imágenes de referencia. Los precios, productos y disponibilidad pueden variar. <br className="hidden md:inline" />
+          Esta plataforma actúa como intermediario entre el cliente y el restaurante. <br className="hidden md:inline" />
+          Para cualquier inconveniente, por favor comuníquese directamente con el establecimiento.
+        </div>
       </footer>
     </div>
   );

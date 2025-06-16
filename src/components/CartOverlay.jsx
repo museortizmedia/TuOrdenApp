@@ -264,7 +264,7 @@ export default function CartOverlay({ onClose }) {
               <div key={item.id} className="flex items-start gap-3 border-b pb-4 pr-2">
                 {/* Imagen a la izquierda */}
                 <img
-                  src={item.image || "public/assets/defaultImage.jpg"}
+                  src={item.image || "/assets/defaultImage.jpg"}
                   alt={item.name}
                   title={item.name}
                   className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded shadow-lg flex-shrink-0"
@@ -376,7 +376,20 @@ export default function CartOverlay({ onClose }) {
             <div className="flex justify-between text-sm"><span>Domicilio</span><span>${deliveryFee.toLocaleString("es-CL")}</span></div>
             <div className="flex justify-between text-lg font-bold"><span>Total</span><span>${total.toLocaleString("es-CL")}</span></div>
 
-            <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded-lg hover:scale-105 cursor-pointer" onClick={handleCheckout}>Pagar</button>
+            <button
+              className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded-lg hover:scale-105 cursor-pointer disabled:bg-amber-200 disabled:text-gray-700"
+              disabled={
+                !buyerName ||
+                !phoneNumber ||
+                !orderType ||
+                !paymentMethod ||
+                (orderType === "Domicilio" && (!address || !neighborhood)) ||
+                (orderType === "Recoger" && !selectedSede)
+              }
+              onClick={handleCheckout}
+            >
+              Pagar
+            </button>
             <button className="w-full text-sm text-gray-500 underline cursor-pointer" title="borra todos los elementos del carrito" onClick={clearCart}>vaciar carrito</button>
           </div>
         )}
