@@ -3,7 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useRestaurant } from "../../contexts/RestaurantContext";
 import firestoreService from "../../servicies/firestoreService";
 import theme from "../../theme";
-import { Menu, X } from "lucide-react";
+import { LogOutIcon, Menu, X } from "lucide-react";
 import AdminProducts from "./pages/AdminProducts";
 import AdminOrdenes from "./pages/AdminOrdenes";
 import AdminStory from "./pages/AdminStory";
@@ -11,6 +11,7 @@ import CategoryOrderManager from "../../components/CategoryOrderManager";
 import supabaseService from "../../servicies/supabaseService.js"
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase/firebase.js";
+import NotificationToggle from "../../components/NotificationToggle.jsx";
 
 function Dashboard() {
   const { user, logout } = useAuth();
@@ -102,9 +103,12 @@ function Dashboard() {
           <span className="text-sm hidden sm:inline">
             {userBD?.name ? `Hola, ${userBD.name}` : "Cargando..."}
           </span>
-          <button onClick={logout} className="text-sm bg-red-500 hover:bg-red-600 px-3 py-1 rounded cursor-pointer">
-            Cerrar sesión
+          <button onClick={logout} className="text-sm bg-red-500 hover:bg-red-600 px-3 py-1 rounded cursor-pointer flex">
+            Salir
+            <LogOutIcon className="w-4 h-4 ml-2"/>
           </button>
+
+          <NotificationToggle/>
 
         </div>
       </header>

@@ -50,6 +50,7 @@ export default function CartOverlay({ onClose }) {
 
   const paymentOptions = {
     Efectivo: "Pagar al finalizar",
+    Datafono: "Usa el datáfono para pagar cont tarjeta",
     Transferencia: "Pagar por transferencia"
   };
 
@@ -102,7 +103,7 @@ export default function CartOverlay({ onClose }) {
     if (navigator.vibrate) navigator.vibrate(150);
     addActiveOrder({ id: newOrderId, ...orderData });
     clearCart();
-    handleClose();
+    //handleClose();
     return newOrderId;
   };
 
@@ -118,8 +119,10 @@ export default function CartOverlay({ onClose }) {
 
     try {
       await submitOrder({ status: "pendiente" });
+      toast.success("¡Orden enviada a cocina exitosamente!");
     } catch (err) {
       console.error("Error al enviar la orden:", err);
+      toast.error("Error al enviar la orden a cocina.");
     }
   };
 
