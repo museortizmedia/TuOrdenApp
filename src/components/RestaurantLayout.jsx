@@ -81,10 +81,10 @@ export default function RestaurantLayout({ children }) {
       <button
         onClick={() => setIsCartOpen(true)}
         className={`
-          fixed bottom-4 right-4 z-50 p-3 sm:p-4 rounded-full shadow-lg transition-transform
+          fixed bottom-4 right-4 z-50 p-3 sm:p-4 rounded-full shadow-lg 
           bg-yellow-400 hover:bg-yellow-500 text-black
           ${justAdded ? "animate-bounce" : ""}
-          hover:animate-pulse cursor-pointer
+          transition-transform hover:scale-105 cursor-pointer
         `}
         style={{ transform: "translateZ(0)" }} // Fix visual glitches in some mobile browsers
         aria-label="Abrir carrito"

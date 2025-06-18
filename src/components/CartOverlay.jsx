@@ -36,22 +36,21 @@ export default function CartOverlay({ onClose }) {
   const touchEndX = useRef(null);
 
   const neighborhoodOptions = {
-    Centro: 2000,
-    Norte: 3000,
-    Sur: 2500,
-    Oriente: 3500,
-    Occidente: 3000,
+    "Zona Urbana Jamundí": 5000,
+    "Conjunto Cerrado - Zona Urbana Jamundí": 6000,
+    "Terranova, El Castillo, Rodeo, Bonanza, Las Flores": 11000,
+    "Ciudad Contry, Cinco Soles y cercanos": 8500,
   };
 
   const orderOptions = {
-    Domicilio: "Pagas cuando llegue a tu casa",
-    Recoger: "Pagas en el local",
+    Domicilio: "¡Llévalo a mi casa!",
+    Recoger: "Paso a buscarlo",
   };
 
   const paymentOptions = {
-    Efectivo: "Pagar al finalizar",
-    Datafono: "Usa el datáfono para pagar cont tarjeta",
-    Transferencia: "Pagar por transferencia"
+    Efectivo: "Pago en efectivo",
+    Datafono: "Con tarjeta",
+    Transferencia: "Por transferencia",
   };
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -209,7 +208,8 @@ export default function CartOverlay({ onClose }) {
   const [manualOrderId, setManualOrderId] = useState("");
 
   const handleManualOrderAdd = () => {
-    if (!manualOrderId.trim()) return alert("Debes ingresar un ID válido.");
+    // TODO: mejorar la retroalimentacion
+    if (!manualOrderId.trim()) return alert("Debes ingresar un número de orden válido.");
 
     addActiveOrder({ id: manualOrderId.trim() })
       .then((order) => {
@@ -252,9 +252,10 @@ export default function CartOverlay({ onClose }) {
       >
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-black"
+          className="absolute top-4 right-4 text-gray-500 hover:text-black hover:scale-105 hover:cursor-pointer"
+          title="Cerrar carrito"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5 hover:w-[1.30rem] hover:h-[1.30rem]" />
         </button>
 
         <h2 className="text-xl font-semibold mb-6">Tu carrito</h2>
@@ -330,8 +331,26 @@ export default function CartOverlay({ onClose }) {
 
         {cart.length > 0 && (
           <div className="mt-6 space-y-4">
-            <input type="text" placeholder="Nombre" value={buyerName} onChange={(e) => setBuyerName(e.target.value)} className="w-full border px-3 py-2 rounded text-sm" />
-            <input type="tel" placeholder="Número de teléfono" value={phoneNumber} onChange={(e) => (/^3\d{0,9}$/.test(e.target.value) || e.target.value === "") && setPhoneNumber(e.target.value)} className="w-full border px-3 py-2 rounded text-sm" />
+            <input type="text" placeholder="Nombre" value={buyerName} onChange={(e) => setBuyerName(e.target.value)} className="w-full border px-3 py-2 rounded text-sm" autoComplete="name" />
+            <input
+              type="tel"
+              placeholder="Número de teléfono"
+              value={phoneNumber}
+              onChange={(e) => {
+                let raw = e.target.value.replace(/\s/g, '');
+                if (/^\+\d{2}/.test(raw)) {
+                  raw = raw.slice(3);
+                }
+                const formatted = raw.replace(/[^\d]/g, '');
+
+                console.log("Valor recibido:", formatted);
+                setPhoneNumber(formatted);
+              }}
+
+              className="w-full border px-3 py-2 rounded text-sm"
+              inputMode="numeric"
+              autoComplete="tel"
+            />
             <select value={orderType} onChange={(e) => setOrderType(e.target.value)} className="w-full border px-3 py-2 rounded text-sm">
               <option value="">Tipo de orden</option>
               {Object.entries(orderOptions).map(([key, val]) => <option key={key} value={key}>{key}: {val}</option>)}
@@ -339,10 +358,10 @@ export default function CartOverlay({ onClose }) {
 
             {orderType === "Domicilio" && (
               <>
-                <input type="text" placeholder="Dirección" value={address} onChange={(e) => setAddress(e.target.value)} className="w-full border px-3 py-2 rounded text-sm" />
+                <input type="text" placeholder="Dirección (no olvides el barrio)" value={address} onChange={(e) => setAddress(e.target.value.replace(/\s+/g, ' ').trimStart())} className="w-full border px-3 py-2 rounded text-sm" autoComplete="street-address" />
                 <select value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="w-full border px-3 py-2 rounded text-sm">
-                  <option value="">Selecciona un barrio</option>
-                  {Object.entries(neighborhoodOptions).map(([key, price]) => <option key={key} value={key}>{key} (${price})</option>)}
+                  <option value="">Sector</option>
+                  {Object.entries(neighborhoodOptions).map(([key, price]) => <option key={key} value={key}>{key}</option>)}
                 </select>
               </>
             )}
@@ -368,7 +387,7 @@ export default function CartOverlay({ onClose }) {
             </select>
 
             <textarea
-              placeholder="Detalles (opcionales)"
+              placeholder="¿Algo más? Salsa preferida, sabor de bebida o petición especial (opcional)"
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}
               className="w-full border px-3 py-2 rounded text-sm resize-none h-24"

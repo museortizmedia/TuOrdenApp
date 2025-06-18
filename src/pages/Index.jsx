@@ -81,7 +81,7 @@ export default function Index() {
             <button
               key={i}
               onClick={btn.onClick}
-              className={`${theme.buttons[btn.style] || theme.buttons.primary} w-full`}
+              className={`${theme.buttons[btn.style] || theme.buttons.primary} w-full cursor-pointer hover:scale-105 duration-200`}
             >
               {btn.text}
             </button>

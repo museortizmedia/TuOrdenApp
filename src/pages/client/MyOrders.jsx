@@ -42,89 +42,97 @@ export default function MyOrders() {
     }
   };
 
-  const statusMessages = {
-    "por pagar": {
-      Domicilio: {
-        Transferencia: [
-          "Esperando transferencia...",
-          "Tu orden está lista para pagar.",
-        ],
-      },
-      Recoger: {
-        Transferencia: [
-          "Confirma el pago para recoger en el local.",
-          "Esperando transferencia...",
-        ],
-      },
+const statusMessages = {
+  "por pagar": {
+    Domicilio: {
+      Transferencia: [
+        "Esperando tu transferencia 💸",
+        "Tu orden ya está lista para pagar 📲",
+      ],
     },
-    "pendiente": {
-      Domicilio: {
-        Efectivo: [
-          "Estamos preparando tu orden...",
-          "Tu orden está en la cola...",
-        ],
-        Transferencia: [
-          "Transferencia aprobada. Orden en la cola.",
-          "Transferencia aprobada.",
-        ],
-      },
-      Recoger: {
-        Efectivo: [
-          "Calibrando tu orden para recoger...",
-          "Preparando los empaques...",
-        ],
-        Transferencia: [
-          "Transferencia aprobada.",
-          "Estamos confirmando el pago.",
-        ],
-      },
+    Recoger: {
+      Transferencia: [
+        "Confirmá el pago y te preparamos todo 👌",
+        "Esperando tu transferencia 💸",
+      ],
     },
-    "en preparación": {
-      Domicilio: {
-        Efectivo: [
-          "¡Estamos cocinando! 🚚🍔",
-          "Tu pedido va en camino pronto.",
-        ],
-        Transferencia: [
-          "Transferencia recibida. Cocinando...",
-          "Pedido confirmado y en preparación.",
-        ],
-      },
-      Recoger: {
-        Efectivo: [
-          "Preparando para recoger.",
-          "Estará listo pronto.",
-        ],
-        Transferencia: [
-          "Transferencia recibida. Cocinando....",
-          "En cocina 🧑‍🍳",
-        ],
-      },
+  },
+
+  "pendiente": {
+    Domicilio: {
+      Efectivo: [
+        "¡Recibido! Alistando todo 🍔",
+        "Tu orden está en la cola 🕒",
+      ],
+      Transferencia: [
+        "¡Gracias! Pago recibido. Te preparamos todo 😋",
+        "Transferencia ok ✔️. En cola.",
+      ],
     },
-    "lista": {
-      Domicilio: {
-        Efectivo: [
-          "Pedido listo y en camino 🛵",
-          "Ya salió para tu casa.",
-        ],
-        Transferencia: [
-          "Enviado. Gracias por tu pago.",
-          "Pedido en camino. 🧾✅",
-        ],
-      },
-      Recoger: {
-        Efectivo: [
-          "Ven a recoger tu orden.",
-          "Está listo para ti.",
-        ],
-        Transferencia: [
-          "Orden lista y pagada.",
-          "Pasa por el local cuando quieras.",
-        ],
-      },
+    Recoger: {
+      Efectivo: [
+        "¡Genial! Te lo vamos dejando listo 🛍️",
+        "Alistando empaques y sabores...",
+      ],
+      Transferencia: [
+        "Pago aprobado ✅",
+        "Ya lo confirmamos, preparando tu orden 👨‍🍳",
+      ],
     },
-    default: ["Procesando orden...", "Esperando actualización..."]
-  };
+  },
+
+  "en preparación": {
+    Domicilio: {
+      Efectivo: [
+        "¡Manos a la obra! Cocinando tu pedido 👩‍🍳",
+        "Ya casi sale para tu casa 🚚",
+      ],
+      Transferencia: [
+        "Transferencia ok ✔️. Cocinando con amor 🍽️",
+        "Pedido confirmado, ya está en cocina 🔥",
+      ],
+    },
+    Recoger: {
+      Efectivo: [
+        "Preparando para que pases a buscarlo 🛍️",
+        "Casi listo, te avisamos cuando esté 👀",
+      ],
+      Transferencia: [
+        "Cocinando lo tuyo 🍔",
+        "¡Ya lo estamos armando! ✨",
+      ],
+    },
+  },
+
+  "lista": {
+    Domicilio: {
+      Efectivo: [
+        "¡Salió tu pedido! Llega pronto 🛵",
+        "Ya va en camino 🍽️",
+      ],
+      Transferencia: [
+        "Gracias por tu pago 🙌. En camino.",
+        "Pedido enviado ✅ ¡Disfrutalo!",
+      ],
+    },
+    Recoger: {
+      Efectivo: [
+        "Tu pedido está listo 🎉 ¡Pasá a buscarlo!",
+        "Ya te está esperando en el local 🏠",
+      ],
+      Transferencia: [
+        "¡Todo listo! 💯",
+        "Pasá cuando quieras 😉",
+      ],
+    },
+  },
+
+  default: [
+    "Procesando tu orden 🕒",
+    "Esperando novedades del restaurante...",
+  ]
+};
+
 
   const [animatedMessages, setAnimatedMessages] = useState({});
 

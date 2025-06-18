@@ -161,7 +161,7 @@ function Carta() {
                             onClick={() => handleCategoryClick(cat)}
                             className={`pb-1 px-3 text-sm transition-colors shrink-0 ${activeCategory === cat
                                     ? "border-b-4 border-yellow-400 text-yellow-400 font-bold"
-                                    : "text-white hover:text-yellow-300 cursor-pointer"
+                                    : "text-white hover:text-yellow-300 cursor-pointer hover:font-bold hover:scale-105 duration-200 transition-transform"
                                 }`}
                         >
                             {cat}
@@ -179,9 +179,9 @@ function Carta() {
                                 key={cat}
                                 id={cat}
                                 ref={(el) => (sectionRefs.current[cat] = el)}
-                                className="scroll-mt-28 md:scroll-mt-32"
+                                className="mt-28 scroll-mt-28 md:scroll-mt-32"
                             >
-                                <h2 className={`text-2xl md:text-3xl lg:text-4xl ${theme.text.yellow} font-bold mt-20 mb-10`}>{cat}</h2>
+                                <h2 className={`text-2xl md:text-3xl lg:text-4xl font-black my-15 py-5 text-center w-screen relative left-1/2 -translate-x-1/2 bg-[#f6d926] text-[#111] hover:scale-105`}>{cat}</h2>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 2xl:grid-cols-3 gap-20 sm:gap-8 md:gap-8 xl:gap-8">
                                     {groupedProducts[cat].map((product, idx) => {
