@@ -3,32 +3,50 @@ import { Bell, BellOff } from "lucide-react";
 
 const NotificationToggle = () => {
   const [hasPermission, setHasPermission] = useState(Notification.permission === "granted");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    return localStorage.getItem("notificationsEnabled") !== "false";
+  });
 
   useEffect(() => {
-    // Escuchar cambios de permisos (en caso de que el usuario cambie en la configuración del navegador)
     const checkPermission = () => setHasPermission(Notification.permission === "granted");
     document.addEventListener("visibilitychange", checkPermission);
     return () => document.removeEventListener("visibilitychange", checkPermission);
   }, []);
 
-  const requestPermission = () => {
-    if (Notification.permission !== "granted") {
+  const toggleNotifications = () => {
+    if (!hasPermission) {
       Notification.requestPermission().then(permission => {
         if (permission === "granted") {
           setHasPermission(true);
+          setNotificationsEnabled(true);
+          localStorage.setItem("notificationsEnabled", "true");
           new Notification("👌 Notificaciones activadas");
         }
       });
+    } else {
+      const newState = !notificationsEnabled;
+      setNotificationsEnabled(newState);
+      localStorage.setItem("notificationsEnabled", newState.toString());
     }
   };
 
   return (
     <button
-      onClick={requestPermission}
+      onClick={toggleNotifications}
       className="p-2 bg-gray-800 text-white rounded-full shadow hover:bg-gray-700 transition hover:cursor-pointer"
-      title={hasPermission ? "Notificaciones activadas" : "Activar notificaciones"}
+      title={
+        hasPermission
+          ? notificationsEnabled
+            ? "Silenciar"
+            : "Activar Notificaciones"
+          : "Activar notificaciones"
+      }
     >
-      {hasPermission ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
+      {hasPermission && notificationsEnabled ? (
+        <Bell className="w-5 h-5" />
+      ) : (
+        <BellOff className="w-5 h-5" />
+      )}
     </button>
   );
 };
