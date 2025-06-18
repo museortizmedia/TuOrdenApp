@@ -11,7 +11,7 @@ export default function AdminOrdenes() {
     const [orders, setOrders] = useState([]);
     const [openDetails, setOpenDetails] = useState({});
 
-    // Detectar ordenenes en tiempo real
+    // Detectar ordenenes en tiempo real y notificaciones
     const [newOrderCount, setNewOrderCount] = useState(0);
 
     const knownOrderIds = useRef(new Set());
@@ -72,8 +72,6 @@ export default function AdminOrdenes() {
         };
     }, []);
 
-
-
     // Nuevas ordenes en titulo de de ventana
     const originalTitle = useRef(document.title); // Titulo de la ventanan original
     useEffect(() => {
@@ -83,6 +81,28 @@ export default function AdminOrdenes() {
             document.title = originalTitle.current;
         }
     }, [newOrderCount]);
+
+    function notify(title, body, tag = "pedido-nuevo") {
+        const notificationsEnabled = localStorage.getItem("notificationsEnabled") !== "false";
+
+        if (Notification.permission === "granted" && notificationsEnabled) {
+            const n = new Notification(
+                title, {
+                body,
+                tag,
+                /*image: "/icon-1000",
+                icon: "/icon-512.png",
+                badge: "/icon-32.png",*/
+                renotify: true,
+                requireInteraction: true,
+                silent: false
+            });
+            n.onclick = (e) => {
+                e.preventDefault();
+                window.focus();
+            };
+        }
+    }
 
 
     const toggleDetails = (orderId) => {
@@ -136,17 +156,18 @@ export default function AdminOrdenes() {
         togglePagoEstado(order.id, nuevoEstado);
     };
 
-    const handleImpresion = (e, order) => {
-        e.preventDefault();
-        const width = 500;
-        const height = 600;
-        const left = (window.screen.width - width) / 2;
-        const top = (window.screen.height - height) / 2;
-        const win = window.open('', '', `width=${width},height=${height},left=${left},top=${top}`);
-        if (!win) return;
+    // Imprimir
+const handleImpresion = (e, order) => {
+    e.preventDefault();
+    const width = 500;
+    const height = 600;
+    const left = (window.screen.width - width) / 2;
+    const top = (window.screen.height - height) / 2;
+    const win = window.open('', '', `width=${width},height=${height},left=${left},top=${top}`);
+    if (!win) return;
 
-        const fecha = order.createdAt?.toDate?.().toLocaleString?.() || new Date().toLocaleString();
-        const itemsHtml = order.items?.map(item => `
+    const fecha = order.createdAt?.toDate?.().toLocaleString?.() || new Date().toLocaleString();
+    const itemsHtml = order.items?.map(item => `
         <tr>
             <td>1x</td>
             <td>${item.name || 'Producto'}</td>
@@ -154,74 +175,73 @@ export default function AdminOrdenes() {
         </tr>
     `).join('') || '';
 
-        const subtotal = order.subtotal || 0;
-        const tax = order.tax || 0;
-        const delivery = order.deliveryFee || 0;
-        const total = order.total || 0;
+    const subtotal = order.subtotal || 0;
+    const tax = order.tax || 0;
+    const delivery = order.deliveryFee || 0;
+    const total = order.total || 0;
 
-        const requierePago = order.status === "por pagar";
-        const esDomicilio = order.orderType === "Domicilio";
-        const esTransferencia = order.paymentMethod === "Transferencia";
-        const esEfectivo = order.paymentMethod === "Efectivo";
-
-        let avisoPago = "";
-
-        if (esDomicilio && esEfectivo) {
-            avisoPago = `
-            <div style="margin: 10px 0; padding: 10px; border-top: 1px dashed black; border-bottom: 1px dashed black;">
-                <strong>⚠️ COBRAR AL ENTREGAR</strong><br/>
-                El domiciliario debe cobrar al cliente en efectivo.
-            </div>
-        `;
-        } else if (!esDomicilio && requierePago) {
-            avisoPago = `
-            <div style="margin: 10px 0; padding: 10px; border-top: 1px dashed black; border-bottom: 1px dashed black;">
-                <strong>⚠️ PAGO PENDIENTE</strong><br/>
-                Cobrar al cliente al entregar.
-            </div>
-        `;
+    const html = `
+<html>
+<head>
+    <title>Orden #${order.id}</title>
+    <style>
+        @media print { 
+            @page { size: 58mm auto; margin: 0; } 
+            body { margin: 0; padding: 0; width: 58mm; } 
         }
+        body { 
+            font-family: monospace; 
+            width: 58mm; 
+            padding: 10px; 
+            color: black; 
+        }
+        .center { text-align: center; font-size: 22px; font-weight: bold; }
+        .section-title { font-size: 18px; font-weight: bold; margin-top: 12px; }
+        .boxed { border: 2px solid black; padding: 10px; margin: 10px 0; font-size: 20px; font-weight: bold; text-align: center; }
+        table { width: 100%; margin-top: 10px; } 
+        td { font-size: 16px; padding: 4px 0; }
+        .totales td { font-weight: bold; font-size: 16px; }
+        .total-final { font-size: 20px; font-weight: bold; margin-top: 10px; text-align: right; }
+        hr { border: none; border-top: 2px solid black; margin: 12px 0; }
+    </style>
+</head>
+<body>
 
-        const html = `
-    <html>
-    <head><title>Orden #${order.id}</title><style>
-    @media print { @page { size: 55mm auto; margin: 0; } body { margin: 0; padding: 0; width: 55mm; } }
-    body { font-family: monospace; width: 55mm; padding: 10px; color: black; }
-    .center { text-align: center; font-size: 20px; font-weight: bold; }
-    .boxed { border: 2px solid black; padding: 10px; margin: 10px 0; font-size: 18px; font-weight: bold; }
-    table { width: 100%; margin-top: 10px; } td { font-size: 14px; padding: 4px 0; }
-    .totales td { font-weight: bold; font-size: 14px; }
-    .total-final { font-size: 18px; font-weight: bold; }
-    hr { border: none; border-top: 2px solid black; margin: 12px 0; }
-    </style></head><body>
-
-    <div class="center">${order.buyerName}</div>
+    <div class="center">${restaurant?.name || 'Restaurante'}</div>
     <div class="boxed">ORDEN #${order.id}</div>
-    <div>${restaurant?.name || 'Restaurante'}</div>
-    <div><strong>Fecha orden:</strong> ${fecha}</div>
+    <div><strong>Fecha:</strong> ${fecha}</div>
 
-    ${avisoPago}
-
-    <div class="boxed">DETALLE ORDEN</div>
+    <div class="section-title">Pedido</div>
     <table>${itemsHtml}</table><hr />
     <table class="totales">
         <tr><td>Subtotal</td><td></td><td style="text-align:right;">$${subtotal.toLocaleString("es-CL")}</td></tr>
         <tr><td>Impuestos</td><td></td><td style="text-align:right;">$${tax.toLocaleString("es-CL")}</td></tr>
         <tr><td>Domicilio</td><td></td><td style="text-align:right;">$${delivery.toLocaleString("es-CL")}</td></tr>
     </table>
-    <div class="total-final" style="margin-top:10px;">TOTAL: $${total.toLocaleString("es-CL")}</div><hr />
-    <div><strong>Método de Pago:</strong> ${order.paymentMethod || 'No especificado'}</div>
-    <div><strong>Tipo de Orden:</strong> ${order.orderType || 'No especificado'}</div>
-    <div><strong>Cliente:</strong> ${order.buyerName}</div>
-    <div><strong>Dirección:</strong> ${order.address}, ${order.neighborhood}</div>
+    <div class="total-final">TOTAL: $${total.toLocaleString("es-CL")}</div><hr />
 
-    <script>window.onload = function() { window.print(); setTimeout(() => window.close(), 500); }</script>
-    </body></html>`;
+    <div class="section-title">Cliente</div>
+    <div><strong>Nombre:</strong> ${order.buyerName}</div>
+    <div><strong>Dirección:</strong></div>
+    <div>${order.address}</div>
+    <div><strong>Sector:</strong> ${order.neighborhood}</div>
+    <div><strong>Teléfono:</strong> ${order.phoneNumber || 'No disponible'}</div>
+    <div><strong>Medio de pago:</strong>${order.paymentMethod || 'No especificado'}</div>
 
-        win.document.open();
-        win.document.write(html);
-        win.document.close();
-    };
+    <script>
+        window.onload = function() { 
+            window.print(); 
+            setTimeout(() => window.close(), 500); 
+        }
+    </script>
+</body>
+</html>`;
+
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+};
+
 
     // Archivar
     const archivarOrden = async (order) => {
@@ -278,7 +298,7 @@ export default function AdminOrdenes() {
         }
     };
 
-    // copiar Orden
+    // Copiar Orden
     const copiarOrdenAlPortapapeles = (order) => {
         const fecha = order.createdAt?.toDate?.().toLocaleString?.() || new Date().toLocaleString();
         const esDomicilio = order.orderType === "Domicilio";
@@ -321,29 +341,6 @@ export default function AdminOrdenes() {
     };
 
     const statusColumns = ['pendiente', 'en preparación', 'lista'];
-
-    // Notificaciones
-    function notify(title, body, tag = "pedido-nuevo") {
-        const notificationsEnabled = localStorage.getItem("notificationsEnabled") !== "false";
-
-        if (Notification.permission === "granted" && notificationsEnabled) {
-            const n = new Notification(
-                title, {
-                body,
-                tag,
-                /*image: "/icon-1000",
-                icon: "/icon-512.png",
-                badge: "/icon-32.png",*/
-                renotify: true,
-                requireInteraction: true,
-                silent: false
-            });
-            n.onclick = (e) => {
-                e.preventDefault();
-                window.focus();
-            };
-        }
-    }
 
     return (
         <>
