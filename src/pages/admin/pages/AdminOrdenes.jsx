@@ -5,6 +5,7 @@ import { useRestaurant } from '../../../contexts/RestaurantContext.jsx';
 import toast, { Toaster } from 'react-hot-toast';
 import { AlertCircle, Archive, CheckCircle, ClockIcon, CreditCardIcon, DollarSign, FlameIcon, PrinterIcon } from 'lucide-react';
 import ToggleSwitch from '../../../components/ToogleSwitch.jsx';
+import audioService from '../../../servicies/audio.js';
 
 export default function AdminOrdenes() {
     const { restaurant } = useRestaurant();
@@ -131,6 +132,9 @@ export default function AdminOrdenes() {
         if (!order) return;
         if (order.status === newStatus || (newStatus === "pendiente" && order.status === "por pagar")) return;
         await updateOrderStatus(orderId, newStatus);
+
+        // solo si mueves a lsita alerta
+        if (newStatus === "lista") { audioService.play("alert"); }
     };
 
     const allowDrop = (e) => e.preventDefault();
@@ -157,17 +161,17 @@ export default function AdminOrdenes() {
     };
 
     // Imprimir
-const handleImpresion = (e, order) => {
-    e.preventDefault();
-    const width = 500;
-    const height = 600;
-    const left = (window.screen.width - width) / 2;
-    const top = (window.screen.height - height) / 2;
-    const win = window.open('', '', `width=${width},height=${height},left=${left},top=${top}`);
-    if (!win) return;
+    const handleImpresion = (e, order) => {
+        e.preventDefault();
+        const width = 500;
+        const height = 600;
+        const left = (window.screen.width - width) / 2;
+        const top = (window.screen.height - height) / 2;
+        const win = window.open('', '', `width=${width},height=${height},left=${left},top=${top}`);
+        if (!win) return;
 
-    const fecha = order.createdAt?.toDate?.().toLocaleString?.() || new Date().toLocaleString();
-    const itemsHtml = order.items?.map(item => `
+        const fecha = order.createdAt?.toDate?.().toLocaleString?.() || new Date().toLocaleString();
+        const itemsHtml = order.items?.map(item => `
         <tr>
             <td>1x</td>
             <td>${item.name || 'Producto'}</td>
@@ -175,12 +179,12 @@ const handleImpresion = (e, order) => {
         </tr>
     `).join('') || '';
 
-    const subtotal = order.subtotal || 0;
-    const tax = order.tax || 0;
-    const delivery = order.deliveryFee || 0;
-    const total = order.total || 0;
+        const subtotal = order.subtotal || 0;
+        const tax = order.tax || 0;
+        const delivery = order.deliveryFee || 0;
+        const total = order.total || 0;
 
-    const html = `
+        const html = `
 <html>
 <head>
     <title>Orden #${order.id}</title>
@@ -237,10 +241,10 @@ const handleImpresion = (e, order) => {
 </body>
 </html>`;
 
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
-};
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+    };
 
 
     // Archivar
@@ -253,6 +257,7 @@ const handleImpresion = (e, order) => {
             await setDoc(historialRef, order);
             await deleteDoc(ordenRef);
             toast.success("Orden archivada");
+            audioService.play("manualInteract")
         } catch (error) {
             console.error("Error al archivar orden:", error);
             toast.error("No se pudo archivar la orden");
@@ -342,203 +347,266 @@ const handleImpresion = (e, order) => {
 
     const statusColumns = ['pendiente', 'en preparación', 'lista'];
 
+    // Filtros
+    const [sedes, setSedes] = useState([]);
+    const [sedeFiltro, setSedeFiltro] = useState("Todas");
+    useEffect(() => {
+        if (!restaurant?.id) return;
+
+        const fetchSedes = async () => {
+            const snapshot = await getDocs(collection(db, `restaurants/${restaurant.id}/sedes`));
+            const fetchedSedes = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            setSedes(fetchedSedes);
+        };
+
+        fetchSedes();
+    }, [restaurant]);
+
+    const filtrarOrdenes = (order) => {
+        const matchStatus = status === "pendiente"
+            ? (order.status === "pendiente" || order.status === "por pagar")
+            : order.status === status;
+
+        if (order.orderType === "Recoger" && sedeFiltro !== "Todas") {
+            const nombreSede = order.sede?.split("-")[0]?.trim() || "";
+            return matchStatus && nombreSede === sedeFiltro;
+        }
+
+        return matchStatus;
+    };
+
     return (
         <>
             <Toaster position="top-right" reverseOrder={false} toastOptions={{ style: { marginTop: '60px' } }} />
 
-            <div className="flex flex-col lg:flex-row gap-4 p-4">
-                {statusColumns.map(status => (
-                    <div
-                        key={status}
-                        onDrop={(e) => handleDrop(e, status)}
-                        onDragOver={allowDrop}
-                        className="flex-1 bg-[#111] p-4 rounded-lg min-h-[27.5vh] lg:min-h-[70vh]"
-                    >
-                        <h2 className="text-xl font-semibold mb-4 capitalize">{status} ({orders.filter(order => status === "pendiente" ? (order.status === "pendiente" || order.status === "por pagar") : order.status === status).length})</h2>
-                        {orders
-                            .filter(order => status === "pendiente" ? (order.status === "pendiente" || order.status === "por pagar") : order.status === status)
-                            .slice()
-                            .reverse()
-                            .map(order => (
-                                <div
-                                    key={order.id}
-                                    draggable
-                                    onDragStart={(e) => handleDragStart(e, order.id)}
-                                    className="bg-[#151515] p-5 mb-3 rounded shadow cursor-move border-2 border-[#202020] relative"
-                                >
-                                    <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
-                                        {((order.status === "pendiente" || order.status === "por pagar") && order.paymentMethod !== "Efectivo") &&
-                                            <ToggleSwitch
-                                                checked={order.status == "pendiente"}
-                                                onChange={order.status == "pendiente"
-                                                    ? (e) => handlePagosTransferencias(e, order, false)
-                                                    : (e) => handlePagosTransferencias(e, order, true)}
-                                                label={order.status === "por pagar" ? "Sin pagar" : "Pagado"}
-                                            />
-                                        }
-                                        <div className="flex items-center gap-2 cursor-grab">
-                                            {order.status === "por pagar" && <AlertCircle className="text-yellow-400 w-4 h-4" />}
-                                            <span className={`px-2 py-0.5 rounded text-xs font-semibold text-white flex gap-2
-                                                ${order.status === "pendiente" ? "bg-red-600"
-                                                    : order.status === "en preparación" ? "bg-orange-500"
-                                                        : order.status === "lista" ? "bg-green-600"
-                                                            : order.status === "por pagar" ? "bg-yellow-600"
-                                                                : "bg-gray-500"}`}>
-                                                {order.status === "por pagar" ?
-                                                    <CreditCardIcon className='w-4 h-4' />
-                                                    : order.status === "pendiente" ?
-                                                        <ClockIcon className='w-4 h-4' />
-                                                        : order.status === "en preparación" ?
-                                                            <FlameIcon className='w-4 h-4' />
-                                                            : order.status === "lista" ?
-                                                                <CheckCircle className='w-4 h-4' />
-                                                                : ""}
-                                                {order.status}
-                                            </span>
-                                        </div>
-                                        <button
-                                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 rounded flex gap-2 cursor-pointer"
-                                            onClick={(e) => handleImpresion(e, order)}
-                                            title='Imprimir'
-                                        >
-                                            <PrinterIcon className='w-4 h-4' />
-                                            Imprimir
-                                        </button>
-                                        {order.status === "lista" && <button
-                                            onClick={() => archivarOrden(order)}
-                                            className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs px-2 py-1 rounded flex gap-2 cursor-pointer"
-                                            title='Esta acción no se puede deshacer'
-                                        >
-                                            <Archive className='w-4 h-4' />
-                                            Archivar
-                                        </button>}
-                                        <button
-                                            onClick={() => copiarOrdenAlPortapapeles(order)}
-                                            className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 rounded flex gap-2 cursor-pointer"
-                                            title='Copiar al portapapeles'
-                                        >
-                                            📋 Copiar
-                                        </button>
-                                    </div>
-
-                                    <p className="font-bold text-white">{order.id} | {order.buyerName}</p>
-
-                                    <p className="text-sm text-gray-300">
-                                        {order.orderType === "Recoger" ? "Para recoger" : "Para domicilio"} y{" "}
-                                        {order.paymentMethod === "Efectivo"
-                                            ? "cobrar en efectivo"
-                                            : order.paymentMethod === "Transferencia"
-                                                ? `se ${order.status === "por pagar" ? "pagará" : "pagó"} por transferencia`
-                                                : order.paymentMethod === "Datafono"
-                                                    ? `se ${order.status === "por pagar" ? "pagará" : "pagó"} con datáfono`
-                                                    : "método de pago no especificado"}
-                                    </p>
-
-                                    {order.orderType == "Recoger" && <div className='p-2'>
-                                        <p className="text-sm text-gray-500">{order.sede.split("-")[0] || ""}</p>
-                                        <p className="text-sm text-gray-500">{order.sede.split("-")[1] || ""}</p>
-                                        <p className="text-sm text-gray-500">{order.sede.split("-")[2] || ""}</p>
-                                    </div>}
-
-                                    {order.orderType == "Domicilio" && <div className='p-2'>
-                                        <p className="text-sm text-gray-500 w-[56%] leading-tight">
-                                            <span className="font-bold">Dirección:</span> {order.address}<br />
-                                            <span className="ml-[5%]">{order.neighborhood}</span>
-                                        </p>
-                                    </div>}
-                                    <a className="text-sm text-gray-400 hover:text-white hover:underline" href={'https://wa.me/57' + order.phoneNumber} target="_blank" title='Abrir en whatsapp'> <span className="font-bold">Contacto:</span> {order.phoneNumber}</a>
-
-
-                                    <ul className="mt-2 text-sm text-gray-300 space-y-1">
-                                        <li>
-                                            <button
-                                                onClick={() => toggleDetails(order.id)}
-                                                className="text-xs text-blue-400 hover:text-blue-200 underline mt-2 cursor-pointer"
-                                            >
-                                                {openDetails[order.id] ? "Ocultar Detalles" : "Ver Detalles"}
-                                            </button>
-                                        </li>
-                                        {openDetails[order.id] && (
-                                            <>
-                                                {order.observaciones && (
-                                                    <li className="mt-3 my-2 p-4 border border-yellow-600 bg-yellow-900/20 text-sm text-yellow-100 rounded">
-                                                        <div className="flex items-center mb-1 font-semibold">
-                                                            <AlertCircle className="w-4 h-4 mr-2" />
-                                                            Observaciones
-                                                        </div>
-                                                        <div className="font-normal">{order.observaciones}</div>
-                                                    </li>
-                                                )}
-
-                                                {order.items?.map((item, idx) => {
-                                                    const quantity = item.quantity || 1;
-                                                    const unitPrice = item.price || 0;
-                                                    const itemTotal = quantity * unitPrice;
-                                                    return (
-                                                        <li key={idx} className="flex justify-between items-start">
-                                                            <div>
-                                                                <div className="font-semibold text-white"><span className='text-lg text-yellow-500'>{quantity} x</span> {item.name}</div>
-                                                                <div className="text-xs text-gray-400">
-                                                                    ${unitPrice.toLocaleString("es-CL")} {quantity !== "1" ? "c/u" : ""}
-                                                                </div>
-                                                            </div>
-                                                            <div className="text-right font-medium text-yellow-200">
-                                                                ${itemTotal.toLocaleString("es-CL")}
-                                                            </div>
-                                                        </li>
-                                                    );
-                                                })}
-
-                                                <li className="flex justify-between pt-3 border-t border-gray-700 text-sm text-gray-300 font-medium">
-                                                    <span>Subtotal</span>
-                                                    <span>${order.subtotal?.toLocaleString("es-CL") || "0"}</span>
-                                                </li>
-                                                <li className="flex justify-between text-sm text-gray-300">
-                                                    <span>Domicilio</span>
-                                                    <span>${order.deliveryFee?.toLocaleString("es-CL") || "0"}</span>
-                                                </li>
-                                                <li className="flex justify-between text-sm text-gray-300">
-                                                    <span>Iva</span>
-                                                    <span>${order.tax?.toLocaleString("es-CL") || "0"}</span>
-                                                </li>
-                                            </>
-                                        )}
-
-                                        <li className="mt-2 pt-2 border-t border-yellow-500 flex justify-between items-center text-sm font-bold text-yellow-300">
-                                            <div className="flex items-center gap-1">
-                                                <DollarSign className="w-4 h-4" />
-                                                Total
-                                            </div>
-                                            <span className="text-base">
-                                                ${order.total?.toLocaleString("es-CL") || "0"}
-                                            </span>
-                                        </li>
-
-
-                                    </ul>
-
-                                </div>
-                            ))}
-                    </div>
-                ))}
-            </div>
 
             {/* Opciones de Administrador */}
-            <div className="flex-1 p-4 mx-4 rounded bg-[#111]">
-                <h3 className='text-center text-xl font-semibold'>Acciones Globales</h3>
-                <div className="flex flex-row border-t gap-4 mt-2 p-2">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mt-2 p-2 mx-5">
 
-                    <button
-                        onClick={moverOrdenesAntiguas}
-                        className="bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium px-4 py-2 rounded cursor-pointer flex items-center gap-2"
-                        title='Envia las órdenes de ayer al archivo'
-                    >
-                        <Archive className='w-4 h-4' />
-                        Archivar órdenes del día anterior
-                    </button>
+                <select
+                    value={sedeFiltro}
+                    onChange={(e) => setSedeFiltro(e.target.value)}
+                    className="bg-[#222] text-white px-3 py-2 rounded border border-gray-600"
+                >
+                    <option value="Todas">Todas las sedes</option>
+                    {sedes.map((sede) => (
+                        <option key={sede.id} value={sede.name}>
+                            {sede.name}
+                        </option>
+                    ))}
+                </select>
 
-                </div>
+                <button
+                    onClick={moverOrdenesAntiguas}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium px-4 py-2 rounded cursor-pointer flex items-center gap-2"
+                    title='Envia las órdenes de ayer al archivo'
+                >
+                    <Archive className='w-4 h-4' />
+                    Archivar Antiguas
+                </button>
+
             </div>
+
+
+            <div className="flex flex-col lg:flex-row gap-4 p-4">
+                {statusColumns.map(status => {
+                    const filtrarOrdenes = (order) => {
+                        const matchStatus = status === "pendiente"
+                            ? (order.status === "pendiente" || order.status === "por pagar")
+                            : order.status === status;
+
+                        if (order.orderType === "Recoger" && sedeFiltro !== "Todas") {
+                            const nombreSede = order.sede?.split("-")[0]?.trim() || "";
+                            return matchStatus && nombreSede === sedeFiltro;
+                        }
+
+                        return matchStatus;
+                    };
+
+                    const ordenesFiltradas = orders.filter(filtrarOrdenes);
+
+                    return (
+                        <div
+                            key={status}
+                            onDrop={(e) => handleDrop(e, status)}
+                            onDragOver={allowDrop}
+                            className="flex-1 bg-[#111] p-4 rounded-lg min-h-[78vh] "
+                        >
+                            <h2 className="text-xl font-semibold mb-4 capitalize">
+                                {status} ({ordenesFiltradas.length})
+                            </h2>
+
+                            {ordenesFiltradas
+                                .slice()
+                                .reverse()
+                                .map(order => (
+                                    <div
+                                        key={order.id}
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(e, order.id)}
+                                        className="bg-[#151515] p-5 mb-3 rounded shadow cursor-move border-2 border-[#202020] relative"
+                                    >
+                                        <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+                                            {((order.status === "pendiente" || order.status === "por pagar") && order.paymentMethod !== "Efectivo") &&
+                                                <ToggleSwitch
+                                                    checked={order.status == "pendiente"}
+                                                    onChange={order.status == "pendiente"
+                                                        ? (e) => handlePagosTransferencias(e, order, false)
+                                                        : (e) => handlePagosTransferencias(e, order, true)}
+                                                    label={order.status === "por pagar" ? "Sin pagar" : "Pagado"}
+                                                />
+                                            }
+                                            <div className="flex items-center gap-2 cursor-grab">
+                                                {order.status === "por pagar" && <AlertCircle className="text-yellow-400 w-4 h-4" />}
+                                                <span className={`px-2 py-0.5 rounded text-xs font-semibold text-white flex gap-2
+                                                ${order.status === "pendiente" ? "bg-red-600"
+                                                        : order.status === "en preparación" ? "bg-orange-500"
+                                                            : order.status === "lista" ? "bg-green-600"
+                                                                : order.status === "por pagar" ? "bg-yellow-600"
+                                                                    : "bg-gray-500"}`}>
+                                                    {order.status === "por pagar" ?
+                                                        <CreditCardIcon className='w-4 h-4' />
+                                                        : order.status === "pendiente" ?
+                                                            <ClockIcon className='w-4 h-4' />
+                                                            : order.status === "en preparación" ?
+                                                                <FlameIcon className='w-4 h-4' />
+                                                                : order.status === "lista" ?
+                                                                    <CheckCircle className='w-4 h-4' />
+                                                                    : ""}
+                                                    {order.status}
+                                                </span>
+                                            </div>
+                                            <button
+                                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 rounded flex gap-2 cursor-pointer"
+                                                onClick={(e) => handleImpresion(e, order)}
+                                                title='Imprimir'
+                                            >
+                                                <PrinterIcon className='w-4 h-4' />
+                                                Imprimir
+                                            </button>
+                                            {order.status === "lista" && <button
+                                                onClick={() => archivarOrden(order)}
+                                                className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs px-2 py-1 rounded flex gap-2 cursor-pointer"
+                                                title='Esta acción no se puede deshacer'
+                                            >
+                                                <Archive className='w-4 h-4' />
+                                                Archivar
+                                            </button>}
+                                            <button
+                                                onClick={() => copiarOrdenAlPortapapeles(order)}
+                                                className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 rounded flex gap-2 cursor-pointer"
+                                                title='Copiar al portapapeles'
+                                            >
+                                                📋 Copiar
+                                            </button>
+                                        </div>
+
+                                        <p className="font-bold text-white">{order.id} | {order.buyerName}</p>
+
+                                        <p className="text-sm text-gray-300">
+                                            {order.orderType === "Recoger" ? "Para recoger" : "Para domicilio"} y{" "}
+                                            {order.paymentMethod === "Efectivo"
+                                                ? "cobrar en efectivo"
+                                                : order.paymentMethod === "Transferencia"
+                                                    ? `se ${order.status === "por pagar" ? "pagará" : "pagó"} por transferencia`
+                                                    : order.paymentMethod === "Datafono"
+                                                        ? `se ${order.status === "por pagar" ? "pagará" : "pagó"} con datáfono`
+                                                        : "método de pago no especificado"}
+                                        </p>
+
+                                        {order.orderType == "Recoger" && <div className='p-2'>
+                                            <p className="text-sm text-gray-500">{order.sede.split("-")[0] || ""}</p>
+                                            <p className="text-sm text-gray-500">{order.sede.split("-")[1] || ""}</p>
+                                            <p className="text-sm text-gray-500">{order.sede.split("-")[2] || ""}</p>
+                                        </div>}
+
+                                        {order.orderType == "Domicilio" && <div className='p-2'>
+                                            <p className="text-sm text-gray-500 w-[56%] leading-tight">
+                                                <span className="font-bold">Dirección:</span> {order.address}<br />
+                                                <span className="ml-[5%]">{order.neighborhood}</span>
+                                            </p>
+                                        </div>}
+                                        <a className="text-sm text-gray-400 hover:text-white hover:underline" href={'https://wa.me/57' + order.phoneNumber} target="_blank" title='Abrir en whatsapp'> <span className="font-bold">Contacto:</span> {order.phoneNumber}</a>
+
+
+                                        <ul className="mt-2 text-sm text-gray-300 space-y-1">
+                                            <li>
+                                                <button
+                                                    onClick={() => toggleDetails(order.id)}
+                                                    className="text-xs text-blue-400 hover:text-blue-200 underline mt-2 cursor-pointer"
+                                                >
+                                                    {openDetails[order.id] ? "Ocultar Detalles" : "Ver Detalles"}
+                                                </button>
+                                            </li>
+                                            {openDetails[order.id] && (
+                                                <>
+                                                    {order.observaciones && (
+                                                        <li className="mt-3 my-2 p-4 border border-yellow-600 bg-yellow-900/20 text-sm text-yellow-100 rounded">
+                                                            <div className="flex items-center mb-1 font-semibold">
+                                                                <AlertCircle className="w-4 h-4 mr-2" />
+                                                                Observaciones
+                                                            </div>
+                                                            <div className="font-normal">{order.observaciones}</div>
+                                                        </li>
+                                                    )}
+
+                                                    {order.items?.map((item, idx) => {
+                                                        const quantity = item.quantity || 1;
+                                                        const unitPrice = item.price || 0;
+                                                        const itemTotal = quantity * unitPrice;
+                                                        return (
+                                                            <li key={idx} className="flex justify-between items-start">
+                                                                <div>
+                                                                    <div className="font-semibold text-white"><span className='text-lg text-yellow-500'>{quantity} x</span> {item.name}</div>
+                                                                    <div className="text-xs text-gray-400">
+                                                                        ${unitPrice.toLocaleString("es-CL")} {quantity !== "1" ? "c/u" : ""}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="text-right font-medium text-yellow-200">
+                                                                    ${itemTotal.toLocaleString("es-CL")}
+                                                                </div>
+                                                            </li>
+                                                        );
+                                                    })}
+
+                                                    <li className="flex justify-between pt-3 border-t border-gray-700 text-sm text-gray-300 font-medium">
+                                                        <span>Subtotal</span>
+                                                        <span>${order.subtotal?.toLocaleString("es-CL") || "0"}</span>
+                                                    </li>
+                                                    <li className="flex justify-between text-sm text-gray-300">
+                                                        <span>Domicilio</span>
+                                                        <span>${order.deliveryFee?.toLocaleString("es-CL") || "0"}</span>
+                                                    </li>
+                                                    <li className="flex justify-between text-sm text-gray-300">
+                                                        <span>Iva</span>
+                                                        <span>${order.tax?.toLocaleString("es-CL") || "0"}</span>
+                                                    </li>
+                                                </>
+                                            )}
+
+                                            <li className="mt-2 pt-2 border-t border-yellow-500 flex justify-between items-center text-sm font-bold text-yellow-300">
+                                                <div className="flex items-center gap-1">
+                                                    <DollarSign className="w-4 h-4" />
+                                                    Total
+                                                </div>
+                                                <span className="text-base">
+                                                    ${order.total?.toLocaleString("es-CL") || "0"}
+                                                </span>
+                                            </li>
+
+
+                                        </ul>
+
+                                    </div>
+                                ))}
+                        </div>
+                    );
+                })}
+            </div>
+
         </>
     );
 }
