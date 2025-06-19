@@ -6,6 +6,7 @@ import { db } from "../firebase/firebase";
 import { doc, runTransaction, collection, getDocs } from "firebase/firestore";
 import MyOrders from "../pages/client/MyOrders";
 import { Toaster, toast } from "react-hot-toast";
+import audioService from "../servicies/audio";
 
 export default function CartOverlay({ onClose }) {
   const { restaurant } = useRestaurant();
@@ -60,8 +61,10 @@ export default function CartOverlay({ onClose }) {
   const handleClose = () => {
     setIsVisible(false);
     setTimeout(onClose, 300);
+    audioService.play("autoInteract")
   };
 
+  // Checkout
   const submitOrder = async ({ status }) => {
     if (!restaurant?.id) return;
 
@@ -98,29 +101,45 @@ export default function CartOverlay({ onClose }) {
       transaction.set(orderRef, orderData);
       return orderId;
     });
-
-    if (navigator.vibrate) navigator.vibrate(150);
     addActiveOrder({ id: newOrderId, ...orderData });
     clearCart();
     //handleClose();
     return newOrderId;
   };
 
-  const handleCheckout = async () => {
-    if (!buyerName || !phoneNumber || !orderType || !paymentMethod) { console.log(buyerName, phoneNumber, orderType, paymentMethod); return; }
-    if (orderType === "Domicilio" && (!address || !neighborhood)) { console.log(address, neighborhood); return; }
-    if (orderType === "Recoger" && !selectedSede) { console.log(selectedSede); return; }
+  const isDisabled =
+    !buyerName ||
+    !phoneNumber ||
+    !orderType ||
+    !paymentMethod ||
+    (orderType === "Domicilio" && (!address || !neighborhood)) ||
+    (orderType === "Recoger" && !selectedSede);
 
+  const handleCheckout = async () => {    
+    // Mostramos en pantalla los campos errados con showError
+    setShowError(isDisabled);
+
+    // Si hay errores mostramos la retroalimentacion y sonido y detenemos el checkout
+    if (isDisabled) {
+      toast.error("¡Ups! Completa los datos antes de hacer la orden 🧑‍🍳")
+      audioService.play("negative");
+      return;
+    }
+
+    // si es transferencia contiguar el checkout en modo modal de tranferencia
     if (paymentMethod === "Transferencia") {
       setShowTransferModal(true);
       return;
     }
 
+    // Tratar de hacer la solitud al servidor
     try {
       await submitOrder({ status: "pendiente" });
       toast.success("¡Orden enviada a cocina exitosamente!");
+      audioService.play("alert2");
     } catch (err) {
       console.error("Error al enviar la orden:", err);
+      audioService.play("negative");
       toast.error("Error al enviar la orden a cocina.");
     }
   };
@@ -132,17 +151,6 @@ export default function CartOverlay({ onClose }) {
       console.error("Error al finalizar transferencia:", err);
     }
   };
-
-  useEffect(() => {
-    setTimeout(() => setIsVisible(true), 10);
-    document.body.style.overflow = "hidden";
-    const handleKeyDown = (e) => e.key === "Escape" && handleClose();
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "auto";
-    };
-  }, []);
 
   // Local user data
   const [isInitialized, setIsInitialized] = useState(false);
@@ -195,6 +203,18 @@ export default function CartOverlay({ onClose }) {
     fetchSedes();
   }, [restaurant]);
 
+  // Gestos
+  useEffect(() => {
+    setTimeout(() => setIsVisible(true), 10);
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (e) => e.key === "Escape" && handleClose();
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
   const handleTouchStart = (e) => {
     touchStartX.current = e.changedTouches[0].clientX;
   };
@@ -204,8 +224,22 @@ export default function CartOverlay({ onClose }) {
     if (touchEndX.current - touchStartX.current > 50) handleClose();
   };
 
-  // Ordenes Activas manuales
+  // Seguimiento de órdenes
   const [manualOrderId, setManualOrderId] = useState("");
+  const manualOrderSuccessMessages = [
+    "📦 ¡Pedido localizado!",
+    "🚀 Seguimiento activado",
+    "🛎️ ¡Vamos tras tu orden!",
+    "😎 Pedido en camino",
+    "🎯 Orden encontrada"
+  ];
+  const manualOrderErrorMessages = [
+    "😕 No encontramos nada",
+    "🚫 Orden no hallada",
+    "🕵️ Sin resultados",
+    "🤔 Revisá el número",
+    "📭 Nada por aquí"
+  ];
 
   const handleManualOrderAdd = () => {
     // TODO: mejorar la retroalimentacion
@@ -213,16 +247,24 @@ export default function CartOverlay({ onClose }) {
 
     addActiveOrder({ id: manualOrderId.trim() })
       .then((order) => {
-        console.log("✅ Orden añadida", order);
-        toast.success("✅ Orden añadida al seguimiento");
+        //console.log("✅ Orden añadida", order);
+        toast.success(manualOrderSuccessMessages[Math.floor(Math.random() * manualOrderSuccessMessages.length)]);
+        audioService.play("alert2");
       })
       .catch((error) => {
-        console.warn("⚠️ Error al añadir la orden:", error.message);
-        toast.error("⚠️ No encontramos esta orden. Puede ya estar archivada.");
+        //console.warn("⚠️ Error al añadir la orden:", error.message);
+        toast.error(manualOrderErrorMessages[Math.floor(Math.random() * manualOrderErrorMessages.length)]);
+        audioService.play("negative");
       });
 
     setManualOrderId("");
   };
+
+  // 👉 Validación visual por campo
+const [showError, setShowError] = useState(false);
+
+const inputClass = (invalid) =>
+  `w-full px-3 py-2 rounded text-sm border text-gray-900 ${invalid ? 'border-red-500' : 'border-gray-300'}`;
 
 
   return (
@@ -309,7 +351,7 @@ export default function CartOverlay({ onClose }) {
                       <button
                         onClick={() => {
                           removeFromCart(item.id);
-                          navigator.vibrate?.(100);
+                          audioService.play("autoInteract")
                         }}
                         className="text-red-500 hover:text-red-600 hover:scale-105"
                       >
@@ -331,7 +373,15 @@ export default function CartOverlay({ onClose }) {
 
         {cart.length > 0 && (
           <div className="mt-6 space-y-4">
-            <input type="text" placeholder="Nombre" value={buyerName} onChange={(e) => setBuyerName(e.target.value)} className="w-full border px-3 py-2 rounded text-sm" autoComplete="name" />
+            <input
+              type="text"
+              placeholder="Nombre"
+              value={buyerName}
+              onChange={(e) => setBuyerName(e.target.value)}
+              className={inputClass(showError && !buyerName)}
+              autoComplete="name"
+            />
+
             <input
               type="tel"
               placeholder="Número de teléfono"
@@ -347,19 +397,29 @@ export default function CartOverlay({ onClose }) {
                 setPhoneNumber(formatted);
               }}
 
-              className="w-full border px-3 py-2 rounded text-sm"
+              className={inputClass(showError && !phoneNumber)}
               inputMode="numeric"
               autoComplete="tel"
             />
-            <select value={orderType} onChange={(e) => setOrderType(e.target.value)} className="w-full border px-3 py-2 rounded text-sm">
+            <select value={orderType} onChange={(e) => setOrderType(e.target.value)} className={inputClass(showError && !orderType)}>
               <option value="">Tipo de orden</option>
               {Object.entries(orderOptions).map(([key, val]) => <option key={key} value={key}>{key}: {val}</option>)}
             </select>
 
             {orderType === "Domicilio" && (
               <>
-                <input type="text" placeholder="Dirección (no olvides el barrio)" value={address} onChange={(e) => setAddress(e.target.value.replace(/\s+/g, ' ').trimStart())} className="w-full border px-3 py-2 rounded text-sm" autoComplete="street-address" />
-                <select value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="w-full border px-3 py-2 rounded text-sm">
+                <input
+                  type="text"
+                  placeholder="Dirección (no olvides el barrio)"
+                  value={address} onChange={(e) => setAddress(e.target.value.replace(/\s+/g, ' ').trimStart())}
+                  className={inputClass(showError && !address)}
+                  autoComplete="street-address"
+                />
+                <select
+                  value={neighborhood}
+                  onChange={(e) => setNeighborhood(e.target.value)}
+                  className={inputClass(showError && !neighborhood)}
+                >
                   <option value="">Sector</option>
                   {Object.entries(neighborhoodOptions).map(([key, price]) => <option key={key} value={key}>{key}</option>)}
                 </select>
@@ -370,7 +430,7 @@ export default function CartOverlay({ onClose }) {
               <select
                 value={selectedSede}
                 onChange={(e) => setSelectedSede(e.target.value)}
-                className="w-full border px-3 py-2 rounded text-sm"
+                className={inputClass(showError && !selectedSede)}
               >
                 <option value="">Selecciona una sede</option>
                 {sedes.map((sede) => (
@@ -381,7 +441,11 @@ export default function CartOverlay({ onClose }) {
               </select>
             )}
 
-            <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="w-full border px-3 py-2 rounded text-sm">
+            <select
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className={inputClass(showError && !paymentMethod)}
+            >
               <option value="">Método de pago</option>
               {Object.entries(paymentOptions).map(([key, val]) => <option key={key} value={key}>{key}: {val}</option>)}
             </select>
@@ -390,7 +454,7 @@ export default function CartOverlay({ onClose }) {
               placeholder="¿Algo más? Salsa preferida, sabor de bebida o petición especial (opcional)"
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}
-              className="w-full border px-3 py-2 rounded text-sm resize-none h-24"
+              className="w-full border border-gray-300 px-3 py-2 rounded text-sm resize-none h-24"
             />
 
             <div className="flex justify-between text-lg"><span>Subtotal</span><span>${subtotal.toLocaleString("es-CL")}</span></div>
@@ -399,20 +463,15 @@ export default function CartOverlay({ onClose }) {
             <div className="flex justify-between text-lg font-bold"><span>Total</span><span>${total.toLocaleString("es-CL")}</span></div>
 
             <button
-              className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded-lg hover:scale-105 cursor-pointer disabled:bg-amber-200 disabled:text-gray-700"
-              disabled={
-                !buyerName ||
-                !phoneNumber ||
-                !orderType ||
-                !paymentMethod ||
-                (orderType === "Domicilio" && (!address || !neighborhood)) ||
-                (orderType === "Recoger" && !selectedSede)
-              }
+              className={`w-full font-bold py-2 rounded-lg transition ${isDisabled
+                ? 'bg-amber-200 text-gray-700 cursor-not-allowed'
+                : 'bg-yellow-400 hover:bg-yellow-500 text-black hover:scale-105'
+                }`}
               onClick={handleCheckout}
             >
               Pagar
             </button>
-            <button className="w-full text-sm text-gray-500 underline cursor-pointer" title="borra todos los elementos del carrito" onClick={clearCart}>vaciar carrito</button>
+            <button className="w-full text-sm text-gray-500 underline cursor-pointer" title="borra todos los elementos del carrito" onClick={() => { clearCart(); audioService.play("autoInteract") }}>vaciar carrito</button>
           </div>
         )}
 
@@ -420,7 +479,7 @@ export default function CartOverlay({ onClose }) {
           <>
             <h3 className="text-xl font-bold text-gray-800 mt-20">Órdenes en seguimiento</h3>
             <div className="mb-6"><MyOrders /></div>
-            <button className="w-full text-sm text-gray-500 underline" onClick={clearActiveOrders}>Quitar todas las órdenes en seguimiento</button>
+            <button className="w-full text-sm text-gray-500 underline" onClick={()=>{ clearActiveOrders(); audioService.play("autoInteract"); }}>Quitar todas las órdenes en seguimiento</button>
           </>
         )}
 
@@ -437,8 +496,9 @@ export default function CartOverlay({ onClose }) {
           />
 
           <button
+            className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded-lg text-sm cursor-pointer disabled:bg-amber-200 disabled:text-gray-700 disabled:cursor-not-allowed"
             onClick={handleManualOrderAdd}
-            className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded-lg text-sm cursor-pointer"
+            disabled={!manualOrderId.trim()}
           >
             Añadir orden a seguimiento
           </button>
