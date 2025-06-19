@@ -116,7 +116,7 @@ export default function RestaurantLayout({ children }) {
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className={`
-        fixed bottom-16 left-4 z-50 p-2 sm:p-4 rounded-full shadow-lg
+        fixed bottom-16 left-4 z-50 p-2 rounded-full shadow-lg
         bg-gray-800 hover:bg-gray-700 text-white
         transition-transform duration-200 active:scale-105 hover:scale-105 cursor-pointer
       `}
