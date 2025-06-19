@@ -1,6 +1,7 @@
 import React from "react";
 import theme from "../../../theme";
 import { useCart } from "../../../contexts/CartContext";
+import audioService from "../../../servicies/audio";
 
 function ProductCard({ product, isFirstImage }) {
     const { addToCart } = useCart();
@@ -9,7 +10,7 @@ function ProductCard({ product, isFirstImage }) {
     const imageSrc = isValidImage ? product.image : "/assets/defaultImage.jpg";
 
     const handleProductCart = () => {
-        if (navigator.vibrate) navigator.vibrate(100);
+        audioService.play("manualInteract");
         addToCart(product);
     };
 
