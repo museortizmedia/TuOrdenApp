@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useRestaurant } from "../contexts/RestaurantContext";
+import { useRestaurant } from "../../../contexts/RestaurantContext";
 import {
     DndContext,
     closestCenter,
@@ -16,7 +16,7 @@ import {
     verticalListSortingStrategy
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import firestoreService from "../servicies/firestoreService";
+import firestoreService from "../../../servicies/firestoreService";
 import toast from "react-hot-toast";
 
 function SortableCategoryCard({ category, children }) {
@@ -28,7 +28,8 @@ function SortableCategoryCard({ category, children }) {
         borderRadius: "0.5rem",
         padding: "1rem",
         display: "flex",
-        flexDirection: "column"
+        flexDirection: "column",
+        cursor: "grab"
     };
 
     return (
