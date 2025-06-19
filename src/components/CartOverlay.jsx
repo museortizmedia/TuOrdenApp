@@ -8,7 +8,7 @@ import MyOrders from "../pages/client/MyOrders";
 import { Toaster, toast } from "react-hot-toast";
 import audioService from "../servicies/audio";
 
-export default function CartOverlay({ onClose }) {
+export default function CartOverlay({ onClose, firstActiveOrders = false }) {
   const { restaurant } = useRestaurant();
   const {
     cart,
@@ -115,7 +115,7 @@ export default function CartOverlay({ onClose }) {
     (orderType === "Domicilio" && (!address || !neighborhood)) ||
     (orderType === "Recoger" && !selectedSede);
 
-  const handleCheckout = async () => {    
+  const handleCheckout = async () => {
     // Mostramos en pantalla los campos errados con showError
     setShowError(isDisabled);
 
@@ -261,10 +261,10 @@ export default function CartOverlay({ onClose }) {
   };
 
   // 👉 Validación visual por campo
-const [showError, setShowError] = useState(false);
+  const [showError, setShowError] = useState(false);
 
-const inputClass = (invalid) =>
-  `w-full px-3 py-2 rounded text-sm border text-gray-900 ${invalid ? 'border-red-500' : 'border-gray-300'}`;
+  const inputClass = (invalid) =>
+    `w-full px-3 py-2 rounded text-sm border text-gray-900 ${invalid ? 'border-red-500' : 'border-gray-300'}`;
 
 
   return (
@@ -283,7 +283,7 @@ const inputClass = (invalid) =>
 
       <div
         className={`
-          w-4/5 sm:w-3/5 md:w-1/4 max-w-none h-full bg-white text-black p-6 relative shadow-lg
+          w-4/5 sm:w-3/5 md:w-1/4 max-w-none h-full bg-white text-black p-6 relative shadow-lg flex flex-col
           transform transition-transform duration-300 ease-in-out
           ${isVisible ? "translate-x-0" : "translate-x-full"}
           overflow-y-auto
@@ -300,208 +300,216 @@ const inputClass = (invalid) =>
           <X className="w-5 h-5 hover:w-[1.30rem] hover:h-[1.30rem]" />
         </button>
 
-        <h2 className="text-xl font-semibold mb-6">Tu carrito</h2>
+        {/* Tu carrito */}
+        <div className={`${firstActiveOrders ? "order-2" : "order-1"}`}>
+          <h3 className="text-xl font-bold text-gray-800 mb-6">Tu carrito</h3>
+          <div className="space-y-6 overflow-y-auto max-h-[60vh] pr-1">
+            {cart.length === 0 ? (
+              <p className="text-gray-500">Tu carrito está vacío.</p>
+            ) : (
+              cart.map((item) => (
+                <div key={item.id} className="flex items-start gap-3 border-b pb-4 pr-2">
+                  {/* Imagen a la izquierda */}
+                  <img
+                    src={item.image || "/assets/defaultImage.jpg"}
+                    alt={item.name}
+                    title={item.name}
+                    className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded shadow-lg flex-shrink-0"
+                  />
 
-        <div className="space-y-6 overflow-y-auto max-h-[60vh] pr-1">
-          {cart.length === 0 ? (
-            <p className="text-gray-500">Tu carrito está vacío.</p>
-          ) : (
-            cart.map((item) => (
-              <div key={item.id} className="flex items-start gap-3 border-b pb-4 pr-2">
-                {/* Imagen a la izquierda */}
-                <img
-                  src={item.image || "/assets/defaultImage.jpg"}
-                  alt={item.name}
-                  title={item.name}
-                  className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded shadow-lg flex-shrink-0"
-                />
-
-                {/* Contenido */}
-                <div className="flex flex-col justify-between flex-1 min-w-0">
-                  {/* Nombre y Descripción */}
-                  <div className="mb-1">
-                    <h3 className="font-bold text-sm line-clamp-1">{item.name}</h3>
-                    <p className="text-xs text-gray-600 line-clamp-2 overflow-y-auto noscrollbar-x">{item.desc}</p>
-                  </div>
-
-                  {/* Controles e información */}
-                  <div className="flex justify-between items-center mt-1 flex-wrap gap-2">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        min="1"
-                        value={inputQuantities[item.id] ?? item.quantity}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          setInputQuantities((prev) => ({ ...prev, [item.id]: value }));
-                        }}
-                        onBlur={() => {
-                          const raw = inputQuantities[item.id];
-                          const num = Number(raw);
-                          if (raw === "0") return removeFromCart(item.id);
-                          if (!raw || isNaN(num) || num <= 0) {
-                            setInputQuantities((prev) => ({ ...prev, [item.id]: "1" }));
-                            return updateQuantity(item.id, 1);
-                          }
-                          updateQuantity(item.id, num);
-                        }}
-                        className="w-14 border rounded text-center text-sm"
-                      />
-
-                      <button
-                        onClick={() => {
-                          removeFromCart(item.id);
-                          audioService.play("autoInteract")
-                        }}
-                        className="text-red-500 hover:text-red-600 hover:scale-105"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                  {/* Contenido */}
+                  <div className="flex flex-col justify-between flex-1 min-w-0">
+                    {/* Nombre y Descripción */}
+                    <div className="mb-1">
+                      <h3 className="font-bold text-sm line-clamp-1">{item.name}</h3>
+                      <p className="text-xs text-gray-600 line-clamp-2 overflow-y-auto noscrollbar-x">{item.desc}</p>
                     </div>
 
-                    {/* Precio */}
-                    <div className="text-right text-md font-bold whitespace-nowrap ml-auto">
-                      ${(item.price * item.quantity).toLocaleString("es-CL")}
+                    {/* Controles e información */}
+                    <div className="flex justify-between items-center mt-1 flex-wrap gap-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min="1"
+                          value={inputQuantities[item.id] ?? item.quantity}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setInputQuantities((prev) => ({ ...prev, [item.id]: value }));
+                          }}
+                          onBlur={() => {
+                            const raw = inputQuantities[item.id];
+                            const num = Number(raw);
+                            if (raw === "0") return removeFromCart(item.id);
+                            if (!raw || isNaN(num) || num <= 0) {
+                              setInputQuantities((prev) => ({ ...prev, [item.id]: "1" }));
+                              return updateQuantity(item.id, 1);
+                            }
+                            updateQuantity(item.id, num);
+                          }}
+                          className="w-14 border rounded text-center text-sm"
+                        />
+
+                        <button
+                          onClick={() => {
+                            removeFromCart(item.id);
+                            audioService.play("autoInteract")
+                          }}
+                          className="text-red-500 hover:text-red-600 hover:scale-105"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Precio */}
+                      <div className="text-right text-md font-bold whitespace-nowrap ml-auto">
+                        ${(item.price * item.quantity).toLocaleString("es-CL")}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-            ))
+              ))
+            )}
+          </div>
+
+
+          {cart.length > 0 && (
+            <div className="mt-6 space-y-4">
+              <input
+                type="text"
+                placeholder="Nombre"
+                value={buyerName}
+                onChange={(e) => setBuyerName(e.target.value)}
+                className={inputClass(showError && !buyerName)}
+                autoComplete="name"
+              />
+
+              <input
+                type="tel"
+                placeholder="Número de teléfono"
+                value={phoneNumber}
+                onChange={(e) => {
+                  let raw = e.target.value.replace(/\s/g, '');
+                  if (/^\+\d{2}/.test(raw)) {
+                    raw = raw.slice(3);
+                  }
+                  const formatted = raw.replace(/[^\d]/g, '');
+
+                  console.log("Valor recibido:", formatted);
+                  setPhoneNumber(formatted);
+                }}
+
+                className={inputClass(showError && !phoneNumber)}
+                inputMode="numeric"
+                autoComplete="tel"
+              />
+              <select value={orderType} onChange={(e) => setOrderType(e.target.value)} className={inputClass(showError && !orderType)}>
+                <option value="">Tipo de orden</option>
+                {Object.entries(orderOptions).map(([key, val]) => <option key={key} value={key}>{key}: {val}</option>)}
+              </select>
+
+              {orderType === "Domicilio" && (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Dirección (no olvides el barrio)"
+                    value={address} onChange={(e) => setAddress(e.target.value.replace(/\s+/g, ' ').trimStart())}
+                    className={inputClass(showError && !address)}
+                    autoComplete="street-address"
+                  />
+                  <select
+                    value={neighborhood}
+                    onChange={(e) => setNeighborhood(e.target.value)}
+                    className={inputClass(showError && !neighborhood)}
+                  >
+                    <option value="">Sector</option>
+                    {Object.entries(neighborhoodOptions).map(([key, price]) => <option key={key} value={key}>{key}</option>)}
+                  </select>
+                </>
+              )}
+
+              {orderType === "Recoger" && (
+                <select
+                  value={selectedSede}
+                  onChange={(e) => setSelectedSede(e.target.value)}
+                  className={inputClass(showError && !selectedSede)}
+                >
+                  <option value="">Selecciona una sede</option>
+                  {sedes.map((sede) => (
+                    <option key={sede.id} value={`${sede.name} - ${sede.address} - ${sede.telefono}`}>
+                      {sede.name} - {sede.address}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              <select
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className={inputClass(showError && !paymentMethod)}
+              >
+                <option value="">Método de pago</option>
+                {Object.entries(paymentOptions).map(([key, val]) => <option key={key} value={key}>{key}: {val}</option>)}
+              </select>
+
+              <textarea
+                placeholder="¿Algo más? Salsa preferida, sabor de bebida o petición especial (opcional)"
+                value={observaciones}
+                onChange={(e) => setObservaciones(e.target.value)}
+                className="w-full border border-gray-300 px-3 py-2 rounded text-sm resize-none h-24"
+              />
+
+              <div className="flex justify-between text-lg"><span>Subtotal</span><span>${subtotal.toLocaleString("es-CL")}</span></div>
+              <div className="flex justify-between text-sm"><span>IVA</span><span>$0</span></div>
+              <div className="flex justify-between text-sm"><span>Domicilio</span><span>${deliveryFee.toLocaleString("es-CL")}</span></div>
+              <div className="flex justify-between text-lg font-bold"><span>Total</span><span>${total.toLocaleString("es-CL")}</span></div>
+
+              <button
+                className={`w-full font-bold py-2 rounded-lg transition ${isDisabled
+                  ? 'bg-amber-200 text-gray-700 cursor-not-allowed'
+                  : 'bg-yellow-400 hover:bg-yellow-500 text-black hover:scale-105'
+                  }`}
+                onClick={handleCheckout}
+              >
+                Pagar
+              </button>
+              <button className="w-full text-sm text-gray-500 underline cursor-pointer" title="borra todos los elementos del carrito" onClick={() => { clearCart(); audioService.play("autoInteract") }}>vaciar carrito</button>
+            </div>
           )}
         </div>
 
-        {cart.length > 0 && (
-          <div className="mt-6 space-y-4">
+        {/* Seguimiento */}
+        <div className={`${firstActiveOrders ? "order-1" : "order-2"}`}>
+            <>
+              <h3 className={`text-xl font-bold text-gray-800 ${firstActiveOrders ? "my-5" : "mt-20"}`}>Órdenes en seguimiento</h3>
+              <div className="mb-6"><MyOrders /></div>
+              <button className="w-full text-sm text-gray-500 underline cursor-pointer" onClick={() => { clearActiveOrders(); audioService.play("autoInteract"); }}>Quitar todas las órdenes en seguimiento</button>
+            </>
+
+          <div className={`mt-10 pt-6 mb-10 pb-10 border-t border-gray-200`}>
+            <span className="text-sm text-gray-600 mb-1 block">¿Tienes el número de una orden?</span>
+            <h4 className="text-lg font-semibold text-gray-800 mb-3">Rastrea tu orden</h4>
+
             <input
               type="text"
-              placeholder="Nombre"
-              value={buyerName}
-              onChange={(e) => setBuyerName(e.target.value)}
-              className={inputClass(showError && !buyerName)}
-              autoComplete="name"
-            />
-
-            <input
-              type="tel"
-              placeholder="Número de teléfono"
-              value={phoneNumber}
-              onChange={(e) => {
-                let raw = e.target.value.replace(/\s/g, '');
-                if (/^\+\d{2}/.test(raw)) {
-                  raw = raw.slice(3);
-                }
-                const formatted = raw.replace(/[^\d]/g, '');
-
-                console.log("Valor recibido:", formatted);
-                setPhoneNumber(formatted);
-              }}
-
-              className={inputClass(showError && !phoneNumber)}
               inputMode="numeric"
-              autoComplete="tel"
+              placeholder="Ej: 20250001"
+              value={manualOrderId}
+              onChange={(e) => {
+                const clean = e.target.value.replace(/\D/g, "");
+                setManualOrderId(clean);
+              }}
+              className="w-full border border-gray-300 px-4 py-2 rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
             />
-            <select value={orderType} onChange={(e) => setOrderType(e.target.value)} className={inputClass(showError && !orderType)}>
-              <option value="">Tipo de orden</option>
-              {Object.entries(orderOptions).map(([key, val]) => <option key={key} value={key}>{key}: {val}</option>)}
-            </select>
-
-            {orderType === "Domicilio" && (
-              <>
-                <input
-                  type="text"
-                  placeholder="Dirección (no olvides el barrio)"
-                  value={address} onChange={(e) => setAddress(e.target.value.replace(/\s+/g, ' ').trimStart())}
-                  className={inputClass(showError && !address)}
-                  autoComplete="street-address"
-                />
-                <select
-                  value={neighborhood}
-                  onChange={(e) => setNeighborhood(e.target.value)}
-                  className={inputClass(showError && !neighborhood)}
-                >
-                  <option value="">Sector</option>
-                  {Object.entries(neighborhoodOptions).map(([key, price]) => <option key={key} value={key}>{key}</option>)}
-                </select>
-              </>
-            )}
-
-            {orderType === "Recoger" && (
-              <select
-                value={selectedSede}
-                onChange={(e) => setSelectedSede(e.target.value)}
-                className={inputClass(showError && !selectedSede)}
-              >
-                <option value="">Selecciona una sede</option>
-                {sedes.map((sede) => (
-                  <option key={sede.id} value={`${sede.name} - ${sede.address} - ${sede.telefono}`}>
-                    {sede.name} - {sede.address}
-                  </option>
-                ))}
-              </select>
-            )}
-
-            <select
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-              className={inputClass(showError && !paymentMethod)}
-            >
-              <option value="">Método de pago</option>
-              {Object.entries(paymentOptions).map(([key, val]) => <option key={key} value={key}>{key}: {val}</option>)}
-            </select>
-
-            <textarea
-              placeholder="¿Algo más? Salsa preferida, sabor de bebida o petición especial (opcional)"
-              value={observaciones}
-              onChange={(e) => setObservaciones(e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2 rounded text-sm resize-none h-24"
-            />
-
-            <div className="flex justify-between text-lg"><span>Subtotal</span><span>${subtotal.toLocaleString("es-CL")}</span></div>
-            <div className="flex justify-between text-sm"><span>IVA</span><span>$0</span></div>
-            <div className="flex justify-between text-sm"><span>Domicilio</span><span>${deliveryFee.toLocaleString("es-CL")}</span></div>
-            <div className="flex justify-between text-lg font-bold"><span>Total</span><span>${total.toLocaleString("es-CL")}</span></div>
 
             <button
-              className={`w-full font-bold py-2 rounded-lg transition ${isDisabled
-                ? 'bg-amber-200 text-gray-700 cursor-not-allowed'
-                : 'bg-yellow-400 hover:bg-yellow-500 text-black hover:scale-105'
-                }`}
-              onClick={handleCheckout}
+              className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded-lg text-sm cursor-pointer disabled:bg-amber-200 disabled:text-gray-700 disabled:cursor-not-allowed"
+              onClick={handleManualOrderAdd}
+              disabled={!manualOrderId.trim()}
             >
-              Pagar
+              Seguir esta orden
             </button>
-            <button className="w-full text-sm text-gray-500 underline cursor-pointer" title="borra todos los elementos del carrito" onClick={() => { clearCart(); audioService.play("autoInteract") }}>vaciar carrito</button>
           </div>
-        )}
-
-        {activeOrders.length > 0 && (
-          <>
-            <h3 className="text-xl font-bold text-gray-800 mt-20">Órdenes en seguimiento</h3>
-            <div className="mb-6"><MyOrders /></div>
-            <button className="w-full text-sm text-gray-500 underline" onClick={()=>{ clearActiveOrders(); audioService.play("autoInteract"); }}>Quitar todas las órdenes en seguimiento</button>
-          </>
-        )}
-
-        <div className="mt-10 pt-6 mb-10 pb-10 border-t border-gray-200">
-          <span className="text-sm text-gray-600 mb-1 block">¿Tienes el número de una orden?</span>
-          <h4 className="text-lg font-semibold text-gray-800 mb-3">Agrega una orden manualmente</h4>
-
-          <input
-            type="text"
-            placeholder="Ej: 20250001"
-            value={manualOrderId}
-            onChange={(e) => setManualOrderId(e.target.value)}
-            className="w-full border border-gray-300 px-4 py-2 rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
-          />
-
-          <button
-            className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded-lg text-sm cursor-pointer disabled:bg-amber-200 disabled:text-gray-700 disabled:cursor-not-allowed"
-            onClick={handleManualOrderAdd}
-            disabled={!manualOrderId.trim()}
-          >
-            Añadir orden a seguimiento
-          </button>
         </div>
 
 

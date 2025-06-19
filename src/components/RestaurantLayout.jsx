@@ -14,6 +14,7 @@ export default function RestaurantLayout({ children }) {
   const { activeOrders } = useCart();
   const { justAdded } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isActiveOrderFirst, setIsActiveOrderFirst] = useState(false);
 
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
@@ -83,6 +84,7 @@ export default function RestaurantLayout({ children }) {
           className="relative w-6 h-6 sm:w-7 sm:h-7 cursor-pointer"
           onClick={() => {
             setIsCartOpen(true);
+            setIsActiveOrderFirst(true);
             audioService.play("alert");
           }}
           title="Rastrear pedidos"
@@ -102,7 +104,7 @@ export default function RestaurantLayout({ children }) {
 
       {/* Floating cart button (always visible) */}
       <button
-        onClick={() => { setIsCartOpen(true); audioService.play("alert2") }}
+        onClick={() => { setIsCartOpen(true); setIsActiveOrderFirst(false); audioService.play("alert2") }}
         className={`
           fixed bottom-4 right-4 z-50 p-3 sm:p-4 rounded-full shadow-lg 
           bg-yellow-400 hover:bg-yellow-500 text-black
@@ -121,7 +123,7 @@ export default function RestaurantLayout({ children }) {
       </main>
 
       {/* Cart Overlay */}
-      {isCartOpen && <CartOverlay onClose={() => setIsCartOpen(false)} />}
+      {isCartOpen && <CartOverlay onClose={() => setIsCartOpen(false)} firstActiveOrders={isActiveOrderFirst} />}
 
       {/* FOOTER */}
       <div className="bg-[#050505] h-80 w-full"></div>
