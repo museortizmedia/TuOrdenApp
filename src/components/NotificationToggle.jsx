@@ -33,7 +33,7 @@ const NotificationToggle = () => {
   return (
     <button
       onClick={toggleNotifications}
-      className="p-2 bg-gray-800 text-white rounded-full shadow hover:bg-gray-700 transition hover:cursor-pointer"
+      className="p-2 bg-gray-800 text-white rounded-full shadow hover:bg-gray-700 transition-transform duration-200 active:scale-105 hover:scale-105 cursor-pointer"
       title={
         hasPermission
           ? notificationsEnabled

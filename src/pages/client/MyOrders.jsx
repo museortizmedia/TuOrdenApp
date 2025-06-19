@@ -9,9 +9,7 @@ export default function MyOrders() {
 
   if (!activeOrders.length) {
     return (
-      <div className="w-full p-4 bg-white/80 text-gray-600 rounded-md shadow">
-        No tienes órdenes activas. Pide algo de la carta primero.
-      </div>
+      <p className="text-gray-500 font-thin text-md">No tienes órdenes activas.</p>
     );
   }
 

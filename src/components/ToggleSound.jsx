@@ -15,7 +15,7 @@ const ToggleSound = () => {
     <button
       onClick={toggle}
       title={muted ? "Sonido desactivado" : "Sonido activado"}
-      className="p-2 rounded-full bg-gray-800 text-white shadow hover:bg-gray-700 transition"
+      className="p-2 rounded-full bg-gray-800 text-white shadow hover:bg-gray-700 transition-transform duration-200 active:scale-105"
     >
       {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
     </button>

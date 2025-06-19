@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRestaurant } from "../contexts/RestaurantContext";
-import { ConciergeBellIcon, ListOrderedIcon, ShoppingCartIcon } from "lucide-react";
+import { ChevronUpIcon, ConciergeBellIcon, ListOrderedIcon, ShoppingCartIcon } from "lucide-react";
 import CartOverlay from "./CartOverlay";
 import { useAuth } from "../contexts/AuthContext";
 import theme from "../theme";
@@ -81,7 +81,7 @@ export default function RestaurantLayout({ children }) {
         </div>
 
         <div
-          className="relative w-6 h-6 sm:w-7 sm:h-7 cursor-pointer"
+          className="relative w-6 h-6 sm:w-7 sm:h-7 transition-transform duration-200 active:scale-105 hover:scale-105 cursor-pointer"
           onClick={() => {
             setIsCartOpen(true);
             setIsActiveOrderFirst(true);
@@ -100,16 +100,32 @@ export default function RestaurantLayout({ children }) {
 
       </header>
 
-      <div className="fixed bottom-4 left-4 z-10 flex items-center"><ToggleSound /></div>
+      {/* Sound control */}
+      <div className="fixed bottom-4 left-[1.1rem] z-10 flex items-center"><ToggleSound /></div>
+
+      {/* Go top */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className={`
+        fixed bottom-16 left-4 z-50 p-2 sm:p-4 rounded-full shadow-lg
+        bg-gray-800 hover:bg-gray-700 text-white
+        transition-transform duration-200 active:scale-105 hover:scale-105 cursor-pointer
+      `}
+        style={{ transform: "translateZ(0)" }}
+        aria-label="Volver arriba"
+      >
+        <ChevronUpIcon className="w-6 h-6 sm:w-7 sm:h-7" />
+      </button>
+
 
       {/* Floating cart button (always visible) */}
       <button
         onClick={() => { setIsCartOpen(true); setIsActiveOrderFirst(false); audioService.play("alert2") }}
         className={`
-          fixed bottom-4 right-4 z-50 p-3 sm:p-4 rounded-full shadow-lg 
+          fixed bottom-5 right-5 z-50 p-4 sm:p-4 rounded-full shadow-lg 
           bg-yellow-400 hover:bg-yellow-500 text-black
           ${justAdded ? "animate-bounce" : ""}
-          transition-transform hover:scale-105 cursor-pointer
+          transition-transform duration-200 active:scale-105 hover:scale-105 cursor-pointer
         `}
         style={{ transform: "translateZ(0)" }} // Fix visual glitches in some mobile browsers
         aria-label="Abrir carrito"

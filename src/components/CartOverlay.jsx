@@ -242,8 +242,6 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
   ];
 
   const handleManualOrderAdd = () => {
-    // TODO: mejorar la retroalimentacion
-    if (!manualOrderId.trim()) return alert("Debes ingresar un número de orden válido.");
 
     addActiveOrder({ id: manualOrderId.trim() })
       .then((order) => {
@@ -302,10 +300,10 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
 
         {/* Tu carrito */}
         <div className={`${firstActiveOrders ? "order-2" : "order-1"}`}>
-          <h3 className="text-xl font-bold text-gray-800 mb-6">Tu carrito</h3>
+          <h3 className="text-xl font-bold text-gray-800 my-3">Tu carrito</h3>
           <div className="space-y-6 overflow-y-auto max-h-[60vh] pr-1">
             {cart.length === 0 ? (
-              <p className="text-gray-500">Tu carrito está vacío.</p>
+              <p className="text-gray-500 font-thin text-md">Tu carrito está vacío.</p>
             ) : (
               cart.map((item) => (
                 <div key={item.id} className="flex items-start gap-3 border-b pb-4 pr-2">
@@ -524,35 +522,35 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
         {/* Seguimiento */}
         <div className={`${firstActiveOrders ? "order-1" : "order-2"}`}>
           <>
-            <h3 className={`text-xl font-bold text-gray-800 ${firstActiveOrders ? "my-5" : "mt-20"}`}>Órdenes en seguimiento</h3>
+            <h3 className={`text-xl font-bold text-gray-800 ${firstActiveOrders ? "my-5" : "mt-20 my-3"}`}>Órdenes en seguimiento</h3>
             <div className="mb-6"><MyOrders /></div>
-            <button className="w-full text-sm text-gray-500 underline cursor-pointer" onClick={() => { clearActiveOrders(); audioService.play("autoInteract"); }}>Quitar todas las órdenes en seguimiento</button>
+            {activeOrders.length > 0 && (<button className="w-full text-sm text-gray-500 underline cursor-pointer" onClick={() => { clearActiveOrders(); audioService.play("autoInteract"); }}>Quitar todas las órdenes en seguimiento</button>)}
           </>
+        </div>
 
-          <div className={`mt-10 pt-6 mb-10 pb-10 border-t border-gray-200`}>
-            <span className="text-sm text-gray-600 mb-1 block">¿Tienes el número de una orden?</span>
-            <h4 className="text-lg font-semibold text-gray-800 mb-3">Rastrea tu orden</h4>
+        <div className={`order-3 mt-10 pt-6 mb-10 pb-10 border-t-1 border-gray-500 `}>
+          <span className="text-sm text-gray-600 mb-1 block">¿Tienes el número de una orden?</span>
+          <h4 className="text-lg font-semibold text-gray-800 mb-3">Rastrea tu orden</h4>
 
-            <input
-              type="text"
-              inputMode="numeric"
-              placeholder="Ej: 20250001"
-              value={manualOrderId}
-              onChange={(e) => {
-                const clean = e.target.value.replace(/\D/g, "");
-                setManualOrderId(clean);
-              }}
-              className="w-full border border-gray-300 px-4 py-2 rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
-            />
+          <input
+            type="text"
+            inputMode="numeric"
+            placeholder="Ej: 20250001"
+            value={manualOrderId}
+            onChange={(e) => {
+              const clean = e.target.value.replace(/\D/g, "");
+              setManualOrderId(clean);
+            }}
+            className="w-full border border-gray-300 px-4 py-2 rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+          />
 
-            <button
-              className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded-lg text-sm cursor-pointer disabled:bg-amber-200 disabled:text-gray-700 disabled:cursor-not-allowed"
-              onClick={handleManualOrderAdd}
-              disabled={!manualOrderId.trim()}
-            >
-              Seguir esta orden
-            </button>
-          </div>
+          <button
+            className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 rounded-lg text-sm cursor-pointer disabled:bg-amber-200 disabled:text-gray-700 disabled:cursor-not-allowed"
+            onClick={handleManualOrderAdd}
+            disabled={!manualOrderId.trim()}
+          >
+            Seguir esta orden
+          </button>
         </div>
 
 
