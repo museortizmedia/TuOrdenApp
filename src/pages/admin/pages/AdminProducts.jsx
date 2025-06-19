@@ -22,7 +22,8 @@ import { CSS } from "@dnd-kit/utilities";
 import ToggleSwitch from "../../../components/ToogleSwitch.jsx"
 import ImageUploader from "../../../components/ImageUploader";
 import { PenIcon } from "lucide-react";
-import CategoryOrderManager from "../../../components/CategoryOrderManager.jsx";
+import CategoryOrderManager from "./CategoryOrderManager.jsx";
+import audioService from "../../../servicies/audio.js";
 
 function SortableItem({ product, onUpdate, onDelete }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: product.id });
@@ -138,7 +139,7 @@ function SortableItem({ product, onUpdate, onDelete }) {
 
                     <div className="flex justify-between mt-2">
                         <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); if (window.confirm("Eliminar?")) onDelete(product.id); }} className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded cursor-pointer">Eliminar</button>
-                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); handleSave(); }} className="bg-green-700 hover:bg-green-800 px-2 py-1 rounded cursor-pointer">Guardar</button>
+                        <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); handleSave(); audioService.play("manualInteract"); }} className="bg-green-700 hover:bg-green-800 px-2 py-1 rounded cursor-pointer">Guardar</button>
                         <button onPointerDownCapture={(e) => e.stopPropagation()} onClick={(e) => { stopDrag(e); setEdit(false); }} className="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded cursor-pointer">Cerrar</button>
                     </div>
                 </>
@@ -299,7 +300,7 @@ function AdminProducts() {
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="font-bold text-lg">{cat}</h2>
                                     <button
-                                        onClick={() => setCreatingCat(creatingCat === cat ? null : cat)}
+                                        onClick={() => setCreatingCat(creatingCat === cat ? null : cat) }
                                         className={`text-green-400 text-xl cursor-pointer transition-transform duration-300 transform origin-center ${creatingCat === cat ? "rotate-45" : "rotate-0"}`}
                                         title={creatingCat === cat ? "Cancelar" : "Crear producto"}>
                                         +
@@ -315,7 +316,7 @@ function AdminProducts() {
                                 {creatingCat === cat && (
                                     <div className="mt-4">
                                         <input className="w-full p-2 rounded bg-gray-700 mb-2 text-white" placeholder="Nombre del producto" value={newProductName} onChange={e => setNewProductName(e.target.value)} />
-                                        <button onClick={() => handleCreateProduct(cat)} className="bg-blue-600 px-4 py-1 rounded text-white">Crear</button>
+                                        <button onClick={() => { handleCreateProduct(cat); audioService.play("manualInteract") }} className="bg-blue-600 px-4 py-1 rounded text-white">Crear</button>
                                     </div>
                                 )}
                             </div>
