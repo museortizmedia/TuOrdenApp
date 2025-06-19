@@ -1,16 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useCart } from "../../contexts/CartContext";
 import { CheckCircle, Loader2, DollarSign, Clock10Icon, AlertCircleIcon } from "lucide-react";
+import audioService from "../../servicies/audio";
 
 export default function MyOrders() {
+
   const { activeOrders } = useCart();
 
-  if (!activeOrders.length)
+  if (!activeOrders.length) {
     return (
       <div className="w-full p-4 bg-white/80 text-gray-600 rounded-md shadow">
         No tienes órdenes activas. Pide algo de la carta primero.
       </div>
     );
+  }
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -42,103 +45,124 @@ export default function MyOrders() {
     }
   };
 
-const statusMessages = {
-  "por pagar": {
-    Domicilio: {
-      Transferencia: [
-        "Esperando tu transferencia 💸",
-        "Tu orden ya está lista para pagar 📲",
-      ],
+  const statusMessages = {
+    "por pagar": {
+      Domicilio: {
+        Transferencia: [
+          "Esperando tu transferencia 💸",
+          "Tu orden ya está lista para pagar 📲",
+        ],
+      },
+      Recoger: {
+        Transferencia: [
+          "Confirmá el pago y te preparamos todo 👌",
+          "Esperando tu transferencia 💸",
+        ],
+      },
     },
-    Recoger: {
-      Transferencia: [
-        "Confirmá el pago y te preparamos todo 👌",
-        "Esperando tu transferencia 💸",
-      ],
-    },
-  },
 
-  "pendiente": {
-    Domicilio: {
-      Efectivo: [
-        "¡Recibido! Alistando todo 🍔",
-        "Tu orden está en la cola 🕒",
-      ],
-      Transferencia: [
-        "¡Gracias! Pago recibido. Te preparamos todo 😋",
-        "Transferencia ok ✔️. En cola.",
-      ],
+    "pendiente": {
+      Domicilio: {
+        Efectivo: [
+          "¡Recibido! Alistando todo 🍔",
+          "Tu orden está en la cola 🕒",
+        ],
+        Transferencia: [
+          "¡Gracias! Pago recibido. Te preparamos todo 😋",
+          "Transferencia ok ✔️. En cola.",
+        ],
+      },
+      Recoger: {
+        Efectivo: [
+          "¡Genial! Te lo vamos dejando listo 🛍️",
+          "Alistando empaques y sabores...",
+        ],
+        Transferencia: [
+          "Pago aprobado ✅",
+          "Ya lo confirmamos, preparando tu orden 👨‍🍳",
+        ],
+      },
     },
-    Recoger: {
-      Efectivo: [
-        "¡Genial! Te lo vamos dejando listo 🛍️",
-        "Alistando empaques y sabores...",
-      ],
-      Transferencia: [
-        "Pago aprobado ✅",
-        "Ya lo confirmamos, preparando tu orden 👨‍🍳",
-      ],
-    },
-  },
 
-  "en preparación": {
-    Domicilio: {
-      Efectivo: [
-        "¡Manos a la obra! Cocinando tu pedido 👩‍🍳",
-        "Ya casi sale para tu casa 🚚",
-      ],
-      Transferencia: [
-        "Transferencia ok ✔️. Cocinando con amor 🍽️",
-        "Pedido confirmado, ya está en cocina 🔥",
-      ],
+    "en preparación": {
+      Domicilio: {
+        Efectivo: [
+          "¡Manos a la obra! Cocinando tu pedido 👩‍🍳",
+          "Ya casi sale para tu casa 🚚",
+        ],
+        Transferencia: [
+          "Transferencia ok ✔️. Cocinando con amor 🍽️",
+          "Pedido confirmado, ya está en cocina 🔥",
+        ],
+      },
+      Recoger: {
+        Efectivo: [
+          "Preparando para que pases a buscarlo 🛍️",
+          "Casi listo, te avisamos cuando esté 👀",
+        ],
+        Transferencia: [
+          "Cocinando lo tuyo 🍔",
+          "¡Ya lo estamos armando! ✨",
+        ],
+      },
     },
-    Recoger: {
-      Efectivo: [
-        "Preparando para que pases a buscarlo 🛍️",
-        "Casi listo, te avisamos cuando esté 👀",
-      ],
-      Transferencia: [
-        "Cocinando lo tuyo 🍔",
-        "¡Ya lo estamos armando! ✨",
-      ],
+
+    "lista": {
+      Domicilio: {
+        Efectivo: [
+          "¡Salió tu pedido! Llega pronto 🛵",
+          "Ya va en camino 🍽️",
+        ],
+        Transferencia: [
+          "Gracias por tu pago 🙌. En camino.",
+          "Pedido enviado ✅ ¡Disfrutalo!",
+        ],
+      },
+      Recoger: {
+        Efectivo: [
+          "Tu pedido está listo 🎉 ¡Pasá a buscarlo!",
+          "Ya te está esperando en el local 🏠",
+        ],
+        Transferencia: [
+          "¡Todo listo! 💯",
+          "Pasá cuando quieras 😉",
+        ],
+      },
     },
-  },
 
-  "lista": {
-    Domicilio: {
-      Efectivo: [
-        "¡Salió tu pedido! Llega pronto 🛵",
-        "Ya va en camino 🍽️",
-      ],
-      Transferencia: [
-        "Gracias por tu pago 🙌. En camino.",
-        "Pedido enviado ✅ ¡Disfrutalo!",
-      ],
-    },
-    Recoger: {
-      Efectivo: [
-        "Tu pedido está listo 🎉 ¡Pasá a buscarlo!",
-        "Ya te está esperando en el local 🏠",
-      ],
-      Transferencia: [
-        "¡Todo listo! 💯",
-        "Pasá cuando quieras 😉",
-      ],
-    },
-  },
+    default: [
+      "Procesando tu orden 🕒",
+      "Esperando novedades del restaurante...",
+    ]
+  };
 
-  default: [
-    "Procesando tu orden 🕒",
-    "Esperando novedades del restaurante...",
-  ]
-};
-
-
+  // 
   const [animatedMessages, setAnimatedMessages] = useState({});
+  const prevStatuses = useRef({});
 
   useEffect(() => {
     if (!activeOrders.length) return;
 
+    // Verificar cambios de estado
+    const newMessages = {};
+    const changedOrders = [];
+
+    activeOrders.forEach(order => {
+      const prevStatus = prevStatuses.current[order.id];
+      if (prevStatus && prevStatus !== order.status) {
+        changedOrders.push(order.id);
+      }
+      prevStatuses.current[order.id] = order.status;
+
+      newMessages[order.id] = getRandomStatusMessage(order.status, order.orderType, order.paymentMethod);
+    });
+
+    if (changedOrders.length > 0) {
+      const sound = activeOrders.some(o => o.status === "lista") ? "alert" : "alert2";
+      audioService.play(sound);
+    }
+
+    // Actualiza estados
     const updateMessages = () => {
       const newMessages = {};
       activeOrders.forEach(order => {
@@ -154,14 +178,12 @@ const statusMessages = {
     return () => clearInterval(interval); // limpieza
   }, [activeOrders]);
 
-
   const getRandomStatusMessage = (status, orderType, paymentMethod) => {
     const fallback = statusMessages.default;
     const messages =
       statusMessages?.[status]?.[orderType]?.[paymentMethod] || fallback;
     return messages[Math.floor(Math.random() * messages.length)];
   };
-
 
 
   return (
