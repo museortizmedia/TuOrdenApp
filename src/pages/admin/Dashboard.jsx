@@ -7,11 +7,12 @@ import { LogOutIcon, Menu, X } from "lucide-react";
 import AdminProducts from "./pages/AdminProducts";
 import AdminOrdenes from "./pages/AdminOrdenes";
 import AdminStory from "./pages/AdminStory";
-import CategoryOrderManager from "../../components/CategoryOrderManager";
+import CategoryOrderManager from "./pages/CategoryOrderManager.jsx";
 import supabaseService from "../../servicies/supabaseService.js"
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase/firebase.js";
 import NotificationToggle from "../../components/NotificationToggle.jsx";
+import ToggleSound from "../../components/ToggleSound.jsx";
 
 function Dashboard() {
   const { user, logout } = useAuth();
@@ -109,6 +110,8 @@ function Dashboard() {
           </button>
 
           <NotificationToggle/>
+
+          <ToggleSound/>
 
         </div>
       </header>
