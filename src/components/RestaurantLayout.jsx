@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRestaurant } from "../contexts/RestaurantContext";
-import { ShoppingCartIcon } from "lucide-react";
+import { ConciergeBellIcon, ListOrderedIcon, ShoppingCartIcon } from "lucide-react";
 import CartOverlay from "./CartOverlay";
 import { useAuth } from "../contexts/AuthContext";
 import theme from "../theme";
 import { useCart } from "../contexts/CartContext";
+import ToggleSound from "./ToggleSound";
+import audioService from "../servicies/audio";
 
 export default function RestaurantLayout({ children }) {
   const { restaurant } = useRestaurant();
   const { user } = useAuth();
+  const { activeOrders } = useCart();
   const { justAdded } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -66,20 +69,40 @@ export default function RestaurantLayout({ children }) {
   return (
     <div className={`${theme.colors.background.dark} relative [min-height:100dvh] w-full max-w-[100vw] overflow-x-hidden`}>
       {/* Header */}
-      <header className={`${theme.colors.background.dark} fixed top-0 left-0 right-0 z-50 flex items-center h-20 px-4 sm:px-6 shadow-md`}>
+      <header className={`${theme.colors.background.dark} fixed top-0 left-0 right-0 z-50 flex items-center h-20 px-4 sm:px-6 shadow-md justify-between`}>
         <div className="flex items-center space-x-2" title={restaurant.desc}>
           <img
             src={restaurant.logo}
-            alt={"Logo de "+restaurant.name}
+            alt={"Logo de " + restaurant.name}
             className="w-[32px] h-[32px] object-cover rounded"
           />
           <p className="text-white text-sm sm:text-base">{restaurant.name}</p>
         </div>
+
+        <div
+          className="relative w-6 h-6 sm:w-7 sm:h-7 cursor-pointer"
+          onClick={() => {
+            setIsCartOpen(true);
+            audioService.play("alert");
+          }}
+          title="Rastrear pedidos"
+        >
+          <ConciergeBellIcon className="w-full h-full text-white" />
+
+          {activeOrders.length > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full leading-none">
+              {activeOrders.length}
+            </span>
+          )}
+        </div>
+
       </header>
+
+      <div className="fixed bottom-4 left-4 z-10 flex items-center"><ToggleSound /></div>
 
       {/* Floating cart button (always visible) */}
       <button
-        onClick={() => setIsCartOpen(true)}
+        onClick={() => { setIsCartOpen(true); audioService.play("alert2") }}
         className={`
           fixed bottom-4 right-4 z-50 p-3 sm:p-4 rounded-full shadow-lg 
           bg-yellow-400 hover:bg-yellow-500 text-black
