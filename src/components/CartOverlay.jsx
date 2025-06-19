@@ -320,44 +320,87 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
                   {/* Contenido */}
                   <div className="flex flex-col justify-between flex-1 min-w-0">
                     {/* Nombre y Descripción */}
-                    <div className="mb-1">
+                    <div className="flex justify-between items-start mb-1">
                       <h3 className="font-bold text-sm line-clamp-1">{item.name}</h3>
-                      <p className="text-xs text-gray-600 line-clamp-2 overflow-y-auto noscrollbar-x">{item.desc}</p>
+                      <button
+                        onClick={() => {
+                          removeFromCart(item.id);
+                          audioService.play("autoInteract");
+                        }}
+                        className="text-red-500 hover:text-red-600 hover:scale-105"
+                        title="Eliminar"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
+                    <p className="text-xs text-gray-600 line-clamp-2 overflow-y-auto noscrollbar-x">{item.desc}</p>
+
 
                     {/* Controles e información */}
                     <div className="flex justify-between items-center mt-1 flex-wrap gap-2">
                       <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min="1"
-                          value={inputQuantities[item.id] ?? item.quantity}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            setInputQuantities((prev) => ({ ...prev, [item.id]: value }));
-                          }}
-                          onBlur={() => {
-                            const raw = inputQuantities[item.id];
-                            const num = Number(raw);
-                            if (raw === "0") return removeFromCart(item.id);
-                            if (!raw || isNaN(num) || num <= 0) {
-                              setInputQuantities((prev) => ({ ...prev, [item.id]: "1" }));
-                              return updateQuantity(item.id, 1);
-                            }
-                            updateQuantity(item.id, num);
-                          }}
-                          className="w-14 border rounded text-center text-sm"
-                        />
 
-                        <button
-                          onClick={() => {
-                            removeFromCart(item.id);
-                            audioService.play("autoInteract")
-                          }}
-                          className="text-red-500 hover:text-red-600 hover:scale-105"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+
+
+
+                        {/* Input numérico central */}
+                        <div className="flex border rounded overflow-hidden w-14">
+                          <button
+                            onClick={() => {
+                              const current = Number(inputQuantities[item.id] ?? item.quantity);
+                              const newQty = current - 1;
+                              if (newQty <= 0) {
+                                removeFromCart(item.id);
+                                audioService.play("autoInteract");
+                              } else {
+                                setInputQuantities((prev) => ({ ...prev, [item.id]: String(newQty) }));
+                                updateQuantity(item.id, newQty);
+                                audioService.play("manualInteract");
+                              }
+                            }}
+                            className=" w-3.5 text-sm text-gray-700 hover:text-black"
+                          >
+                            –
+                          </button>
+
+                          <input
+                            type="number"
+                            min="1"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={inputQuantities[item.id] ?? item.quantity}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setInputQuantities((prev) => ({ ...prev, [item.id]: value }));
+                            }}
+                            onBlur={() => {
+                              const raw = inputQuantities[item.id];
+                              const num = Number(raw);
+                              if (raw === "0") return removeFromCart(item.id);
+                              if (!raw || isNaN(num) || num <= 0) {
+                                setInputQuantities((prev) => ({ ...prev, [item.id]: "1" }));
+                                return updateQuantity(item.id, 1);
+                              }
+                              updateQuantity(item.id, num);
+                            }}
+                            className="w-5 text-center text-sm border-0 focus:outline-none"
+                          />
+
+                          <button
+                            onClick={() => {
+                              const current = Number(inputQuantities[item.id] ?? item.quantity);
+                              const newQty = current + 1;
+                              setInputQuantities((prev) => ({ ...prev, [item.id]: String(newQty) }));
+                              updateQuantity(item.id, newQty);
+                              audioService.play("manualInteract");
+                            }}
+                            className="w-3.5 text-sm text-gray-700 hover:text-black"
+                          >
+                            +
+                          </button>
+                        </div>
+
+
                       </div>
 
                       {/* Precio */}
@@ -480,11 +523,11 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
 
         {/* Seguimiento */}
         <div className={`${firstActiveOrders ? "order-1" : "order-2"}`}>
-            <>
-              <h3 className={`text-xl font-bold text-gray-800 ${firstActiveOrders ? "my-5" : "mt-20"}`}>Órdenes en seguimiento</h3>
-              <div className="mb-6"><MyOrders /></div>
-              <button className="w-full text-sm text-gray-500 underline cursor-pointer" onClick={() => { clearActiveOrders(); audioService.play("autoInteract"); }}>Quitar todas las órdenes en seguimiento</button>
-            </>
+          <>
+            <h3 className={`text-xl font-bold text-gray-800 ${firstActiveOrders ? "my-5" : "mt-20"}`}>Órdenes en seguimiento</h3>
+            <div className="mb-6"><MyOrders /></div>
+            <button className="w-full text-sm text-gray-500 underline cursor-pointer" onClick={() => { clearActiveOrders(); audioService.play("autoInteract"); }}>Quitar todas las órdenes en seguimiento</button>
+          </>
 
           <div className={`mt-10 pt-6 mb-10 pb-10 border-t border-gray-200`}>
             <span className="text-sm text-gray-600 mb-1 block">¿Tienes el número de una orden?</span>
