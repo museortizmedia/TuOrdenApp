@@ -100,6 +100,19 @@ Permite a restaurantes gestionar sus órdenes, gestionar la carta, y a los usuar
 ├── firebase-config.js      # (solo si decides no usar un wrapper)
 └── README.md
 
+# AUDIOS
+## Panel admin
+- al recibir un pedido (notificacion) x
+- cambiar a listo (dindang) alert x
+## Carta y carrito
+- añadir un producto (pop) autointeract x
+- Enviar pedido (chime) positive x
+- Error en el formulario (pitido) negative x
+## Rastreador
+- Cambio de estado (pap) manualinteract
+
+
+
 
 # Verificar prerender
 https://metatags.io/
