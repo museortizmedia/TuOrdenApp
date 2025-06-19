@@ -7,6 +7,7 @@ export default function AdminStory() {
   const { restaurant } = useRestaurant();
   const [groupedOrders, setGroupedOrders] = useState({});
 
+  const [allOrders, setAllOrders] = useState([]);
   useEffect(() => {
     if (!restaurant?.id) return;
 
@@ -16,10 +17,13 @@ export default function AdminStory() {
       restaurant.id,
       `historial/${year}/ordenes`,
       (orders) => {
+
         const parsed = orders.map(order => ({
           ...order,
           createdAt: order.createdAt?.toDate?.() || new Date(0),
         }));
+
+        setAllOrders(parsed);
 
         const grouped = {};
         for (const order of parsed) {
@@ -68,6 +72,7 @@ export default function AdminStory() {
     clienteEstrella: { telefono: '', cantidad: 0, nombre: '' }
   });
 
+  const [sampleDates, setSampleDates] = useState({});
   useEffect(() => {
     if (!restaurant?.id) return;
 
@@ -82,15 +87,26 @@ export default function AdminStory() {
           createdAt: order.createdAt?.toDate?.() || new Date(0),
         }));
 
-        // Agrupar por fecha
+        setAllOrders(parsed); // Guarda todas las órdenes sin filtrar
+
+        // ✅ Agrupar por fecha local (Bogotá)
         const grouped = {};
+        const sampleDateForGroup = {}; // ← para encabezado visual correcto
+
         for (const order of parsed) {
-          const dateKey = order.createdAt.toISOString().split('T')[0];
-          if (!grouped[dateKey]) grouped[dateKey] = [];
+          const dateKey = order.createdAt.toLocaleDateString('sv-SE', {
+            timeZone: 'America/Bogota',
+          }); // → 'YYYY-MM-DD'
+
+          if (!grouped[dateKey]) {
+            grouped[dateKey] = [];
+            sampleDateForGroup[dateKey] = order.createdAt; // guarda muestra real
+          }
+
           grouped[dateKey].push(order);
         }
 
-        // Ordenar por fecha
+        // ✅ Ordenar por fecha descendente
         const sortedKeys = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
         const sortedGrouped = {};
         for (const key of sortedKeys) {
@@ -98,78 +114,11 @@ export default function AdminStory() {
         }
 
         setGroupedOrders(sortedGrouped);
+        setSampleDates(sampleDateForGroup); // ← nuevo estado para mostrar días bien
+        setCollapsedDates(Object.fromEntries(sortedKeys.map(key => [key, true])));
 
         // 📊 Estadísticas
-        const totalOrdenes = parsed.length;
-        const totalVentas = parsed.reduce((sum, o) => sum + (o.total || 0), 0);
-        const ticketPromedio = totalOrdenes ? Math.round(totalVentas / totalOrdenes) : 0;
-
-        const porMetodoPago = {};
-        const porTipoOrden = { Domicilio: 0, Recoger: 0 };
-        let totalDomicilio = 0;
-        let countDomicilio = 0;
-        let taxTotal = 0;
-
-        const productoCount = {};
-        const clienteCount = {};
-        const clienteNombres = {};
-
-        for (const o of parsed) {
-          // Métodos de pago
-          porMetodoPago[o.paymentMethod] = (porMetodoPago[o.paymentMethod] || 0) + (o.total || 0);
-
-          // Tipo de orden
-          porTipoOrden[o.orderType] = (porTipoOrden[o.orderType] || 0) + 1;
-
-          // Ticket promedio domicilio
-          if (o.orderType === "Domicilio") {
-            totalDomicilio += o.total || 0;
-            countDomicilio += 1;
-          }
-
-          // Total impuestos
-          taxTotal += o.tax || 0;
-
-          // Productos más pedidos
-          for (const item of o.items || []) {
-            productoCount[item.name] = (productoCount[item.name] || 0) + item.quantity;
-          }
-
-          // Cliente estrella
-          if (o.phoneNumber) {
-            clienteCount[o.phoneNumber] = (clienteCount[o.phoneNumber] || 0) + 1;
-          }
-
-          if (!clienteNombres[o.phoneNumber]) {
-            clienteNombres[o.phoneNumber] = o.buyerName;
-          }
-
-          if (!clienteNombres[o.phoneNumber]) {
-            clienteNombres[o.phoneNumber] = o.buyerName;
-          }
-        }
-
-
-        const topProductos = Object.entries(productoCount)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5);
-
-        const [topClienteTel, topClienteCount] = Object.entries(clienteCount)
-          .sort((a, b) => b[1] - a[1])[0] || ["", 0];
-
-        const topClienteName = clienteNombres[topClienteTel] || "";
-
-        setStats({
-          totalVentas,
-          totalOrdenes,
-          ticketPromedio,
-          porMetodoPago,
-          porTipoOrden,
-          ticketPromedioDomicilio: countDomicilio ? Math.round(totalDomicilio / countDomicilio) : 0,
-          taxTotal,
-          topProductos,
-          clienteEstrella: { telefono: topClienteTel, cantidad: topClienteCount, nombre: topClienteName }
-        });
+        calcularEstadisticas(parsed);
       }
     );
 
@@ -177,8 +126,196 @@ export default function AdminStory() {
   }, [restaurant?.id]);
 
 
+
+  const calcularEstadisticas = (orders) => {
+    const totalOrdenes = orders.length;
+    const totalVentas = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+    const ticketPromedio = totalOrdenes ? Math.round(totalVentas / totalOrdenes) : 0;
+
+    const porMetodoPago = {};
+    const porTipoOrden = { Domicilio: 0, Recoger: 0 };
+    let totalDeliveryFee = 0;
+    let taxTotal = 0;
+
+    const productoCount = {};
+    const clienteCount = {};
+    const clienteNombres = {};
+
+    for (const o of orders) {
+      porMetodoPago[o.paymentMethod] = (porMetodoPago[o.paymentMethod] || 0) + (o.total || 0);
+      porTipoOrden[o.orderType] = (porTipoOrden[o.orderType] || 0) + 1;
+
+      if (o.orderType === "Domicilio") {
+        totalDeliveryFee += o.deliveryFee || 0;
+      }
+
+      taxTotal += o.tax || 0;
+
+      for (const item of o.items || []) {
+        productoCount[item.name] = (productoCount[item.name] || 0) + item.quantity;
+      }
+
+      if (o.phoneNumber) {
+        clienteCount[o.phoneNumber] = (clienteCount[o.phoneNumber] || 0) + 1;
+      }
+
+      if (!clienteNombres[o.phoneNumber]) {
+        clienteNombres[o.phoneNumber] = o.buyerName;
+      }
+    }
+
+    const topProductos = Object.entries(productoCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    const [topClienteTel, topClienteCount] = Object.entries(clienteCount)
+      .sort((a, b) => b[1] - a[1])[0] || ["", 0];
+
+    const topClienteName = clienteNombres[topClienteTel] || "";
+
+    setStats({
+      totalVentas,
+      totalOrdenes,
+      ticketPromedio,
+      porMetodoPago,
+      porTipoOrden,
+      ticketPromedioDomicilio: totalDeliveryFee,
+      taxTotal,
+      topProductos,
+      clienteEstrella: {
+        telefono: topClienteTel,
+        cantidad: topClienteCount,
+        nombre: topClienteName
+      }
+    });
+  };
+
+  //Filtros
+  const [filters, setFilters] = useState({
+    fechaDesde: null,
+    fechaHasta: null,
+    diasSemana: [],      // ej: ['lunes', 'martes']
+    sedes: [],            // ej: ['Sede Norte', 'Sede Sur']
+  });
+
+  const diasSemana = [
+    { valor: "lunes", etiqueta: "Lunes" },
+    { valor: "martes", etiqueta: "Martes" },
+    { valor: "miercoles", etiqueta: "Miércoles" },
+    { valor: "jueves", etiqueta: "Jueves" },
+    { valor: "viernes", etiqueta: "Viernes" },
+    { valor: "sabado", etiqueta: "Sábado" },
+    { valor: "domingo", etiqueta: "Domingo" },
+  ];
+
+  useEffect(() => {
+    if (!allOrders.length) return;
+
+    const filtradas = allOrders.filter((order) => {
+      const fecha = order.createdAt;
+
+      const diaSemana = order.createdAt
+        .toLocaleDateString('es-CL', {
+          weekday: 'long',
+          timeZone: 'America/Bogota',
+        })
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+
+      const cumpleFecha =
+        (!filters.fechaDesde || fecha >= filters.fechaDesde) &&
+        (!filters.fechaHasta || fecha <= filters.fechaHasta);
+
+      const cumpleDia =
+        filters.diasSemana.length === 0 || filters.diasSemana.includes(diaSemana);
+
+      const cumpleSede =
+        filters.sedes.length === 0 || filters.sedes.includes(order.sede); // ← debes tener campo sede
+
+      return cumpleFecha && cumpleDia && cumpleSede;
+    });
+
+    // Agrupar y actualizar estado como antes
+    const grouped = {};
+    for (const order of filtradas) {
+      const dateKey = order.createdAt.toISOString().split('T')[0];
+      if (!grouped[dateKey]) grouped[dateKey] = [];
+      grouped[dateKey].push(order);
+    }
+
+    const sortedKeys = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
+    const sortedGrouped = {};
+    for (const key of sortedKeys) {
+      sortedGrouped[key] = grouped[key].sort((a, b) => b.createdAt - a.createdAt);
+    }
+
+    setGroupedOrders(sortedGrouped);
+    setCollapsedDates(Object.fromEntries(sortedKeys.map(key => [key, true])));
+
+    // Calcula estadísticas también con las filtradas
+    calcularEstadisticas(filtradas);
+
+  }, [filters, allOrders]);
+
+
+
   return (
     <div className="p-6 text-white space-y-8 max-w-screen-2xl mx-auto">
+
+      {/* FILTROS */}
+      <div className="bg-[#1a1a1a] p-4 rounded-xl mb-6 grid gap-4 text-white"
+     style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+        <div>
+        <div>
+          <label className="block text-sm text-gray-400">Desde</label>
+          <input type="date" className="bg-[#0f0f0f] p-2 rounded-lg w-full" onChange={(e) =>
+            setFilters(prev => ({ ...prev, fechaDesde: e.target.value ? new Date(e.target.value) : null }))
+          } />
+        </div>
+        <div>
+          <label className="block text-sm text-gray-400">{"Hasta (excluyente)"}</label>
+          <input type="date" className="bg-[#0f0f0f] p-2 rounded-lg w-full" onChange={(e) =>
+            setFilters(prev => ({ ...prev, fechaHasta: e.target.value ? new Date(e.target.value) : null }))
+          } />
+        </div>
+        </div>
+
+        <div>
+          <label className="block text-sm text-gray-400">Días</label>
+          <select
+            multiple
+            className="bg-[#0f0f0f] p-2 rounded-s-lg w-full"
+            onChange={(e) => {
+              const selected = Array.from(e.target.selectedOptions).map(o => o.value);
+
+              // Si seleccionan "todos", se limpian los filtros de día
+              if (selected.includes("todos")) {
+                setFilters(prev => ({ ...prev, diasSemana: [] }));
+              } else {
+                setFilters(prev => ({ ...prev, diasSemana: selected }));
+              }
+            }}
+          >
+            <option value="todos">Todos</option>
+            {diasSemana.map(dia => (
+              <option key={dia.valor} value={dia.valor}>{dia.etiqueta}</option>
+            ))}
+          </select>
+        </div>
+
+        {/*<div>
+          <label className="block text-sm text-gray-400">Sedes</label>
+          <select multiple className="bg-[#0f0f0f] p-2 rounded w-full" onChange={(e) => {
+            const selected = Array.from(e.target.selectedOptions).map(o => o.value);
+            setFilters(prev => ({ ...prev, sedes: selected }));
+          }}>
+            //Aquí puedes mapear dinámicamente si tienes una lista de sedes
+            <option value="Sede Norte">Sede Norte</option>
+            <option value="Sede Sur">Sede Sur</option>
+          </select>
+        </div>*/}
+      </div>
+
 
       {/* 📊 Panel de estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-10 text-white">
@@ -204,9 +341,9 @@ export default function AdminStory() {
           </div>
         </div>
 
-        {/* 🎟️ Tickets */}
+        {/* 🎟️ Venta */}
         <div className="bg-[#1f1f1f] p-5 rounded-xl shadow border border-yellow-500">
-          <p className="text-sm text-gray-400 mb-1">Ticket promedio</p>
+          <p className="text-sm text-gray-400 mb-1">Valor Promedio</p>
           <p className="text-2xl font-bold text-yellow-300">${stats.ticketPromedio.toLocaleString("es-CL")}</p>
           <div className="text-xs text-gray-400 mt-2 space-y-1">
             <p>Domicilio: <span className="text-white">${stats.ticketPromedioDomicilio.toLocaleString("es-CL")}</span></p>
@@ -241,7 +378,13 @@ export default function AdminStory() {
         <div key={date} className='bg-[#0f0f0f] p-1 rounded-2xl'>
           <h2 onClick={() => toggleCollapse(date)} className={`text-2xl font-semibold sticky top-0  py-2 px-4 z-10 mb-4 ${collapsedDates[date] ? '' : 'bg-[#0f0f0f] border-b border-gray-700'} `}>
             <ChevronDown className={`mr-2 inline transition-transform ${collapsedDates[date] ? 'rotate-180' : ''}`} />
-            {new Date(date).toLocaleDateString("es-CL", { weekday: 'long', day: 'numeric', month: 'long' })}
+            {sampleDates[date]?.toLocaleDateString("es-CL", {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long',
+              timeZone: 'America/Bogota',
+            })}
+
           </h2>
 
           {!collapsedDates[date] && (
@@ -290,6 +433,13 @@ export default function AdminStory() {
                       <li className="italic text-gray-500">Sin productos registrados</li>
                     )}
                   </ul>
+
+
+                  {order.deliveryFee && <div className="mt-4 text-sm font-semibold text-yellow-100 flex justify-between">
+                    <span>Domicilio:</span>
+                    <span>${order.deliveryFee?.toLocaleString("es-CL") || '0'}</span>
+                  </div>
+                  }
 
                   <div className="mt-4 pt-2 border-t border-gray-700 text-sm font-semibold text-yellow-400 flex justify-between">
                     <span>Total:</span>
