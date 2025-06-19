@@ -33,9 +33,6 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
   const [inputQuantities, setInputQuantities] = useState({});
   const [showTransferModal, setShowTransferModal] = useState(false);
 
-  const touchStartX = useRef(null);
-  const touchEndX = useRef(null);
-
   const neighborhoodOptions = {
     "Zona Urbana Jamundí": 5000,
     "Conjunto Cerrado - Zona Urbana Jamundí": 6000,
@@ -203,7 +200,10 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
     fetchSedes();
   }, [restaurant]);
 
-  // Gestos
+  // Gestos CIERRE
+  const touchStartX = useRef(null);
+  const touchEndX = useRef(null);
+
   useEffect(() => {
     setTimeout(() => setIsVisible(true), 10);
     document.body.style.overflow = "hidden";

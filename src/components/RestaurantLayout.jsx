@@ -16,20 +16,29 @@ export default function RestaurantLayout({ children }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isActiveOrderFirst, setIsActiveOrderFirst] = useState(false);
 
+  // Gestos APERTURA
   const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
   const touchEndX = useRef(null);
 
   useEffect(() => {
     const handleTouchStart = (e) => {
-      touchStartX.current = e.changedTouches[0].clientX;
+      const touch = e.changedTouches[0];
+      touchStartX.current = touch.clientX;
+      touchStartY.current = touch.clientY;
     };
 
     const handleTouchEnd = (e) => {
-      touchEndX.current = e.changedTouches[0].clientX;
+      const touch = e.changedTouches[0];
+      touchEndX.current = touch.clientX;
+
       const deltaX = touchStartX.current - touchEndX.current;
+      const startedNearRightEdge = touchStartX.current > window.innerWidth - 50;
+      const startedInBottomHalf = touchStartY.current > window.innerHeight / 2;
 
       if (
-        touchStartX.current > window.innerWidth - 50 &&
+        startedNearRightEdge &&
+        startedInBottomHalf &&
         deltaX > 50 &&
         !isCartOpen
       ) {
