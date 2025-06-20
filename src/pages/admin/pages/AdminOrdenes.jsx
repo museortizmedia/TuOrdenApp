@@ -309,13 +309,13 @@ export default function AdminOrdenes() {
         const esDomicilio = order.orderType === "Domicilio";
         const esRecoger = order.orderType === "Recoger";
 
-        let texto = `🧾 ORDEN #${order.id}\n`;
+        let texto = `🧾 ORDEN #${order.id} - ${fecha}\n`;
         texto += `👤 Cliente: ${order.buyerName}\n`;
-        texto += `📅 Fecha: ${fecha}\n`;
+        //texto += `📅 Fecha: ${fecha}\n`;
         texto += `📱 Teléfono: ${order.phoneNumber}\n`;
-        texto += `📦 Tipo: ${order.orderType || 'No especificado'}\n`;
+        //texto += `📦 Tipo: ${order.orderType || 'No especificado'}\n`;
         texto += `💳 Método de pago: ${order.paymentMethod || 'No especificado'}\n`;
-        texto += `💵 Estado: ${order.status}\n\n`;
+        //texto += `💵 Estado: ${order.status}\n\n`;
 
         if (esDomicilio) {
             texto += `🏠 Dirección: ${order.address}, ${order.neighborhood}\n`;
@@ -323,21 +323,21 @@ export default function AdminOrdenes() {
 
         if (esRecoger && order.sede) {
             const [nombre, ciudad, referencia] = order.sede.split("-");
-            texto += `🏢 Sede: ${nombre}\n📍 Ciudad: ${ciudad}\n📌 Referencia: ${referencia}\n`;
+            texto += `🏠 Sede: ${nombre} ${ciudad} ${referencia}\n`;
         }
 
-        if (order.observaciones) {
+        /*if (order.observaciones) {
             texto += `📝 Observaciones:\n${order.observaciones}\n\n`;
-        }
+        }*/
 
         texto += `🛒 Items:\n`;
         order.items?.forEach(item => {
             texto += ` - ${item.quantity || 1}x ${item.name} ($${item.price?.toLocaleString("es-CL") || "0"})\n`;
         });
 
-        texto += `\n💰 Subtotal: $${order.subtotal?.toLocaleString("es-CL") || "0"}`;
-        texto += `\n🚚 Domicilio: $${order.deliveryFee?.toLocaleString("es-CL") || "0"}`;
-        texto += `\n🧾 IVA: $${order.tax?.toLocaleString("es-CL") || "0"}`;
+        //texto += `\n💰 Subtotal: $${order.subtotal?.toLocaleString("es-CL") || "0"}`;
+        //texto += `\n🚚 Domicilio: $${order.deliveryFee?.toLocaleString("es-CL") || "0"}`;
+        //texto += `\n🧾 IVA: $${order.tax?.toLocaleString("es-CL") || "0"}`;
         texto += `\n🔸 Total: $${order.total?.toLocaleString("es-CL") || "0"}\n`;
 
         navigator.clipboard.writeText(texto)
