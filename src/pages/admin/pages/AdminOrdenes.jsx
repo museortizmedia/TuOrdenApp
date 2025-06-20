@@ -173,7 +173,7 @@ export default function AdminOrdenes() {
         const fecha = order.createdAt?.toDate?.().toLocaleString?.() || new Date().toLocaleString();
         const itemsHtml = order.items?.map(item => `
         <tr>
-            <td>1x</td>
+            <td>${item.quantity}x</td>
             <td>${item.name || 'Producto'}</td>
             <td style="text-align:right;">$${(item.price || 0).toLocaleString("es-CL")}</td>
         </tr>
