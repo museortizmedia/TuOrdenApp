@@ -453,7 +453,7 @@ export default function AdminStory() {
               👑 Cliente estrella:<br />
               <a href={`https://wa.me/57${stats.clienteEstrella.telefono}`} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">
                 {stats.clienteEstrella.nombre}
-              </a> ({stats.clienteEstrella.cantidad} pedidos)
+              </a> ({stats.clienteEstrella.cantidad == "1"? stats.clienteEstrella.cantidad + " pedido": stats.clienteEstrella.cantidad + " pedidos"}{": $"+stats.clienteEstrella.gastoTotal.toLocaleString("es-CL")})
             </p>
           )}
         </div>
