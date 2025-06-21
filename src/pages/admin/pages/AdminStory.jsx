@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useRestaurant } from '../../../contexts/RestaurantContext.jsx';
 import firestoreService from '../../../servicies/firestoreService.js';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, MoreVertical, RotateCcw, Trash2Icon, TrashIcon, Undo, Undo2Icon } from 'lucide-react';
+import MenuOpciones from '../../../components/MenuOpciones.jsx';
+import toast from 'react-hot-toast';
 
 export default function AdminStory() {
   const { restaurant } = useRestaurant();
@@ -128,8 +130,10 @@ export default function AdminStory() {
 
 
   const calcularEstadisticas = (orders) => {
-    const totalOrdenes = orders.length;
-    const totalVentas = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+    const ordenesValidas = orders.filter(o => !o.softdelete); // Filtrar órdenes con softdelete === true
+
+    const totalOrdenes = ordenesValidas.length;
+    const totalVentas = ordenesValidas.reduce((sum, o) => sum + (o.total || 0), 0);
     const ticketPromedio = totalOrdenes ? Math.round(totalVentas / totalOrdenes) : 0;
 
     const porMetodoPago = {};
@@ -141,7 +145,7 @@ export default function AdminStory() {
     const clienteCount = {};
     const clienteNombres = {};
 
-    for (const o of orders) {
+    for (const o of ordenesValidas) {
       porMetodoPago[o.paymentMethod] = (porMetodoPago[o.paymentMethod] || 0) + (o.total || 0);
       porTipoOrden[o.orderType] = (porTipoOrden[o.orderType] || 0) + 1;
 
@@ -189,6 +193,7 @@ export default function AdminStory() {
       }
     });
   };
+
 
   //Filtros
   const [filters, setFilters] = useState({
@@ -257,15 +262,96 @@ export default function AdminStory() {
 
   }, [filters, allOrders]);
 
+  // Eliminar orden
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [inputClave, setInputClave] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
+  const openModal = (order) => {
+    setSelectedOrder(order);
+    setInputClave("");
+    setShowPasswordModal(true);
+  };
 
-  return (
-    <div className="p-6 text-white space-y-8 max-w-screen-2xl mx-auto">
+  const closeModal = () => {
+    setShowPasswordModal(false);
+    setSelectedOrder(null);
+    setInputClave("");
+  };
 
-      {/* FILTROS */}
-      <div className="bg-[#1a1a1a] p-4 rounded-xl mb-6 grid gap-4 text-white"
-     style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
-        <div>
+  const confirmarAccion = async () => {
+    if (!selectedOrder) return;
+
+    const esRestauracion = selectedOrder.softdelete === true;
+    const claveCorrecta = inputClave?.toString() === restaurant.deletePSW?.toString();
+
+    if (!claveCorrecta) {
+      toast.error("Contraseña incorrecta");
+      closeModal();
+      return;
+    }
+
+    const newState = !esRestauracion;
+    const añoActual = new Date().getFullYear();
+
+    try {
+      await firestoreService.update(
+        `restaurants/${restaurant.id}/historial/${añoActual}/ordenes`,
+        selectedOrder.id,
+        { softdelete: newState }
+      );
+
+      toast.success(`Orden ${newState ? "eliminada" : "restaurada"}`);
+    } catch (error) {
+      console.error("Error al actualizar softdelete:", error);
+      toast.error("No se pudo actualizar la orden");
+    } finally {
+      closeModal();
+    }
+  };
+
+return (
+  <div className="p-6 text-white space-y-8 max-w-screen-2xl mx-auto">
+
+    {/* Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={closeModal}>
+          <div className="bg-[#111] text-white rounded-xl p-6 shadow-lg w-[90%] max-w-sm" onClick={(e) => {e.stopPropagation();}}>
+            <h2 className="text-lg font-semibold mb-4">
+              Clave de {selectedOrder?.softdelete === true ? "restauración" : "eliminación"}
+            </h2>
+
+            <input
+              type="password"
+              placeholder="Contraseña"
+              value={inputClave}
+              onChange={(e) => setInputClave(e.target.value)}
+              className="w-full border px-3 py-2 rounded mb-4"
+              autoComplete='off'
+            />
+
+            <div className="flex justify-between gap-2">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarAccion}
+                className="px-4 py-2 bg-yellow-500 hover:bg-yellow-300 text-gray-950 hover:scale-105 cursor-pointer font-semibold rounded"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    {/* FILTROS */}
+    <div className="bg-[#1a1a1a] p-4 rounded-xl mb-6 grid gap-4 text-white"
+      style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+      <div>
         <div>
           <label className="block text-sm text-gray-400">Desde</label>
           <input type="date" className="bg-[#0f0f0f] p-2 rounded-lg w-full" onChange={(e) =>
@@ -278,32 +364,32 @@ export default function AdminStory() {
             setFilters(prev => ({ ...prev, fechaHasta: e.target.value ? new Date(e.target.value) : null }))
           } />
         </div>
-        </div>
+      </div>
 
-        <div>
-          <label className="block text-sm text-gray-400">Días</label>
-          <select
-            multiple
-            className="bg-[#0f0f0f] p-2 rounded-s-lg w-full"
-            onChange={(e) => {
-              const selected = Array.from(e.target.selectedOptions).map(o => o.value);
+      <div>
+        <label className="block text-sm text-gray-400">Días</label>
+        <select
+          multiple
+          className="bg-[#0f0f0f] p-2 rounded-s-lg w-full"
+          onChange={(e) => {
+            const selected = Array.from(e.target.selectedOptions).map(o => o.value);
 
-              // Si seleccionan "todos", se limpian los filtros de día
-              if (selected.includes("todos")) {
-                setFilters(prev => ({ ...prev, diasSemana: [] }));
-              } else {
-                setFilters(prev => ({ ...prev, diasSemana: selected }));
-              }
-            }}
-          >
-            <option value="todos">Todos</option>
-            {diasSemana.map(dia => (
-              <option key={dia.valor} value={dia.valor}>{dia.etiqueta}</option>
-            ))}
-          </select>
-        </div>
+            // Si seleccionan "todos", se limpian los filtros de día
+            if (selected.includes("todos")) {
+              setFilters(prev => ({ ...prev, diasSemana: [] }));
+            } else {
+              setFilters(prev => ({ ...prev, diasSemana: selected }));
+            }
+          }}
+        >
+          <option value="todos">Todos</option>
+          {diasSemana.map(dia => (
+            <option key={dia.valor} value={dia.valor}>{dia.etiqueta}</option>
+          ))}
+        </select>
+      </div>
 
-        {/*<div>
+      {/*<div>
           <label className="block text-sm text-gray-400">Sedes</label>
           <select multiple className="bg-[#0f0f0f] p-2 rounded w-full" onChange={(e) => {
             const selected = Array.from(e.target.selectedOptions).map(o => o.value);
@@ -314,96 +400,107 @@ export default function AdminStory() {
             <option value="Sede Sur">Sede Sur</option>
           </select>
         </div>*/}
-      </div>
+    </div>
 
 
-      {/* 📊 Panel de estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-10 text-white">
+    {/* 📊 Panel de estadísticas */}
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-10 text-white">
 
-        {/* 💵 Totales */}
-        <div className="bg-[#1f1f1f] p-5 rounded-xl shadow border border-yellow-500">
-          <p className="text-sm text-gray-400 mb-1">Total vendido</p>
-          <p className="text-2xl font-bold text-yellow-300">${stats.totalVentas.toLocaleString("es-CL")}</p>
-          <div className="text-xs text-gray-400 mt-2 space-y-1">
-            {Object.entries(stats.porMetodoPago).map(([metodo, monto]) => (
-              <p key={metodo}>{metodo}: <span className="text-white">${monto.toLocaleString("es-CL")}</span></p>
-            ))}
-          </div>
-        </div>
-
-        {/* 📦 Órdenes */}
-        <div className="bg-[#1f1f1f] p-5 rounded-xl shadow border border-yellow-500">
-          <p className="text-sm text-gray-400 mb-1">Órdenes registradas</p>
-          <p className="text-2xl font-bold text-yellow-300">{stats.totalOrdenes}</p>
-          <div className="text-xs text-gray-400 mt-2 space-y-1">
-            <p>Domicilio: <span className="text-white">{stats.porTipoOrden.Domicilio || 0}</span></p>
-            <p>Recoger: <span className="text-white">{stats.porTipoOrden.Recoger || 0}</span></p>
-          </div>
-        </div>
-
-        {/* 🎟️ Venta */}
-        <div className="bg-[#1f1f1f] p-5 rounded-xl shadow border border-yellow-500">
-          <p className="text-sm text-gray-400 mb-1">Valor Promedio</p>
-          <p className="text-2xl font-bold text-yellow-300">${stats.ticketPromedio.toLocaleString("es-CL")}</p>
-          <div className="text-xs text-gray-400 mt-2 space-y-1">
-            <p>Domicilio: <span className="text-white">${stats.ticketPromedioDomicilio.toLocaleString("es-CL")}</span></p>
-            <p>IVA total: <span className="text-white">${stats.taxTotal.toLocaleString("es-CL")}</span></p>
-          </div>
-        </div>
-
-        {/* 🏆 Productos y cliente */}
-        <div className="bg-[#1f1f1f] p-5 rounded-xl shadow border border-yellow-500">
-          <p className="text-sm text-gray-400 mb-1">Top productos</p>
-          <ul className="text-xs text-white space-y-1">
-            {stats.topProductos.map(([producto, cantidad], index) => (
-              <li key={producto}> <span className='font-black'>{index + 1}.</span> {producto} ({cantidad})</li>
-            ))}
-          </ul>
-          {stats.clienteEstrella.telefono && (
-            <p className="mt-3 text-xs text-gray-400">
-              👑 Cliente estrella:<br />
-              <a href={`https://wa.me/57${stats.clienteEstrella.telefono}`} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">
-                {stats.clienteEstrella.nombre}
-              </a> ({stats.clienteEstrella.cantidad} pedidos)
-            </p>
-          )}
+      {/* 💵 Totales */}
+      <div className="bg-[#1f1f1f] p-5 rounded-xl shadow border border-yellow-500">
+        <p className="text-sm text-gray-400 mb-1">Total vendido</p>
+        <p className="text-2xl font-bold text-yellow-300">${stats.totalVentas.toLocaleString("es-CL")}</p>
+        <div className="text-xs text-gray-400 mt-2 space-y-1">
+          {Object.entries(stats.porMetodoPago).map(([metodo, monto]) => (
+            <p key={metodo}>{metodo}: <span className="text-white">${monto.toLocaleString("es-CL")}</span></p>
+          ))}
         </div>
       </div>
 
+      {/* 📦 Órdenes */}
+      <div className="bg-[#1f1f1f] p-5 rounded-xl shadow border border-yellow-500">
+        <p className="text-sm text-gray-400 mb-1">Órdenes registradas</p>
+        <p className="text-2xl font-bold text-yellow-300">{stats.totalOrdenes}</p>
+        <div className="text-xs text-gray-400 mt-2 space-y-1">
+          <p>Domicilio: <span className="text-white">{stats.porTipoOrden.Domicilio || 0}</span></p>
+          <p>Recoger: <span className="text-white">{stats.porTipoOrden.Recoger || 0}</span></p>
+        </div>
+      </div>
 
-      {/* Historial */}
-      <h1 className="text-3xl font-bold mb-8 text-center">Historial de Órdenes</h1>
+      {/* 🎟️ Venta */}
+      <div className="bg-[#1f1f1f] p-5 rounded-xl shadow border border-yellow-500">
+        <p className="text-sm text-gray-400 mb-1">Valor Promedio</p>
+        <p className="text-2xl font-bold text-yellow-300">${stats.ticketPromedio.toLocaleString("es-CL")}</p>
+        <div className="text-xs text-gray-400 mt-2 space-y-1">
+          <p>Domicilio: <span className="text-white">${stats.ticketPromedioDomicilio.toLocaleString("es-CL")}</span></p>
+          <p>IVA total: <span className="text-white">${stats.taxTotal.toLocaleString("es-CL")}</span></p>
+        </div>
+      </div>
 
-      {Object.entries(groupedOrders).map(([date, orders]) => (
-        <div key={date} className='bg-[#0f0f0f] p-1 rounded-2xl'>
-          <h2 onClick={() => toggleCollapse(date)} className={`text-2xl font-semibold sticky top-0  py-2 px-4 z-10 mb-4 ${collapsedDates[date] ? '' : 'bg-[#0f0f0f] border-b border-gray-700'} `}>
-            <ChevronDown className={`mr-2 inline transition-transform ${collapsedDates[date] ? 'rotate-180' : ''}`} />
-            {sampleDates[date]?.toLocaleDateString("es-CL", {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long',
-              timeZone: 'America/Bogota',
-            })}
+      {/* 🏆 Productos y cliente */}
+      <div className="bg-[#1f1f1f] p-5 rounded-xl shadow border border-yellow-500">
+        <p className="text-sm text-gray-400 mb-1">Top productos</p>
+        <ul className="text-xs text-white space-y-1">
+          {stats.topProductos.map(([producto, cantidad], index) => (
+            <li key={producto}> <span className='font-black'>{index + 1}.</span> {producto} ({cantidad})</li>
+          ))}
+        </ul>
+        {stats.clienteEstrella.telefono && (
+          <p className="mt-3 text-xs text-gray-400">
+            👑 Cliente estrella:<br />
+            <a href={`https://wa.me/57${stats.clienteEstrella.telefono}`} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">
+              {stats.clienteEstrella.nombre}
+            </a> ({stats.clienteEstrella.cantidad} pedidos)
+          </p>
+        )}
+      </div>
+    </div>
 
-          </h2>
 
-          {!collapsedDates[date] && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 p-5">
-              {orders.map(order => (
+    {/* Historial */}
+    <h1 className="text-3xl font-bold mb-8 text-center">Historial de Órdenes</h1>
+
+    {Object.entries(groupedOrders).map(([date, orders]) => (
+      <div key={date} className='bg-[#0f0f0f] p-1 rounded-2xl'>
+        <h2 onClick={() => toggleCollapse(date)} className={`text-2xl font-semibold sticky top-0  py-2 px-4 z-10 mb-4 ${collapsedDates[date] ? '' : 'bg-[#0f0f0f] border-b border-gray-700'} `}>
+          <ChevronDown className={`mr-2 inline transition-transform ${collapsedDates[date] ? 'rotate-180' : ''}`} />
+          {sampleDates[date]?.toLocaleDateString("es-CL", {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            timeZone: 'America/Bogota',
+          })}
+
+        </h2>
+
+        {!collapsedDates[date] && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 p-5">
+            {orders.map(order => (
+
+              <>
+                {/* CARTA NORMAL */}
                 <div
                   key={order.id}
-                  className="bg-[#1a1a1a] rounded-lg shadow-md border border-[#2c2c2c] p-5 flex flex-col justify-between hover:border-yellow-400 transition-all duration-200"
+                  className={`${!!order.softdelete === true ? "bg-[#111111] opacity-50" : "bg-[#1a1a1a] hover:border-yellow-400"} rounded-lg shadow-md border border-[#2c2c2c] p-5 flex flex-col justify-between transition-all duration-200`}
                 >
                   <div className="flex justify-between items-center mb-3">
+
+                    <span className="text-sm text-gray-400">#{order.id}</span>
+
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white
-                    ${order.status === 'pendiente' ? 'bg-red-600' :
+                              ${order.status === 'pendiente' ? 'bg-red-600' :
                         order.status === 'en preparación' ? 'bg-orange-500' :
                           order.status === 'lista' ? 'bg-green-600' :
                             'bg-gray-600'
                       }`}>
                       {order.status || ""}
                     </span>
-                    <span className="text-sm text-gray-400">#{order.id}</span>
+
+                    <MenuOpciones
+                      opciones={
+                        [{ label: !!order.softdelete === true ? "Restaurar" : "Eliminar", onClick: () => openModal(order) },]}
+                    />
+
                   </div>
 
                   <div className="space-y-1">
@@ -446,12 +543,14 @@ export default function AdminStory() {
                     <span>${order.total?.toLocaleString("es-CL") || '0'}</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
 
-        </div>
-      ))}
-    </div>
-  );
+              </>
+            ))}
+          </div>
+        )}
+
+      </div>
+    ))}
+  </div>
+);
 }
