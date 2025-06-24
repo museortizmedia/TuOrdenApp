@@ -237,6 +237,7 @@ function Carta() {
                                                         <ProductCard
                                                             product={product}
                                                             isFirstImage={isFirstImage}
+                                                            compact={false}
                                                         />
                                                     </Suspense>
                                                 ) : (
