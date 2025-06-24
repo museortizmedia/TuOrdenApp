@@ -232,6 +232,11 @@ export default function AdminOrdenes() {
     <div><strong>Teléfono:</strong> ${order.phoneNumber || 'No disponible'}</div>
     <div><strong>Medio de pago:</strong>${order.paymentMethod || 'No especificado'}</div>
 
+    ${order.observaciones
+        ? `<div class="boxed">📝 ${order.observaciones}</div>`
+        : ''
+    }
+
     <script>
         window.onload = function() { 
             window.print(); 

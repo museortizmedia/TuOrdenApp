@@ -71,7 +71,7 @@ function Carta() {
     }, []);
 
     const isScrollingByClick = useRef(false); // Flag para saber si el scroll fue manual
-    
+
     // Detectar qué categoría está visible para resaltar el botón (mientras sea scroll manual)
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -98,19 +98,24 @@ function Carta() {
 
     // Click en categoría: scroll suave + prevenir intersección temporal
     const handleCategoryClick = (cat) => {
-        const el = sectionRefs.current[cat];
-        if (el) {
-            isScrollingByClick.current = true; // Flag activado
+    const el = sectionRefs.current[cat];
+    if (el) {
+        isScrollingByClick.current = true;
 
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
-            setActiveCategory(cat); // Lo seteamos directamente
+        // Calcula el desplazamiento tomando en cuenta el scroll-margin
+        const yOffset = -120; // Ajusta este valor según tu scroll-mt-28 (~112px aprox)
+        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
 
-            // Apagamos el flag después de un tiempo razonable (~1s)
-            setTimeout(() => {
-                isScrollingByClick.current = false;
-            }, 1000);
-        }
-    };
+        window.scrollTo({ top: y, behavior: "smooth" });
+
+        setActiveCategory(cat);
+
+        setTimeout(() => {
+            isScrollingByClick.current = false;
+        }, 1000);
+    }
+};
+
 
     // Referencias para botones de categoría
     const buttonRefs = useRef({});
@@ -167,54 +172,54 @@ function Carta() {
                             {cat}
                         </button>
                     ))}
-                </nav>
-            </div>
+            </nav>
+        </div >
 
-            {/* Contenido principal */}
-            <RestaurantLayout>
-                <div className={`${theme.layout.darkBackground} [min-height:100dvh]`}>
-                    <div className="p-4 space-y-8">
-                        {categories.map((cat) => (
-                            <section
-                                key={cat}
-                                id={cat}
-                                ref={(el) => (sectionRefs.current[cat] = el)}
-                                className="mt-28 scroll-mt-28 md:scroll-mt-32"
-                            >
-                                <h2 className={`text-2xl md:text-3xl lg:text-4xl font-black my-15 py-5 text-center w-screen relative left-1/2 -translate-x-1/2 bg-[#f6d926] text-[#111] hover:scale-105`}>{cat}</h2>
+            {/* Contenido principal */ }
+            < RestaurantLayout >
+            <div className={`${theme.layout.darkBackground} [min-height:100dvh]`}>
+                <div className="p-4 space-y-8">
+                    {categories.map((cat) => (
+                        <section
+                            key={cat}
+                            id={cat}
+                            ref={(el) => (sectionRefs.current[cat] = el)}
+                            className="mt-28 scroll-mt-28 md:scroll-mt-32"
+                        >
+                            <h2 id={cat} className={`text-2xl md:text-3xl lg:text-4xl font-black my-15 py-5 text-center w-screen relative left-1/2 -translate-x-1/2 bg-[#f6d926] text-[#111] hover:scale-105`}>{cat}</h2>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 2xl:grid-cols-3 gap-20 sm:gap-8 md:gap-8 xl:gap-8">
-                                    {groupedProducts[cat].map((product, idx) => {
-                                        const isVisible = visibleProductIds.has(product.id);
-                                        const isValidImage = product.image && product.image !== "/assets/defaultImage.jpg";
-                                        const isFirstImage = idx === 0 && isValidImage;
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 2xl:grid-cols-3 gap-20 sm:gap-8 md:gap-8 xl:gap-8">
+                                {groupedProducts[cat].map((product, idx) => {
+                                    const isVisible = visibleProductIds.has(product.id);
+                                    const isValidImage = product.image && product.image !== "/assets/defaultImage.jpg";
+                                    const isFirstImage = idx === 0 && isValidImage;
 
-                                        return (
-                                            <div
-                                                key={product.id}
-                                                data-id={product.id}
-                                                ref={(el) => (productRefs.current[product.id] = el)}
-                                                className="px-10 sm:px-0"
-                                            >
-                                                {isVisible ? (
-                                                    <Suspense fallback={<div className="h-[300px] bg-neutral-900 rounded-xl animate-pulse" />}>
-                                                        <ProductCard
-                                                            product={product}
-                                                            isFirstImage={isFirstImage}
-                                                        />
-                                                    </Suspense>
-                                                ) : (
-                                                    <div className="h-[300px] bg-neutral-800 rounded-xl animate-pulse" />
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </section>
-                        ))}
-                    </div>
+                                    return (
+                                        <div
+                                            key={product.id}
+                                            data-id={product.id}
+                                            ref={(el) => (productRefs.current[product.id] = el)}
+                                            className="px-10 sm:px-0"
+                                        >
+                                            {isVisible ? (
+                                                <Suspense fallback={<div className="h-[300px] bg-neutral-900 rounded-xl animate-pulse" />}>
+                                                    <ProductCard
+                                                        product={product}
+                                                        isFirstImage={isFirstImage}
+                                                    />
+                                                </Suspense>
+                                            ) : (
+                                                <div className="h-[300px] bg-neutral-800 rounded-xl animate-pulse" />
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </section>
+                    ))}
                 </div>
-            </RestaurantLayout>
+            </div>
+            </RestaurantLayout >
         </>
     );
 }
