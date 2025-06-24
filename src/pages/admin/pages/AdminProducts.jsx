@@ -49,10 +49,12 @@ function SortableItem({ product, onUpdate, onDelete }) {
         const currentSupabaseUser = await supabaseService.getCurrentUser();
 
         let imageUrl = form.image || "";
+        
         if (currentSupabaseUser != null) {
             if (selectedImage) {
+                const processedImage = await processImage(selectedImage, 416, 0.8);
                 const uploadedUrl = await supabaseService.uploadProductImage(
-                    selectedImage,
+                    processedImage,
                     restaurant.id,
                     product.id,
                     31536000
@@ -77,6 +79,60 @@ function SortableItem({ product, onUpdate, onDelete }) {
 
         await onUpdate(product.id, { ...form, price: parsedPrice, image: (imageUrl || "") });
         setEdit(false);
+    };
+
+    const processImage = (file, maxSize = 416, quality = 0.8) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const reader = new FileReader();
+
+            reader.onload = () => {
+                img.src = reader.result;
+            };
+
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                const ratio = img.width / img.height;
+
+                let newWidth = img.width;
+                let newHeight = img.height;
+
+                if (img.width > img.height && img.width > maxSize) {
+                    newWidth = maxSize;
+                    newHeight = Math.round(maxSize / ratio);
+                } else if (img.height > maxSize) {
+                    newHeight = maxSize;
+                    newWidth = Math.round(maxSize * ratio);
+                }
+
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) {
+                            const webpFile = new File([blob], file.name.replace(/\.\w+$/, ".webp"), {
+                                type: "image/webp",
+                                lastModified: Date.now(),
+                            });
+                            resolve(webpFile);
+                        } else {
+                            reject(new Error("No se pudo convertir la imagen"));
+                        }
+                    },
+                    "image/webp",
+                    quality
+                );
+            };
+
+            img.onerror = reject;
+            reader.onerror = reject;
+
+            reader.readAsDataURL(file);
+        });
     };
 
     useEffect(() => {
@@ -300,7 +356,7 @@ function AdminProducts() {
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="font-bold text-lg">{cat}</h2>
                                     <button
-                                        onClick={() => setCreatingCat(creatingCat === cat ? null : cat) }
+                                        onClick={() => setCreatingCat(creatingCat === cat ? null : cat)}
                                         className={`text-green-400 text-xl cursor-pointer transition-transform duration-300 transform origin-center ${creatingCat === cat ? "rotate-45" : "rotate-0"}`}
                                         title={creatingCat === cat ? "Cancelar" : "Crear producto"}>
                                         +

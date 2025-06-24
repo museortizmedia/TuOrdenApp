@@ -201,7 +201,7 @@ export default function AdminOrdenes() {
         }
         .center { text-align: center; font-size: 22px; font-weight: bold; }
         .section-title { font-size: 18px; font-weight: bold; margin-top: 12px; }
-        .boxed { border: 2px solid black; padding: 10px; margin: 10px 0; font-size: 20px; font-weight: bold; text-align: center; }
+        .boxed { border: 2px solid black; padding: 10px; margin: 10px 0; font-size: 15px; font-weight: bold; text-align: center; }
         table { width: 100%; margin-top: 10px; } 
         td { font-size: 16px; padding: 4px 0; }
         .totales td { font-weight: bold; font-size: 16px; }
@@ -232,10 +232,7 @@ export default function AdminOrdenes() {
     <div><strong>Teléfono:</strong> ${order.phoneNumber || 'No disponible'}</div>
     <div><strong>Medio de pago:</strong>${order.paymentMethod || 'No especificado'}</div>
 
-    ${order.observaciones
-        ? `<div class="boxed">📝 ${order.observaciones}</div>`
-        : ''
-    }
+    ${order.observaciones ? `<div class="boxed">Observaciones: ${order.observaciones}</div>` : ''}
 
     <script>
         window.onload = function() { 

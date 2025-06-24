@@ -356,7 +356,7 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
                                 audioService.play("manualInteract");
                               }
                             }}
-                            className=" w-3.5 text-sm text-gray-700 hover:text-black"
+                            className=" w-3.5 text-sm text-gray-700 hover:text-black md:hidden"
                           >
                             –
                           </button>
@@ -381,7 +381,7 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
                               }
                               updateQuantity(item.id, num);
                             }}
-                            className="w-5 text-center text-sm border-0 focus:outline-none"
+                            className="w-5 md:w-full text-center text-sm border-0 focus:outline-none"
                           />
 
                           <button
@@ -392,7 +392,7 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
                               updateQuantity(item.id, newQty);
                               audioService.play("manualInteract");
                             }}
-                            className="w-3.5 text-sm text-gray-700 hover:text-black"
+                            className="w-3.5 text-sm text-gray-700 hover:text-black md:hidden"
                           >
                             +
                           </button>
