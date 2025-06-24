@@ -29,7 +29,10 @@ export default function AdminStory() {
 
         const grouped = {};
         for (const order of parsed) {
-          const dateKey = order.createdAt.toISOString().split('T')[0];
+          const dateKey = order.createdAt.toLocaleDateString('sv-SE', {
+            timeZone: 'America/Bogota',
+          }); // → 'YYYY-MM-DD'
+
           if (!grouped[dateKey]) grouped[dateKey] = [];
           grouped[dateKey].push(order);
         }
@@ -98,7 +101,7 @@ export default function AdminStory() {
         for (const order of parsed) {
           const dateKey = order.createdAt.toLocaleDateString('sv-SE', {
             timeZone: 'America/Bogota',
-          }); // → 'YYYY-MM-DD'
+          });
 
           if (!grouped[dateKey]) {
             grouped[dateKey] = [];
@@ -128,75 +131,75 @@ export default function AdminStory() {
   }, [restaurant?.id]);
 
   const calcularEstadisticas = (orders) => {
-  const ordenesValidas = orders.filter(o => !o.softdelete);
+    const ordenesValidas = orders.filter(o => !o.softdelete);
 
-  const totalOrdenes = ordenesValidas.length;
-  const totalVentas = ordenesValidas.reduce((sum, o) => sum + (o.total || 0), 0);
-  const ticketPromedio = totalOrdenes ? Math.round(totalVentas / totalOrdenes) : 0;
+    const totalOrdenes = ordenesValidas.length;
+    const totalVentas = ordenesValidas.reduce((sum, o) => sum + (o.total || 0), 0);
+    const ticketPromedio = totalOrdenes ? Math.round(totalVentas / totalOrdenes) : 0;
 
-  const porMetodoPago = {};
-  const porTipoOrden = { Domicilio: 0, Recoger: 0 };
-  let totalDeliveryFee = 0;
-  let taxTotal = 0;
+    const porMetodoPago = {};
+    const porTipoOrden = { Domicilio: 0, Recoger: 0 };
+    let totalDeliveryFee = 0;
+    let taxTotal = 0;
 
-  const productoCount = {};
-  const clienteGasto = {};
-  const clienteNombres = {};
-  const clienteOrdenesCount = {};
+    const productoCount = {};
+    const clienteGasto = {};
+    const clienteNombres = {};
+    const clienteOrdenesCount = {};
 
-  for (const o of ordenesValidas) {
-    porMetodoPago[o.paymentMethod] = (porMetodoPago[o.paymentMethod] || 0) + (o.total || 0);
-    porTipoOrden[o.orderType] = (porTipoOrden[o.orderType] || 0) + 1;
+    for (const o of ordenesValidas) {
+      porMetodoPago[o.paymentMethod] = (porMetodoPago[o.paymentMethod] || 0) + (o.total || 0);
+      porTipoOrden[o.orderType] = (porTipoOrden[o.orderType] || 0) + 1;
 
-    if (o.orderType === "Domicilio") {
-      totalDeliveryFee += o.deliveryFee || 0;
-    }
+      if (o.orderType === "Domicilio") {
+        totalDeliveryFee += o.deliveryFee || 0;
+      }
 
-    taxTotal += o.tax || 0;
+      taxTotal += o.tax || 0;
 
-    for (const item of o.items || []) {
-      productoCount[item.name] = (productoCount[item.name] || 0) + item.quantity;
+      for (const item of o.items || []) {
+        productoCount[item.name] = (productoCount[item.name] || 0) + item.quantity;
+
+        const clienteKey = o.phoneNumber || "Desconocido";
+        const gasto = (item.price || 0) * item.quantity;
+        clienteGasto[clienteKey] = (clienteGasto[clienteKey] || 0) + gasto;
+
+        if (!clienteNombres[clienteKey]) {
+          clienteNombres[clienteKey] = o.buyerName;
+        }
+      }
 
       const clienteKey = o.phoneNumber || "Desconocido";
-      const gasto = (item.price || 0) * item.quantity;
-      clienteGasto[clienteKey] = (clienteGasto[clienteKey] || 0) + gasto;
+      clienteOrdenesCount[clienteKey] = (clienteOrdenesCount[clienteKey] || 0) + 1;
+    }
 
-      if (!clienteNombres[clienteKey]) {
-        clienteNombres[clienteKey] = o.buyerName;
+    const topProductos = Object.entries(productoCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    const [topClienteTel, topClienteGasto] = Object.entries(clienteGasto)
+      .sort((a, b) => b[1] - a[1])[0] || ["", 0];
+
+    const topClienteName = clienteNombres[topClienteTel] || "";
+    const topClienteCount = clienteOrdenesCount[topClienteTel] || 0;
+
+    setStats({
+      totalVentas,
+      totalOrdenes,
+      ticketPromedio,
+      porMetodoPago,
+      porTipoOrden,
+      ticketPromedioDomicilio: totalDeliveryFee,
+      taxTotal,
+      topProductos,
+      clienteEstrella: {
+        telefono: topClienteTel,
+        nombre: topClienteName,
+        gastoTotal: topClienteGasto,
+        cantidad: topClienteCount
       }
-    }
-
-    const clienteKey = o.phoneNumber || "Desconocido";
-    clienteOrdenesCount[clienteKey] = (clienteOrdenesCount[clienteKey] || 0) + 1;
-  }
-
-  const topProductos = Object.entries(productoCount)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-
-  const [topClienteTel, topClienteGasto] = Object.entries(clienteGasto)
-    .sort((a, b) => b[1] - a[1])[0] || ["", 0];
-
-  const topClienteName = clienteNombres[topClienteTel] || "";
-  const topClienteCount = clienteOrdenesCount[topClienteTel] || 0;
-
-  setStats({
-    totalVentas,
-    totalOrdenes,
-    ticketPromedio,
-    porMetodoPago,
-    porTipoOrden,
-    ticketPromedioDomicilio: totalDeliveryFee,
-    taxTotal,
-    topProductos,
-    clienteEstrella: {
-      telefono: topClienteTel,
-      nombre: topClienteName,
-      gastoTotal: topClienteGasto,
-      cantidad: topClienteCount
-    }
-  });
-};
+    });
+  };
 
   //Filtros
   const [filters, setFilters] = useState({
@@ -246,7 +249,10 @@ export default function AdminStory() {
     // Agrupar y actualizar estado como antes
     const grouped = {};
     for (const order of filtradas) {
-      const dateKey = order.createdAt.toISOString().split('T')[0];
+      const dateKey = order.createdAt.toLocaleDateString('sv-SE', {
+        timeZone: 'America/Bogota',
+      });
+
       if (!grouped[dateKey]) grouped[dateKey] = [];
       grouped[dateKey].push(order);
     }
@@ -453,7 +459,7 @@ export default function AdminStory() {
               👑 Cliente estrella:<br />
               <a href={`https://wa.me/57${stats.clienteEstrella.telefono}`} target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">
                 {stats.clienteEstrella.nombre}
-              </a> ({stats.clienteEstrella.cantidad == "1"? stats.clienteEstrella.cantidad + " pedido": stats.clienteEstrella.cantidad + " pedidos"}{": $"+stats.clienteEstrella.gastoTotal.toLocaleString("es-CL")})
+              </a> ({stats.clienteEstrella.cantidad == "1" ? stats.clienteEstrella.cantidad + " pedido" : stats.clienteEstrella.cantidad + " pedidos"}{": $" + stats.clienteEstrella.gastoTotal.toLocaleString("es-CL")})
             </p>
           )}
         </div>

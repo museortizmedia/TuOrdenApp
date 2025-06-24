@@ -3,16 +3,15 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useRestaurant } from "../../contexts/RestaurantContext";
 import firestoreService from "../../servicies/firestoreService";
 import theme from "../../theme";
-import { LogOutIcon, Menu, X } from "lucide-react";
+import { LogOutIcon, Menu, X, ClipboardList, ShoppingBag, Layers, CalendarClock, Settings } from "lucide-react";
 import AdminProducts from "./pages/AdminProducts";
 import AdminOrdenes from "./pages/AdminOrdenes";
 import AdminStory from "./pages/AdminStory";
 import CategoryOrderManager from "./pages/CategoryOrderManager.jsx";
 import supabaseService from "../../servicies/supabaseService.js"
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase/firebase.js";
 import NotificationToggle from "../../components/NotificationToggle.jsx";
 import ToggleSound from "../../components/ToggleSound.jsx";
+import AdminSettings from "./pages/AdminSettings.jsx";
 
 function Dashboard() {
   const { user, logout } = useAuth();
@@ -64,10 +63,11 @@ function Dashboard() {
   }, []);
 
   const subPages = [
-    { name: "Órdenes", content: <AdminOrdenes /> },
-    { name: "Productos", content: <AdminProducts /> },
-    { name: "Orden Carta", content: <CategoryOrderManager /> },
-    { name: "Historial", content: <AdminStory /> },
+    { logo: ClipboardList, name: "Órdenes", content: <AdminOrdenes /> },
+    { logo: ShoppingBag, name: "Productos", content: <AdminProducts /> },
+    { logo: Layers, name: "Orden Carta", content: <CategoryOrderManager /> },
+    { logo: CalendarClock, name: "Historial", content: <AdminStory /> },
+    { logo: Settings, name: "Ajustes", content: <AdminSettings /> },
   ];
 
   const currentPage = subPages.find((p) => p.name === activePage);
@@ -136,9 +136,10 @@ function Dashboard() {
                   setActivePage(page.name);
                   setMenuOpen(false); // Cierra en móvil
                 }}
-                className={`text-left px-3 py-2 rounded hover:bg-neutral-700 transition ${activePage === page.name ? "bg-neutral-700 font-bold cursor-auto" : "cursor-pointer"
+                className={`text-left px-3 py-2 rounded hover:bg-neutral-700 flex transition ${activePage === page.name ? "bg-neutral-700 font-bold cursor-auto" : "cursor-pointer"
                   }`}
               >
+                <page.logo className="mr-2"/>
                 {page.name}
               </button>
             ))}

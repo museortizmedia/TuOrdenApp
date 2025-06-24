@@ -89,23 +89,25 @@ export default function RestaurantLayout({ children }) {
           <p className="text-white text-sm sm:text-base">{restaurant.name}</p>
         </div>
 
-        <div
-          className="relative w-6 h-6 sm:w-7 sm:h-7 transition-transform duration-200 active:scale-105 hover:scale-105 cursor-pointer"
-          onClick={() => {
-            setIsCartOpen(true);
-            setIsActiveOrderFirst(true);
-            audioService.play("alert");
-          }}
-          title="Rastrear pedidos"
-        >
-          <ConciergeBellIcon className="w-full h-full text-white" />
+        {restaurant.estaAbierto && (
+          <div
+            className="relative w-6 h-6 sm:w-7 sm:h-7 transition-transform duration-200 active:scale-105 hover:scale-105 cursor-pointer"
+            onClick={() => {
+              setIsCartOpen(true);
+              setIsActiveOrderFirst(true);
+              audioService.play("alert");
+            }}
+            title="Rastrear pedidos"
+          >
+            <ConciergeBellIcon className="w-full h-full text-white" />
 
-          {activeOrders.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full leading-none">
-              {activeOrders.length}
-            </span>
-          )}
-        </div>
+            {activeOrders.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full leading-none">
+                {activeOrders.length}
+              </span>
+            )}
+          </div>
+        )}
 
       </header>
 
@@ -128,19 +130,21 @@ export default function RestaurantLayout({ children }) {
 
 
       {/* Floating cart button (always visible) */}
-      <button
-        onClick={() => { setIsCartOpen(true); setIsActiveOrderFirst(false); audioService.play("alert2") }}
-        className={`
+      {restaurant.estaAbierto && (
+        <button
+          onClick={() => { setIsCartOpen(true); setIsActiveOrderFirst(false); audioService.play("alert2") }}
+          className={`
           fixed bottom-5 right-5 z-50 p-4 sm:p-4 rounded-full shadow-lg 
           bg-yellow-400 hover:bg-yellow-500 text-black
           ${justAdded ? "animate-bounce" : ""}
           transition-transform duration-200 active:scale-105 hover:scale-105 cursor-pointer
         `}
-        style={{ transform: "translateZ(0)" }} // Fix visual glitches in some mobile browsers
-        aria-label="Abrir carrito"
-      >
-        <ShoppingIcon />
-      </button>
+          style={{ transform: "translateZ(0)" }} // Fix visual glitches in some mobile browsers
+          aria-label="Abrir carrito"
+        >
+          <ShoppingIcon />
+        </button>
+      )}
 
       {/* Main content area with safe padding */}
       <main className="pb-28 px-4 sm:px-6 md:px-10">

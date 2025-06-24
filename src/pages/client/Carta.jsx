@@ -98,23 +98,23 @@ function Carta() {
 
     // Click en categoría: scroll suave + prevenir intersección temporal
     const handleCategoryClick = (cat) => {
-    const el = sectionRefs.current[cat];
-    if (el) {
-        isScrollingByClick.current = true;
+        const el = sectionRefs.current[cat];
+        if (el) {
+            isScrollingByClick.current = true;
 
-        // Calcula el desplazamiento tomando en cuenta el scroll-margin
-        const yOffset = -120; // Ajusta este valor según tu scroll-mt-28 (~112px aprox)
-        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            // Calcula el desplazamiento tomando en cuenta el scroll-margin
+            const yOffset = -120; // Ajusta este valor según tu scroll-mt-28 (~112px aprox)
+            const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
 
-        window.scrollTo({ top: y, behavior: "smooth" });
+            window.scrollTo({ top: y, behavior: "smooth" });
 
-        setActiveCategory(cat);
+            setActiveCategory(cat);
 
-        setTimeout(() => {
-            isScrollingByClick.current = false;
-        }, 1000);
-    }
-};
+            setTimeout(() => {
+                isScrollingByClick.current = false;
+            }, 1000);
+        }
+    };
 
 
     // Referencias para botones de categoría
@@ -154,8 +154,39 @@ function Carta() {
         return () => observer.disconnect();
     }, [products, visibleProductIds]);
 
+    // Horario
+    const obtenerHorarioDeHoy = () => {
+        try {
+            if (!restaurant?.horarios) return null;
+
+            const horarios = JSON.parse(restaurant.horarios);
+
+            const dia = new Date().toLocaleDateString("es-CO", {
+                weekday: "long",
+                timeZone: "America/Bogota",
+            }).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+            return horarios[dia] || null;
+        } catch {
+            return null;
+        }
+    };
+
+
     return (
         <>
+            {!restaurant.estaAbierto && (
+                <div className="bg-red-950 text-white text-center font-bold py-4 sticky top-[8rem] z-[9999] shadow-lg">
+                    🚫 La tienda está cerrada por el momento.
+                    {(() => {
+                        const horario = obtenerHorarioDeHoy();
+                        return horario
+                            ? ` Hoy atendemos de ${horario.replace("-", " a ")}.`
+                            : ` Hoy no atendemos.`;
+                    })()}
+                </div>
+            )}
+
             {/* Navegación por categorías */}
             <div className="sticky top-[4.8rem] z-50 shadow-md">
                 <nav className={`${theme.colors.background.dark} flex overflow-x-auto whitespace-nowrap p-2 space-x-2 border-b border-neutral-800 w-full max-w-full`}>
@@ -165,60 +196,60 @@ function Carta() {
                             ref={(el) => (buttonRefs.current[cat] = el)}
                             onClick={() => handleCategoryClick(cat)}
                             className={`pb-1 px-3 text-sm transition-colors shrink-0 ${activeCategory === cat
-                                    ? "border-b-4 border-yellow-400 text-yellow-400 font-bold"
-                                    : "text-white hover:text-yellow-300 cursor-pointer hover:font-bold hover:scale-105 duration-200 transition-transform"
+                                ? "border-b-4 border-yellow-400 text-yellow-400 font-bold"
+                                : "text-white hover:text-yellow-300 cursor-pointer hover:font-bold hover:scale-105 duration-200 transition-transform"
                                 }`}
                         >
                             {cat}
                         </button>
                     ))}
-            </nav>
-        </div >
+                </nav>
+            </div >
 
-            {/* Contenido principal */ }
+            {/* Contenido principal */}
             < RestaurantLayout >
-            <div className={`${theme.layout.darkBackground} [min-height:100dvh]`}>
-                <div className="p-4 space-y-8">
-                    {categories.map((cat) => (
-                        <section
-                            key={cat}
-                            id={cat}
-                            ref={(el) => (sectionRefs.current[cat] = el)}
-                            className="mt-28 scroll-mt-28 md:scroll-mt-32"
-                        >
-                            <h2 id={cat} className={`text-2xl md:text-3xl lg:text-4xl font-black my-15 py-5 text-center w-screen relative left-1/2 -translate-x-1/2 bg-[#f6d926] text-[#111] hover:scale-105`}>{cat}</h2>
+                <div className={`${theme.layout.darkBackground} [min-height:100dvh]`}>
+                    <div className="p-4 space-y-8">
+                        {categories.map((cat) => (
+                            <section
+                                key={cat}
+                                id={cat}
+                                ref={(el) => (sectionRefs.current[cat] = el)}
+                                className="mt-28 scroll-mt-28 md:scroll-mt-32"
+                            >
+                                <h2 id={cat} className={`text-2xl md:text-3xl lg:text-4xl font-black my-15 py-5 text-center w-screen relative left-1/2 -translate-x-1/2 bg-[#f6d926] text-[#111] hover:scale-105`}>{cat}</h2>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 2xl:grid-cols-3 gap-20 sm:gap-8 md:gap-8 xl:gap-8">
-                                {groupedProducts[cat].map((product, idx) => {
-                                    const isVisible = visibleProductIds.has(product.id);
-                                    const isValidImage = product.image && product.image !== "/assets/defaultImage.jpg";
-                                    const isFirstImage = idx === 0 && isValidImage;
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 2xl:grid-cols-3 gap-20 sm:gap-8 md:gap-8 xl:gap-8">
+                                    {groupedProducts[cat].map((product, idx) => {
+                                        const isVisible = visibleProductIds.has(product.id);
+                                        const isValidImage = product.image && product.image !== "/assets/defaultImage.jpg";
+                                        const isFirstImage = idx === 0 && isValidImage;
 
-                                    return (
-                                        <div
-                                            key={product.id}
-                                            data-id={product.id}
-                                            ref={(el) => (productRefs.current[product.id] = el)}
-                                            className="px-10 sm:px-0"
-                                        >
-                                            {isVisible ? (
-                                                <Suspense fallback={<div className="h-[300px] bg-neutral-900 rounded-xl animate-pulse" />}>
-                                                    <ProductCard
-                                                        product={product}
-                                                        isFirstImage={isFirstImage}
-                                                    />
-                                                </Suspense>
-                                            ) : (
-                                                <div className="h-[300px] bg-neutral-800 rounded-xl animate-pulse" />
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </section>
-                    ))}
+                                        return (
+                                            <div
+                                                key={product.id}
+                                                data-id={product.id}
+                                                ref={(el) => (productRefs.current[product.id] = el)}
+                                                className="px-10 sm:px-0"
+                                            >
+                                                {isVisible ? (
+                                                    <Suspense fallback={<div className="h-[300px] bg-neutral-900 rounded-xl animate-pulse" />}>
+                                                        <ProductCard
+                                                            product={product}
+                                                            isFirstImage={isFirstImage}
+                                                        />
+                                                    </Suspense>
+                                                ) : (
+                                                    <div className="h-[300px] bg-neutral-800 rounded-xl animate-pulse" />
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </section>
+                        ))}
+                    </div>
                 </div>
-            </div>
             </RestaurantLayout >
         </>
     );

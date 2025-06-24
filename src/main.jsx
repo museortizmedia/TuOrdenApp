@@ -84,8 +84,57 @@ function AppWrapper() {
   const [restaurant, setRestaurant] = useState(null);
 
   useEffect(() => {
-    firestoreService.findById("restaurants", id).then(setRestaurant);
+    firestoreService.findById("restaurants", id).then((data) => {
+      const estaAbierto = calcularEstadoAbierto(data?.horarios);
+      setRestaurant({ ...data, estaAbierto });
+    });
   }, [id]);
+
+  // Horarios de atencion
+  function calcularEstadoAbierto(horariosString) {
+    if (!horariosString) return false;
+
+    try {
+      const horarios = JSON.parse(horariosString);
+
+      const ahora = new Date();
+      const dia = ahora.toLocaleDateString('es-CO', {
+        weekday: 'long',
+        timeZone: 'America/Bogota',
+      }).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+      const horaActualStr = ahora.toLocaleTimeString('es-CO', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'America/Bogota',
+      });
+
+      const rango = horarios[dia]; // ej: "18:00-00:00"
+      if (!rango || !rango.includes("-")) return false;
+
+      const [inicio, fin] = rango.split("-");
+
+      const aMinutos = (hhmm) => {
+        const [h, m] = hhmm.split(":").map(Number);
+        return h * 60 + m;
+      };
+
+      const ahoraMin = aMinutos(horaActualStr);
+      const inicioMin = aMinutos(inicio);
+      const finMin = aMinutos(fin);
+
+      // 🕐 si el rango cruza medianoche, ej: 18:00-00:00
+      if (inicioMin > finMin) {
+        return ahoraMin >= inicioMin || ahoraMin < finMin;
+      }
+
+      return ahoraMin >= inicioMin && ahoraMin < finMin;
+    } catch (e) {
+      console.error("Error evaluando horarios:", e);
+      return false;
+    }
+  }
 
   if (!restaurant) {
     return (
@@ -99,7 +148,7 @@ function AppWrapper() {
     <RestaurantProvider value={{ id, restaurant }}>
       <CartProvider>
         <Router>
-        <DynamicHead />
+          <DynamicHead />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/carta" element={<Carta />} />
