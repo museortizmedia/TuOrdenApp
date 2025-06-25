@@ -367,7 +367,7 @@ export default function AdminOrdenes() {
         fetchSedes();
     }, [restaurant]);
 
-    const filtrarOrdenes = (order) => {
+    /*const filtrarOrdenes = (order) => {
         const matchStatus = status === "pendiente"
             ? (order.status === "pendiente" || order.status === "por pagar")
             : order.status === status;
@@ -378,7 +378,7 @@ export default function AdminOrdenes() {
         }
 
         return matchStatus;
-    };
+    };*/
 
     return (
         <>
@@ -393,10 +393,11 @@ export default function AdminOrdenes() {
                     onChange={(e) => setSedeFiltro(e.target.value)}
                     className="bg-[#222] text-white px-3 py-2 rounded border border-gray-600"
                 >
-                    <option value="Todas">Todas las sedes</option>
+                    <option value="Todas">Todas las ordenes</option>
+                    <option value="Domicilio">Domicilios</option>
                     {sedes.map((sede) => (
                         <option key={sede.id} value={sede.name}>
-                            {sede.name}
+                            Solo recoger en: {sede.name}
                         </option>
                     ))}
                 </select>
@@ -420,12 +421,20 @@ export default function AdminOrdenes() {
                             ? (order.status === "pendiente" || order.status === "por pagar")
                             : order.status === status;
 
-                        if (order.orderType === "Recoger" && sedeFiltro !== "Todas") {
+                        if (sedeFiltro === "Todas") {
+                            return matchStatus;
+                        }
+
+                        if (sedeFiltro === "Domicilio") {
+                            return matchStatus && order.orderType=="Domicilio";
+                        }
+
+                        if (order.orderType === "Recoger") {
                             const nombreSede = order.sede?.split("-")[0]?.trim() || "";
                             return matchStatus && nombreSede === sedeFiltro;
                         }
 
-                        return matchStatus;
+                        return false;
                     };
 
                     const ordenesFiltradas = orders.filter(filtrarOrdenes);

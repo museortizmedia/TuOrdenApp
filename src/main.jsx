@@ -92,6 +92,11 @@ function AppWrapper() {
 
   // Horarios de atencion
   function calcularEstadoAbierto(horariosString) {
+    // Si estamos en localhost siempre abrir
+    const hostname = window.location.host.toLowerCase();
+    if (hostname.includes("localhost")) return true;
+
+    // Si no se encuentra el horario solicitado devolver false
     if (!horariosString) return false;
 
     try {
