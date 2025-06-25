@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Bell, BellOff } from "lucide-react";
 
-const NotificationToggle = () => {
+const ToggleNotification = () => {
   const [hasPermission, setHasPermission] = useState(Notification.permission === "granted");
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     return localStorage.getItem("notificationsEnabled") !== "false";
@@ -51,4 +51,4 @@ const NotificationToggle = () => {
   );
 };
 
-export default NotificationToggle;
+export default ToggleNotification;

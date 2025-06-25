@@ -1,8 +1,8 @@
 import React from "react";
-import theme from "../../../theme";
-import { useCart } from "../../../contexts/CartContext";
-import { useRestaurant } from "../../../contexts/RestaurantContext";
-import audioService from "../../../servicies/audio";
+import theme from "../theme";
+import { useCart } from "../contexts/CartContext";
+import { useRestaurant } from "../contexts/RestaurantContext";
+import audioService from "../servicies/audio";
 
 function ProductCard({ product, isFirstImage, compact = false }) {
   const { restaurant } = useRestaurant();

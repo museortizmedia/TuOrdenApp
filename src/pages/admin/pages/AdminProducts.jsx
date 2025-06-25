@@ -22,7 +22,7 @@ import { CSS } from "@dnd-kit/utilities";
 import ToggleSwitch from "../../../components/ToogleSwitch.jsx"
 import ImageUploader from "../../../components/ImageUploader";
 import { PenIcon } from "lucide-react";
-import CategoryOrderManager from "./CategoryOrderManager.jsx";
+import CategoryOrderManager from "./AdminCategoryOrden.jsx";
 import audioService from "../../../servicies/audio.js";
 
 function SortableItem({ product, onUpdate, onDelete }) {

@@ -39,7 +39,7 @@ function SortableCategoryCard({ category, children }) {
     );
 }
 
-function CategoryOrderManager() {
+function AdminCategoryOrden() {
     const { restaurant } = useRestaurant();
     const [products, setProducts] = useState([]);
     const [activeCat, setActiveCat] = useState(null);
@@ -143,4 +143,4 @@ function CategoryOrderManager() {
     );
 }
 
-export default CategoryOrderManager;
+export default AdminCategoryOrden;

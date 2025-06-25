@@ -4,7 +4,7 @@ import {
     getAllDocs,
     queryDocs,
     getSubcollection
-} from "../servicies/firestoreService";
+} from "../../servicies/firestoreService";
 
 export default function TestFirebaseService() {
 

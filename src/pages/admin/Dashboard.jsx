@@ -7,9 +7,9 @@ import { LogOutIcon, Menu, X, ClipboardList, ShoppingBag, Layers, CalendarClock,
 import AdminProducts from "./pages/AdminProducts";
 import AdminOrdenes from "./pages/AdminOrdenes";
 import AdminStory from "./pages/AdminStory";
-import CategoryOrderManager from "./pages/CategoryOrderManager.jsx";
+import AdminCategoryOrden from "./pages/AdminCategoryOrden.jsx";
 import supabaseService from "../../servicies/supabaseService.js"
-import NotificationToggle from "../../components/NotificationToggle.jsx";
+import ToggleNotification from "../../components/ToggleNotification.jsx";
 import ToggleSound from "../../components/ToggleSound.jsx";
 import AdminSettings from "./pages/AdminSettings.jsx";
 
@@ -65,7 +65,7 @@ function Dashboard() {
   const subPages = [
     { logo: ClipboardList, name: "Órdenes", content: <AdminOrdenes /> },
     { logo: ShoppingBag, name: "Productos", content: <AdminProducts /> },
-    { logo: Layers, name: "Orden Carta", content: <CategoryOrderManager /> },
+    { logo: Layers, name: "Orden Carta", content: <AdminCategoryOrden /> },
     { logo: CalendarClock, name: "Historial", content: <AdminStory /> },
     { logo: Settings, name: "Ajustes", content: <AdminSettings /> },
   ];
@@ -109,7 +109,7 @@ function Dashboard() {
             <LogOutIcon className="w-4 h-4 ml-2"/>
           </button>
 
-          <NotificationToggle/>
+          <ToggleNotification/>
 
           <ToggleSound/>
 

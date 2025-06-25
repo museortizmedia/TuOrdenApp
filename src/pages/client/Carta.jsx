@@ -10,7 +10,7 @@ import theme from "../../theme";
 import RestaurantLayout from "../../components/RestaurantLayout";
 
 // Componentes de carga diferida
-const ProductCard = lazy(() => import("./components/ProductCard.jsx"));
+const ProductCard = lazy(() => import("../../components/ProductCard.jsx"));
 
 function Carta() {
     const { restaurant } = useRestaurant(); // Contexto de informacion del restaurante
