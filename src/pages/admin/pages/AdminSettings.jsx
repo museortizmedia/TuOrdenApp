@@ -32,8 +32,13 @@ export default function AdminSettings() {
 
   const guardarHorarios = async () => {
     const formateados = {};
+
+    const normalizarClave = (str) =>
+      str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
     for (const [dia, { apertura, cierre }] of Object.entries(horarios)) {
-      formateados[dia] = apertura && cierre ? `${apertura}-${cierre}` : "";
+      const diaNormalizado = normalizarClave(dia);
+      formateados[diaNormalizado] = apertura && cierre ? `${apertura}-${cierre}` : "";
     }
 
     const horariosString = JSON.stringify(formateados);
@@ -102,11 +107,10 @@ export default function AdminSettings() {
         <button
           onClick={guardarHorarios}
           disabled={!hayCambios}
-          className={`mt-4 px-4 py-2 rounded font-semibold transition ${
-            hayCambios
+          className={`mt-4 px-4 py-2 rounded font-semibold transition ${hayCambios
               ? "bg-yellow-500 hover:bg-yellow-400 text-black cursor-pointer"
               : "bg-gray-600 text-gray-300 cursor-not-allowed"
-          }`}
+            }`}
         >
           Guardar horarios
         </button>
