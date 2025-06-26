@@ -463,7 +463,7 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
                     onChange={(e) => setNeighborhood(e.target.value)}
                     className={inputClass(showError && !neighborhood)}
                   >
-                    <option value="">Sector</option>
+                    <option value="">Barrio</option>
                     {Object.entries(neighborhoodOptions).map(([key, price]) => <option key={key} value={key}>{key}</option>)}
                   </select>
                 </>

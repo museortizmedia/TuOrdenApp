@@ -18,9 +18,14 @@ function Dashboard() {
   const { restaurant } = useRestaurant();
   const [userBD, setUserBD] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activePage, setActivePage] = useState("Órdenes");
+  const [activePage, setActivePage] = useState(() => {
+    const hash = window.location.hash.replace("#", "");
+    return decodeURIComponent(hash) || "Órdenes";
+  });
+
 
   const menuRef = useRef();
+
 
   // Detectar clic fuera para cerrar el menú
   useEffect(() => {
@@ -106,12 +111,12 @@ function Dashboard() {
           </span>
           <button onClick={logout} className="text-sm bg-red-500 hover:bg-red-600 px-3 py-1 rounded cursor-pointer flex">
             Salir
-            <LogOutIcon className="w-4 h-4 ml-2"/>
+            <LogOutIcon className="w-4 h-4 ml-2" />
           </button>
 
-          <ToggleNotification/>
+          <ToggleNotification />
 
-          <ToggleSound/>
+          <ToggleSound />
 
         </div>
       </header>
@@ -134,12 +139,13 @@ function Dashboard() {
                 key={page.name}
                 onClick={() => {
                   setActivePage(page.name);
+                  window.location.hash = encodeURIComponent(page.name); // actualiza la URL
                   setMenuOpen(false); // Cierra en móvil
                 }}
                 className={`text-left px-3 py-2 rounded hover:bg-neutral-700 flex transition ${activePage === page.name ? "bg-neutral-700 font-bold cursor-auto" : "cursor-pointer"
                   }`}
               >
-                <page.logo className="mr-2"/>
+                <page.logo className="mr-2" />
                 {page.name}
               </button>
             ))}

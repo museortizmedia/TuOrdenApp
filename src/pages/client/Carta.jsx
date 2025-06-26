@@ -8,6 +8,7 @@ import firestoreService from "../../servicies/firestoreService";
 import theme from "../../theme";
 // Components
 import RestaurantLayout from "../../components/RestaurantLayout";
+import ImageSlider from "../../components/SliderImage.jsx";
 
 // Componentes de carga diferida
 const ProductCard = lazy(() => import("../../components/ProductCard.jsx"));
@@ -116,7 +117,6 @@ function Carta() {
         }
     };
 
-
     // Referencias para botones de categoría
     const buttonRefs = useRef({});
     useEffect(() => {
@@ -172,7 +172,6 @@ function Carta() {
         }
     };
 
-
     return (
         <>
             {!restaurant.estaAbierto && (
@@ -189,7 +188,7 @@ function Carta() {
 
             {/* Navegación por categorías */}
             <div className="sticky top-[4.8rem] z-50 shadow-md">
-                <nav className={`${theme.colors.background.dark} flex overflow-x-auto whitespace-nowrap p-2 space-x-2 border-b border-neutral-800 w-full max-w-full`}>
+                <nav className={`${theme.colors.background.dark} flex overflow-x-auto whitespace-nowrap p-2 space-x-2 border-b border-neutral-800 w-full max-w-full shadow-black shadow-2xl`}>
                     {categories.map((cat) => (
                         <button
                             key={cat}
@@ -205,6 +204,11 @@ function Carta() {
                     ))}
                 </nav>
             </div >
+
+            { restaurant.slider.length > 0 && (
+            /*Slider de imagenes*/
+            <ImageSlider images={restaurant.slider.map((url) => ({ image: url }))} height="h-[20dvh]" className="top-[4.8rem] z-10 shadow-lg" />
+            )}
 
             {/* Contenido principal */}
             < RestaurantLayout >
