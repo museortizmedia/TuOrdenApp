@@ -18,11 +18,11 @@ Object.entries(audioFiles).forEach(([key, path]) => {
   audioInstances[key] = audio;
 });
 
-// 🔇 Estado de mute almacenado en sessionStorage
-const isMuted = () => sessionStorage.getItem("audioMuted") === "true";
+// 🔇 Estado de mute almacenado en localStorage
+const isMuted = () => localStorage.getItem("audioMuted") === "true";
 
 const setMuted = (muted) => {
-  sessionStorage.setItem("audioMuted", muted ? "true" : "false");
+  localStorage.setItem("audioMuted", muted ? "true" : "false");
 };
 
 /**
