@@ -19,7 +19,6 @@ import theme from "./theme";
 import "./index.css";
 
 // Componentes
-import CookieNotice from "./components/CookieNotice.jsx";
 import DynamicHead from "./components/DynamicHead";
 
 // Páginas
@@ -157,11 +156,6 @@ function AppWrapper() {
       <CartProvider>
         <Router>
           <DynamicHead />
-
-          <CookieNotice
-            consent={false}
-          />
-
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/carta" element={<Carta />} />

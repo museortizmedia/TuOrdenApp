@@ -7,9 +7,6 @@ import { useAuth } from "../contexts/AuthContext";
 // others
 import theme from "../theme";
 
-// Componentes
-import CookieNotice from "../components/CookieNotice";
-
 export default function Index() {
   const { restaurant } = useRestaurant();
   const { user, loading } = useAuth();
@@ -24,13 +21,12 @@ export default function Index() {
     },
     {
       text: "Ver Carta",
-      onClick: () => { window.location.href = "/carta"; localStorage.setItem("cookie-consent", "dismissed"); },
+      onClick: () => { window.location.href = "/carta"; },
       style: "secondary",
     },
   ];
 
-  return (<>
-
+  return (
     <div className={`${theme.layout.darkBackground} [min-height:120dvh] flex flex-col`}>
       {/* Header sesión */}
       <div className="flex justify-end p-2 pr-4 text-xs text-gray-400 invisible md:visible">
@@ -107,5 +103,5 @@ export default function Index() {
       </footer>
 
     </div>
-  </>);
+  );
 }

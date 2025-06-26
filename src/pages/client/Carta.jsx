@@ -9,6 +9,7 @@ import theme from "../../theme";
 // Components
 import RestaurantLayout from "../../components/RestaurantLayout";
 import ImageSlider from "../../components/SliderImage.jsx";
+import CookieNotice from "../../components/CookieNotice";
 
 // Componentes de carga diferida
 const ProductCard = lazy(() => import("../../components/ProductCard.jsx"));
@@ -174,6 +175,13 @@ function Carta() {
 
     return (
         <>
+            <CookieNotice
+                consent={false}
+                position="button"
+                customMargin="mb-20 mx-4"
+                minimizedPosition="right"
+            />
+
             {!restaurant.estaAbierto && (
                 <div className="bg-red-950 text-white text-center font-bold py-4 sticky top-[8rem] z-[9999] shadow-lg">
                     🚫 La tienda está cerrada por el momento.
@@ -205,9 +213,9 @@ function Carta() {
                 </nav>
             </div >
 
-            { restaurant.slider.length > 0 && (
-            /*Slider de imagenes*/
-            <ImageSlider images={restaurant.slider.map((url) => ({ image: url }))} height="h-[20dvh]" className="top-[4.8rem] z-10 shadow-lg" />
+            {restaurant.slider.length > 0 && (
+                /*Slider de imagenes*/
+                <ImageSlider images={restaurant.slider.map((url) => ({ image: url }))} height="h-[20dvh]" className="top-[4.8rem] z-10 shadow-lg" />
             )}
 
             {/* Contenido principal */}
