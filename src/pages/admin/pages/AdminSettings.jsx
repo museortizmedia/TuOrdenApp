@@ -99,8 +99,8 @@ export default function AdminSettings() {
   return (
     <>
       <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+      
       <div className="p-6 max-w-xl mx-auto text-white space-y-6">
-
         <h2 className="text-2xl font-bold">Horarios de atención</h2>
         {DIAS_SEMANA.map((dia) => {
           const apertura = horarios[dia]?.apertura || "";
@@ -160,10 +160,12 @@ export default function AdminSettings() {
         })}
 
 
-
-        <SliderManager slider={slider} setSlider={setSlider} />
+        <div className="mt-20">
+          <SliderManager slider={slider} setSlider={setSlider} />
+        </div>
 
         {/* <ColorPickerSettings /> */}
+
 
         <button
           onClick={guardarCambios}
