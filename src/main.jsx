@@ -18,12 +18,15 @@ import domains from "./domains.json";
 import theme from "./theme";
 import "./index.css";
 
+// Componentes
+import CookieNotice from "./components/CookieNotice.jsx";
+import DynamicHead from "./components/DynamicHead";
+
 // Páginas
 import Index from "./pages/Index.jsx";
 import Carta from "./pages/client/Carta";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
-import DynamicHead from "./components/DynamicHead";
 
 // Ruta protegida
 function AdminRoute() {
@@ -154,6 +157,11 @@ function AppWrapper() {
       <CartProvider>
         <Router>
           <DynamicHead />
+
+          <CookieNotice
+            consent={false}
+          />
+
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/carta" element={<Carta />} />

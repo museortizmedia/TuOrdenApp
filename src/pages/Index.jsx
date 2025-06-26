@@ -7,6 +7,9 @@ import { useAuth } from "../contexts/AuthContext";
 // others
 import theme from "../theme";
 
+// Componentes
+import CookieNotice from "../components/CookieNotice";
+
 export default function Index() {
   const { restaurant } = useRestaurant();
   const { user, loading } = useAuth();
@@ -21,12 +24,13 @@ export default function Index() {
     },
     {
       text: "Ver Carta",
-      onClick: () => (window.location.href = "/carta"),
+      onClick: () => { window.location.href = "/carta"; localStorage.setItem("cookie-consent", "dismissed"); },
       style: "secondary",
     },
   ];
 
-  return (
+  return (<>
+
     <div className={`${theme.layout.darkBackground} [min-height:120dvh] flex flex-col`}>
       {/* Header sesión */}
       <div className="flex justify-end p-2 pr-4 text-xs text-gray-400 invisible md:visible">
@@ -91,14 +95,17 @@ export default function Index() {
 
       {/* Footer */}
       <footer className="text-xs text-gray-400 text-center px-4 pb-6 leading-snug opacity-60 hover:opacity-80 transition-opacity duration-300">
-        <div className="max-w-xl mx-auto">
-          © 2025. Todos los derechos reservados. <br className="hidden md:inline" />
-          *Aplican condiciones. Promociones válidas solo en canales seleccionados. <br className="hidden md:inline" />
-          Imágenes de referencia. Los precios, productos y disponibilidad pueden variar. <br className="hidden md:inline" />
-          Esta plataforma actúa como intermediario entre el cliente y el restaurante. <br className="hidden md:inline" />
-          Para cualquier inconveniente, por favor comuníquese directamente con el establecimiento.
+        <div className="max-w-xl mx-auto mb-2 font-bold">
+          © 2025 Todos los derechos reservados.
+        </div>
+        <div className="max-w-xl mx-auto space-y-1 italic">
+          Aplican condiciones. Promociones válidas solo en canales seleccionados.
+          Las imágenes son ilustrativas. Precios, productos y disponibilidad pueden cambiar sin previo aviso.
+          Esta plataforma funciona como intermediario entre los restaurantes y los clientes.
+          Para cualquier reclamo o consulta, por favor contacte directamente al restaurante.
         </div>
       </footer>
+
     </div>
-  );
+  </>);
 }
