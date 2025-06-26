@@ -89,7 +89,7 @@ export default function DynamicHead() {
         </>
       )}
 
-      {/* PRELOAD */}
+      {/* PRELOAD 
       {restaurant.logo && (
         <link
           rel="preload"
@@ -99,6 +99,7 @@ export default function DynamicHead() {
           fetchpriority="high"
         />
       )}
+      */}
 
       <script type="application/ld+json">
         {isCarta ?
