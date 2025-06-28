@@ -105,7 +105,6 @@ export default function AdminOrdenes() {
         }
     }
 
-
     const toggleDetails = (orderId) => {
         setOpenDetails(prev => ({
             ...prev,
@@ -174,7 +173,10 @@ export default function AdminOrdenes() {
         const itemsHtml = order.items?.map(item => `
         <tr>
             <td>${item.quantity}x</td>
-            <td>${item.name || 'Producto'}</td>
+            <td>
+                ${item.name || 'Producto'}:
+                ${item.selectedVariation != null ? `: <span style="font-style: italic; color: #6b7280;">${item.selectedVariation}</span>` : ''}
+            </td>
             <td style="text-align:right;">$${(item.price || 0).toLocaleString("es-CL")}</td>
         </tr>
     `).join('') || '';
@@ -196,7 +198,9 @@ export default function AdminOrdenes() {
         body { 
             font-family: monospace; 
             width: 58mm; 
-            padding: 10px; 
+            padding: 5px;
+            padding-top: 5px;
+            padding-bottom: 5px;
             color: black; 
         }
         .center { text-align: center; font-size: 22px; font-weight: bold; }
@@ -207,6 +211,9 @@ export default function AdminOrdenes() {
         .totales td { font-weight: bold; font-size: 16px; }
         .total-final { font-size: 20px; font-weight: bold; margin-top: 10px; text-align: right; }
         hr { border: none; border-top: 2px solid black; margin: 12px 0; }
+        * {
+        box-sizing: border-box;
+        }
     </style>
 </head>
 <body>

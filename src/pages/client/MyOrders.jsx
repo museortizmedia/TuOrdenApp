@@ -183,6 +183,9 @@ export default function MyOrders() {
     return messages[Math.floor(Math.random() * messages.length)];
   };
 
+  // detalles
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
+
 
   return (
     <>
@@ -207,6 +210,7 @@ export default function MyOrders() {
                 {order.orderType == "Domicilio" ? order.status == "lista" ? "Salió para:" : "Se entregará en:" : order.status == "lista" ? "Se preparó en:" : "Se preparará en:"}
               </span> {order.orderType == "Domicilio" ? order.address : order.sede.split("-")[0] || ""}
             </div>
+
             <div className="text-sm text-gray-800 flex items-center">
               <span className="font-semibold mr-1">Estado:</span>
               <span
@@ -216,6 +220,32 @@ export default function MyOrders() {
                 {animatedMessages[order.id] || getRandomStatusMessage(order.status, order.orderType, order.paymentMethod)}
               </span>
             </div>
+
+            {/* Expandir detalles */}
+            <div className="text-right">
+              <button
+                onClick={() =>
+                  setExpandedOrderId(expandedOrderId === order.id ? null : order.id)
+                }
+                className="text-yellow-500 text-sm underline cursor-pointer"
+              >
+                {expandedOrderId === order.id ? "Ocultar detalles" : "Ver detalles"}
+              </button>
+            </div>
+
+            {expandedOrderId === order.id && (
+              <div className="mt-2 border-t pt-2 space-y-1">
+                {order.items?.map((item, index) => (
+                  <div key={index} className="text-sm text-gray-700 flex gap-1 items-center">
+                    <span className="font-mono">{item.quantity}x</span>
+                    <span>{item.name}</span>
+                    {item.selectedVariation && (
+                      <span className="italic text-gray-500">: {item.selectedVariation}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {(order.orderType == "Recoger" && order.status == "lista") &&
               <div className='p-2'>

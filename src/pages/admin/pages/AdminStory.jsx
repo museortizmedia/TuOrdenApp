@@ -531,7 +531,7 @@ export default function AdminStory() {
                       {order.items?.length > 0 ? (
                         order.items.map((item, index) => (
                           <li key={index} className="flex justify-between">
-                            <span>{item.name || 'Ítem'} x {item.quantity || 1}</span>
+                            <span>{item.name || 'Ítem'} x {item.quantity || 1} {item.selectedVariation != null && (<>: <span className="italic text-gray-500">{item.selectedVariation}</span></>)}</span>
                             <span className="text-yellow-200">${(item.price || 0).toLocaleString("es-CL")}</span>
                           </li>
                         ))

@@ -139,6 +139,7 @@ function SortableItem({ product, onUpdate, onDelete }) {
     useEffect(() => {
         if (edit) {
             setForm({ ...product });
+            setVariations(product.variations || []);
         }
     }, [edit, product]);
 
