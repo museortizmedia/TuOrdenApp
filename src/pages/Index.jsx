@@ -57,6 +57,7 @@ export default function Index() {
             sizes="(max-width: 768px) 80vw, 300px"
             width={300}
             height={300}
+            fetchpriority="high"
             alt={"Logo de " + restaurant.name}
             className={`rounded-xl shadow-lg w-full transition-opacity duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"
               }`}

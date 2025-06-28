@@ -7,6 +7,7 @@ import { doc, runTransaction, collection, getDocs } from "firebase/firestore";
 import MyOrders from "../pages/client/MyOrders";
 import { Toaster, toast } from "react-hot-toast";
 import audioService from "../servicies/audio";
+import AutocompleteSelect from "./AutocompleteSelect";
 
 export default function CartOverlay({ onClose, firstActiveOrders = false }) {
   const { restaurant } = useRestaurant();
@@ -33,12 +34,176 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
   const [inputQuantities, setInputQuantities] = useState({});
   const [showTransferModal, setShowTransferModal] = useState(false);
 
-  const neighborhoodOptions = {
+  /*const neighborhoodOptions = {
     "Zona Urbana Jamundí": 5000,
     "Conjunto Cerrado - Zona Urbana Jamundí": 6000,
     "Terranova, El Castillo, Rodeo, Bonanza, Las Flores": 11000,
     "Ciudad Contry, Cinco Soles y cercanos": 8500,
-  };
+  };*/
+  const neighborhoodOptions = [
+  { value: "ciudadela_del_viento", label: "CIUDADELA DEL VIENTO", price: 11000 },
+  { value: "urbanizacion_alamadina", label: "URBANIZACION ALAMADINA", price: 11000 },
+  { value: "oasis_de_terranova", label: "OASIS DE TERRANOVA", price: 11000 },
+  { value: "marbella", label: "MARBELLA", price: 11000 },
+  { value: "san_isidro", label: "SAN ISIDRO", price: 11000 },
+  { value: "terranova", label: "TERRANOVA", price: 11000 },
+  { value: "cr_molinos_de_terranova", label: "CR. MOLINOS DE TERRANOVA", price: 11000 },
+  { value: "paisaje_de_las_flores", label: "PAISAJE DE LAS FLORES", price: 11000 },
+  { value: "bonanza", label: "BONANZA", price: 11000 },
+  { value: "cond_eden_del_parque", label: "COND. EDEN DEL PARQUE", price: 11000 },
+  { value: "las_flores", label: "LAS FLORES", price: 11000 },
+  { value: "almendros_de_belicia", label: "ALMENDROS DE BELICIA", price: 10000 },
+  { value: "canto_verde", label: "CANTO VERDE", price: 10000 },
+  { value: "galicia", label: "GALICIA", price: 10000 },
+  { value: "villa_del_rio", label: "VILLA DEL RIO", price: 10000 },
+  { value: "bosque_encantado_del_sur", label: "BOSQUE ENCANTADO DEL SUR", price: 10000 },
+  { value: "condominios_de_la_morada", label: "CONDOMINIOS DE LA MORADA", price: 8500 },
+  { value: "tecnoquimicas", label: "TECNOQUIMICAS", price: 6000 },
+  { value: "cinco_soles", label: "CINCO SOLES", price: 8500 },
+  { value: "ciudad_country", label: "CIUDAD COUNTRY", price: 8500 },
+  { value: "el_castillo", label: "EL CASTILLO", price: 11000 },
+  { value: "condominio_saman_del_lago", label: "CONDOMINIO SAMÁN DEL LAGO", price: 6000 },
+  { value: "quintas_de_bolivar", label: "QUINTAS DE BOLIVAR", price: 5000 },
+  { value: "oporto", label: "OPORTO", price: 6000 },
+  { value: "motel_vuelta_al_mundo", label: "MOTEL VUELTA AL MUNDO", price: 7000 },
+  { value: "condominio_ciudad_de_dios", label: "CONDOMINIO CIUDAD DE DIOS", price: 7000 },
+  { value: "ciudad_de_dios_2", label: "CIUDAD DE DIOS 2", price: 7000 },
+  { value: "villa_pime", label: "VILLA PIME", price: 6000 },
+  { value: "los_mangos", label: "LOS MANGOS", price: 6000 },
+  { value: "las_margaritas", label: "LAS MARGARITAS", price: 6000 },
+  { value: "urbanizacion_las_palmas", label: "URBANIZACION LAS PALMAS", price: 7000 },
+  { value: "llano_grande", label: "LLANO GRANDE", price: 7000 },
+  { value: "amigos_2000", label: "AMIGOS 2000", price: 6000 },
+  { value: "callejon_juan_de_dios_las_pinas", label: "CALLEJON JUAN DE DIOS LAS PIÑAS", price: 7000 },
+  { value: "corregimiento_paso_de_la_bolsa", label: "CORREGIMIENTO PASO DE LA BOLSA", price: 11000 },
+  { value: "senderos_de_las_mercedes", label: "SENDEROS DE LAS MERCEDES", price: 9000 },
+  { value: "villas_de_las_mercedes", label: "VILLAS DE LAS MERCEDES", price: 9000 },
+  { value: "rincon_de_las_mercedes", label: "RINCON DE LAS MERCEDES", price: 9000 },
+  { value: "fontana_de_las_mercedes", label: "FONTANA DE LAS MERCEDES", price: 9000 },
+  { value: "hontanar_de_las_mercedes", label: "HONTANAR DE LAS MERCEDES", price: 9000 },
+  { value: "manantial_de_las_mercedes", label: "MANANTIAL DE LAS MERCEDES", price: 9000 },
+  { value: "las_mercedes", label: "LAS MERCEDES", price: 9000 },
+  { value: "valle_del_rio", label: "VALLE DEL RIO", price: 9000 },
+  { value: "valle_verde", label: "VALLE VERDE", price: 9000 },
+  { value: "riberas_de_las_mercedes", label: "RIBERAS DE LAS MERCEDES", price: 9000 },
+  { value: "tangelos", label: "TANGELOS", price: 9000 },
+  { value: "casa_campo", label: "CASA CAMPO", price: 9000 },
+  { value: "miralagos", label: "MIRALAGOS", price: 9000 },
+  { value: "entrelagos", label: "ENTRELAGOS", price: 9000 },
+  { value: "casazul", label: "CASAZUL", price: 9000 },
+  { value: "casa_terra", label: "CASA TERRA", price: 9000 },
+  { value: "portales_de_verde_horizonte", label: "PORTALES DE VERDE HORIZONTE", price: 12000 },
+  { value: "verde_horizonte", label: "VERDE HORIZONTE", price: 12000 },
+  { value: "senderos_de_verde_horizonte", label: "SENDEROS DE VERDE HORIZONTE", price: 12000 },
+  { value: "praderas_de_verde_horizonte", label: "PRADERAS DE VERDE HORIZONTE", price: 12000 },
+  { value: "bosques_de_verde_horizonte", label: "BOSQUES DE VERDE HORIZONTE", price: 12000 },
+  { value: "guaduales_de_las_mercedes", label: "GUADUALES DE LAS MERCEDES", price: 12000 },
+  { value: "remansos_del_jordan", label: "REMANSOS DEL JORDAN", price: 12000 },
+  { value: "oceano_verde", label: "OCEANO VERDE", price: 12000 },
+  { value: "miravalle_3", label: "MIRAVALLE 3", price: 12000 },
+  { value: "colinas_de_miravalle", label: "COLINAS DE MIRAVALLE", price: 12000 },
+    { value: "paseo_de_pangola", label: "PASEO DE PANGOLA", price: 6000 },
+  { value: "caminos_de_pangola", label: "CAMINOS DE PANGOLA", price: 6000 },
+  { value: "paisajes_de_pangola", label: "PAISAJES DE PANGOLA", price: 6000 },
+  { value: "surcos_de_pangola", label: "SURCOS DE PANGOLA", price: 6000 },
+  { value: "manzana_5_de_pangola", label: "MANZANA 5 DE PANGOLA", price: 6000 },
+  { value: "invasion_la_playita", label: "INVASION LA PLAYITA", price: 6000 },
+  { value: "palmetum_park_club_house", label: "PALMETUM PARK CLUB HOUSE", price: 6000 },
+  { value: "los_naranjos", label: "LOS NARANJOS", price: 6000 },
+  { value: "bio_ciudadela_la_reserva", label: "BIO CIUDADELA LA RESERVA", price: 6000 },
+  { value: "conjunto_res_carbonero", label: "CONJUNTO RES. CARBONERO", price: 6000 },
+  { value: "p_r_la_arboleda", label: "P.R. LA ARBOLEDA", price: 6000 },
+  { value: "conjunto_res_bambu", label: "CONJUNTO RES. BAMBU", price: 6000 },
+  { value: "condominio_koa", label: "CONDOMINIO KOA", price: 6000 },
+  { value: "cr_hacienda_el_pino", label: "C.R. HACIENDA EL PINO", price: 6000 },
+  { value: "parque_natura", label: "PARQUE NATURA", price: 6000 },
+  { value: "cr_villas_de_altagracia", label: "CR VILLAS DE ALTAGRACIA", price: 6000 },
+  { value: "torres_de_jamundi", label: "TORRES DE JAMUNDI", price: 6000 },
+  { value: "conj_cerrado_portal_de_jamundi", label: "CONJ. CERRADO PORTAL DE JAMUNDI", price: 6000 },
+  { value: "alameda_de_rio_claro", label: "ALAMEDA DE RIO CLARO", price: 6000 },
+  { value: "cr_san_cayetano", label: "CR. SAN CAYETANO", price: 6000 },
+  { value: "cr_parques_de_castilla_1", label: "CR. PARQUES DE CASTILLA 1", price: 5000 },
+  { value: "cr_parques_de_castilla_2", label: "CR. PARQUES DE CASTILLA 2", price: 6000 },
+  { value: "condominio_madeira", label: "CONDOMINIO MADEIRA", price: 6000 },
+  { value: "siglo_xxi", label: "SIGLO XXI", price: 6000 },
+  { value: "cr_alegra", label: "CR. ALEGRA", price: 6000 },
+  { value: "cond_rincon_de_las_garzas", label: "COND. RINCON DE LAS GARZAS", price: 6000 },
+  { value: "cond_prados_de_alfaguara", label: "COND. PRADOS DE ALFAGUARA", price: 6000 },
+  { value: "country_plaza", label: "COUNTRY PLAZA", price: 6000 },
+  { value: "la_ceibita", label: "LA CEIBITA", price: 5000 },
+  { value: "la_arboleda", label: "LA ARBOLEDA", price: 5000 },
+  { value: "portal_de_jamundi", label: "PORTAL DE JAMUNDI", price: 5000 },
+  { value: "macunaima", label: "MACUNAIMA", price: 5000 },
+  { value: "villa_paulina", label: "VILLA PAULINA", price: 5000 },
+  { value: "el_socorro", label: "EL SOCORRO", price: 5000 },
+  { value: "parques_de_castilla", label: "PARQUES DE CASTILLA", price: 5000 },
+  { value: "las_acacias", label: "LAS ACACIAS", price: 5000 },
+  { value: "la_hojarasca", label: "LA HOJARASCA", price: 5000 },
+  { value: "juan_pablo_ii", label: "JUAN PABLO II", price: 5000 },
+  { value: "palo_santo", label: "PALO SANTO", price: 5000 },
+  { value: "cantabria", label: "CANTABRIA", price: 5000 },
+  { value: "villa_estela", label: "VILLA ESTELA", price: 5000 },
+  { value: "portal_del_jordan", label: "PORTAL DEL JORDAN", price: 5000 },
+  { value: "rincon_de_zaragoza", label: "RINCON DE ZARAGOZA", price: 5000 },
+  { value: "los_mandarinos", label: "LOS MANDARINOS", price: 5000 },
+  { value: "villa_tatiana", label: "VILLA TATIANA", price: 5000 },
+  { value: "el_piloto", label: "EL PILOTO", price: 5000 },
+  { value: "cerezos_del_rosario", label: "CEREZOS DEL ROSARIO", price: 5000 },
+  { value: "portal_del_saman", label: "PORTAL DEL SAMAN 1 Y 2", price: 5000 },
+  { value: "villa_ema", label: "VILLA EMA", price: 5000 },
+  { value: "santa_ana", label: "SANTA ANA", price: 5000 },
+  { value: "villa_monica", label: "VILLA MONICA", price: 5000 },
+  { value: "coliseo_indere", label: "COLISEO INDERE", price: 5000 },
+  { value: "riberas_del_rosario", label: "RIBERAS DEL ROSARIO", price: 5000 },
+  { value: "chipaya_plaza", label: "CHIPAYÁ PLAZA-LA GRAN COLOMBIA", price: 5000 },
+  { value: "los_anturios", label: "LOS ANTURIOS", price: 5000 },
+  { value: "brisas_de_farallones", label: "BRISAS DE FARALLONES", price: 5000 },
+  { value: "recanto", label: "RECANTO", price: 5000 },
+  { value: "ventino", label: "VENTINO", price: 5000 },
+  { value: "condados_del_sur", label: "CONDADOS DEL SUR", price: 5000 },
+  { value: "alborada", label: "ALBORADA 1 Y 2", price: 5000 },
+  { value: "senderos_de_alfaguara", label: "SENDEROS DE ALFAGUARA", price: 5000 },
+  { value: "brisas_del_rosario", label: "BRISAS DEL ROSARIO", price: 5000 },
+  { value: "solar_de_las_garzas", label: "SOLAR DE LAS GARZAS", price: 5000 },
+  { value: "rincon_de_las_garzas", label: "RINCON DE LAS GARZAS", price: 5000 },
+  { value: "cc_alfaguara", label: "CC. ALFAGUARA", price: 5000 },
+  { value: "villa_elvira", label: "VILLA ELVIRA", price: 5000 },
+  { value: "villa_del_sol", label: "VILLA DEL SOL", price: 5000 },
+  { value: "villa_maite", label: "VILLA MAITE", price: 5000 },
+  { value: "callejon_coodinter", label: "CALLEJON COODINTER", price: 5000 },
+  { value: "cazadores", label: "CAZADORES", price: 5000 },
+  { value: "el_rosario", label: "EL ROSARIO", price: 5000 },
+  { value: "sachamate", label: "SACHAMATE", price: 5000 },
+  { value: "la_estacion", label: "LA ESTACION", price: 5000 },
+  { value: "la_esmeralda", label: "LA ESMERALDA", price: 5000 },
+  { value: "angel_maria_camacho", label: "ANGEL MARIA CAMACHO", price: 5000 },
+  { value: "primero_de_mayo", label: "PRIMERO DE MAYO", price: 5000 },
+  { value: "el_popular", label: "EL POPULAR", price: 5000 },
+  { value: "el_porvenir", label: "EL PORVENIR", price: 5000 },
+  { value: "parque_del_amor", label: "PARQUE DEL AMOR", price: 5000 },
+  { value: "juan_de_ampudia", label: "JUAN DE AMPUDIA", price: 5000 },
+  { value: "parque_principal", label: "PARQUE PRINCIPAL", price: 5000 },
+  { value: "simon_bolivar", label: "SIMON BOLIVAR", price: 5000 },
+  { value: "la_lucha", label: "LA LUCHA", price: 5000 },
+  { value: "ciro_velasco", label: "CIRO VELASCO", price: 5000 },
+  { value: "covicedros", label: "COVICEDROS", price: 5000 },
+  { value: "la_pradera", label: "LA PRADERA", price: 5000 },
+  { value: "la_esperanza", label: "LA ESPERANZA", price: 5000 },
+  { value: "libertadores", label: "LIBERTADORES", price: 5000 },
+  { value: "belalcazar", label: "BELALCAZAR 1 Y 2", price: 5000 },
+  { value: "colegio_el_ceti", label: "COLEGIO EL CETI", price: 5000 },
+  { value: "la_adrianita", label: "LA ADRIANITA", price: 5000 },
+  { value: "la_aurora", label: "LA AURORA", price: 5000 },
+  { value: "el_cotolengo", label: "EL COTOLENGO", price: 5000 },
+  { value: "el_jardin", label: "EL JARDIN", price: 5000 },
+  { value: "ciudad_sur", label: "CIUDAD SUR", price: 5000 },
+  { value: "centenario", label: "CENTENARIO", price: 5000 },
+  { value: "barriles_el_saman", label: "BARRILES- EL SAMAN", price: 5000 },
+  { value: "bello_horizonte", label: "BELLO HORIZONTE", price: 5000 },
+  { value: "el_panamericano", label: "EL PANAMERICANO", price: 5000 },
+  { value: "alferez_real", label: "ALFEREZ REAL", price: 5000 } 
+];
+
 
   const orderOptions = {
     Domicilio: "¡Llévalo a mi casa!",
@@ -52,7 +217,8 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
   };
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const deliveryFee = orderType === "Domicilio" ? (neighborhoodOptions[neighborhood] || 0) : 0;
+  const selectedNeighborhood = neighborhoodOptions.find(option => option.value === neighborhood);
+  const deliveryFee = orderType === "Domicilio" ? (selectedNeighborhood?.price || 0) : 0;
   const total = subtotal + deliveryFee;
 
   const handleClose = () => {
@@ -458,14 +624,24 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
                     className={inputClass(showError && !address)}
                     autoComplete="street-address"
                   />
+                  {/*
                   <select
                     value={neighborhood}
                     onChange={(e) => setNeighborhood(e.target.value)}
                     className={inputClass(showError && !neighborhood)}
                   >
+                    
+
                     <option value="">Barrio</option>
                     {Object.entries(neighborhoodOptions).map(([key, price]) => <option key={key} value={key}>{key}</option>)}
-                  </select>
+                  </select>*/}
+
+                  <AutocompleteSelect
+                  placeholder="Barrio"
+                  options={neighborhoodOptions}
+                  value={neighborhood}
+                  onChange={(option) => setNeighborhood(option.value)}
+                  />
                 </>
               )}
 
