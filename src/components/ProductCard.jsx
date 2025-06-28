@@ -22,8 +22,7 @@ function ProductCard({ product, isFirstImage, compact = false }) {
     return (
       <div
         key={product.id}
-        className={`flex items-center bg-[#1a1a1a] rounded-xl shadow-sm w-full overflow-hidden px-3 py-2 transition
-          ${isAvailable ? "hover:scale-[1.01]" : "opacity-60 grayscale cursor-not-allowed"}`}
+        className={`flex items-center bg-gradient-to-br from-[#1a1a1a] to-[#121212] rounded-xl shadow-sm w-full overflow-hidden px-3 py-2 transition ${isAvailable ? "hover:scale-[1.01]" : "opacity-60 grayscale cursor-not-allowed"}`}
         style={{ minHeight: "90px", maxHeight: "110px" }}
       >
         {/* Imagen */}
@@ -74,7 +73,7 @@ function ProductCard({ product, isFirstImage, compact = false }) {
   return (
     <div
       key={product.id}
-      className={`flex flex-col lg:flex-row bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-lg mx-auto w-full min-w-[200px] max-w-[500px]
+      className={`flex flex-col lg:flex-row bg-gradient-to-br from-[#1a1a1a] to-[#121212] rounded-2xl overflow-hidden shadow-lg mx-auto w-full min-w-[200px] max-w-[500px]
         ${isAvailable ? "hover:scale-[1.02] transition-transform" : restaurant.estaAbierto ? "opacity-60 grayscale cursor-not-allowed" : ""}`}
       title={product.name}
     >
