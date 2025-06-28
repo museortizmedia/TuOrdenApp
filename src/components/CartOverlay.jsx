@@ -22,6 +22,8 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
   } = useCart();
 
   const [isVisible, setIsVisible] = useState(false);
+
+  // Buyer form
   const [buyerName, setBuyerName] = useState("");
   const [address, setAddress] = useState("");
   const [neighborhood, setNeighborhood] = useState("");
@@ -220,6 +222,15 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
     audioService.play("autoInteract")
   };
 
+  // Variaciones
+  const [selectedVariations, setSelectedVariations] = useState({});
+
+  const hasUnselectedVariation = cart.some(item =>
+    Array.isArray(item.variations) &&
+    item.variations.length > 0 &&
+    !selectedVariations[item.id]
+  );
+
   // Checkout
   const submitOrder = async ({ status }) => {
     if (!restaurant?.id) return;
@@ -228,9 +239,18 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
     const restaurantId = restaurant.id;
     const counterDocRef = doc(db, `restaurants/${restaurantId}/counters/${year}`);
 
+    // editar los items si se necesita
+    const enrichedItems = cart.map((item) => ({
+      ...item,
+      selectedVariation:
+        Array.isArray(item.variations) && item.variations.length > 0
+          ? item.variations[selectedVariations[item.id]]
+          : null,
+    }));
+
     const orderData = {
       createdAt: new Date(),
-      items: cart,
+      items: enrichedItems,
       subtotal,
       tax: 0,
       deliveryFee,
@@ -269,7 +289,8 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
     !orderType ||
     !paymentMethod ||
     (orderType === "Domicilio" && (!address || !neighborhood)) ||
-    (orderType === "Recoger" && !selectedSede);
+    (orderType === "Recoger" && !selectedSede) ||
+    hasUnselectedVariation;
 
   const handleCheckout = async () => {
     // Mostramos en pantalla los campos errados con showError
@@ -423,8 +444,7 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
   // Validación visual por campo
   const [showError, setShowError] = useState(false);
 
-  const inputClass = (invalid) =>
-    `w-full px-3 py-2 rounded text-sm border text-gray-900 ${invalid ? 'border-red-500' : 'border-gray-300'}`;
+  const inputClass = (invalid) => `w-full px-3 py-2 rounded text-sm border text-gray-900 ${invalid ? 'border-red-500' : 'border-gray-300'}`;
 
 
   return (
@@ -462,8 +482,11 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
 
         {/* Tu carrito */}
         <div className={`${firstActiveOrders ? "order-2" : "order-1"}`}>
+
           <h3 className="text-xl font-bold text-gray-800 my-3">Tu carrito</h3>
+
           <div className="space-y-6 overflow-y-auto max-h-[60vh] pr-1">
+            {/* Productos del carrito */}
             {cart.length === 0 ? (
               <p className="text-gray-500 font-thin text-md">Tu carrito está vacío.</p>
             ) : (
@@ -499,9 +522,6 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
                     {/* Controles e información */}
                     <div className="flex justify-between items-center mt-1 flex-wrap gap-2">
                       <div className="flex items-center gap-2">
-
-
-
 
                         {/* Input numérico central */}
                         <div className="flex border rounded overflow-hidden w-14">
@@ -560,7 +580,6 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
                           </button>
                         </div>
 
-
                       </div>
 
                       {/* Precio */}
@@ -568,14 +587,38 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
                         ${(item.price * item.quantity).toLocaleString("es-CL")}
                       </div>
                     </div>
+
+                    {/* Variaciones */}
+                    {Array.isArray(item.variations) && item.variations.length > 0 && (
+                      <select
+                        className={inputClass(showError && !selectedVariations[item.id]) + " mt-2 text-sm bg-white border-gray-300 border-[1px] text-black rounded p-1"}
+                        value={selectedVariations[item.id] || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setSelectedVariations((prev) => ({
+                            ...prev,
+                            [item.id]: value
+                          }));
+                        }}
+                      >
+                        <option value="" disabled>Selecciona una variación</option>
+                        {item.variations.map((variation, index) => (
+                          <option key={index} value={index}>
+                            {variation}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
                   </div>
+
                 </div>
 
               ))
             )}
           </div>
 
-
+          {/* Buyer form */}
           {cart.length > 0 && (
             <div className="mt-6 space-y-4">
               <input
@@ -758,7 +801,7 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
             <div className="flex flex-col space-y-2">
               <button
                 className="flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-black py-2 rounded font-medium"
-                onClick={() => { setShowTransferModal(false); setConfirmedTransfer(false); audioService.play("autoInteract");}}
+                onClick={() => { setShowTransferModal(false); setConfirmedTransfer(false); audioService.play("autoInteract"); }}
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Cambiar tipo de orden
@@ -767,7 +810,7 @@ export default function CartOverlay({ onClose, firstActiveOrders = false }) {
               {!confirmedTransfer ? (
                 <button
                   className="flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded font-medium"
-                  onClick={() => { setConfirmedTransfer(true); audioService.play("manualInteract");} }
+                  onClick={() => { setConfirmedTransfer(true); audioService.play("manualInteract"); }}
                 >
                   <Check className="w-4 h-4 mr-2" />
                   Confirmar Transferencia

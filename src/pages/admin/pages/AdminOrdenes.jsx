@@ -426,7 +426,7 @@ export default function AdminOrdenes() {
                         }
 
                         if (sedeFiltro === "Domicilio") {
-                            return matchStatus && order.orderType=="Domicilio";
+                            return matchStatus && order.orderType == "Domicilio";
                         }
 
                         if (order.orderType === "Recoger") {
@@ -571,10 +571,17 @@ export default function AdminOrdenes() {
                                                         return (
                                                             <li key={idx} className="flex justify-between items-start">
                                                                 <div>
-                                                                    <div className="font-semibold text-white"><span className='text-lg text-yellow-500'>{quantity} x</span> {item.name}</div>
+                                                                    <div className="font-semibold text-white">
+                                                                        <span className="text-lg text-yellow-500">{quantity} x</span> {item.name}
+                                                                        {item.selectedVariation != null && (
+                                                                            <>: <span className="italic text-gray-500">{item.selectedVariation}</span></>
+                                                                        )}
+                                                                    </div>
+
                                                                     <div className="text-xs text-gray-400">
                                                                         ${unitPrice.toLocaleString("es-CL")} {quantity !== "1" ? "c/u" : ""}
                                                                     </div>
+
                                                                 </div>
                                                                 <div className="text-right font-medium text-yellow-200">
                                                                     ${itemTotal.toLocaleString("es-CL")}

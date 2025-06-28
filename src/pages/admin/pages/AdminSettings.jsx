@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRestaurant } from "../../../contexts/RestaurantContext";
 import firestoreService from "../../../servicies/firestoreService";
 import toast, { Toaster } from "react-hot-toast";
-import SliderManager from "../../../components/SliderManager";
+import ListManager from "../../../components/ListManager";
 // import ColorPickerSettings from "./components/ColorPickerSettings"; // futuro uso
 
 const horas = Array.from({ length: 24 }, (_, h) =>
@@ -35,7 +35,7 @@ export default function AdminSettings() {
   const [horariosCargados, setHorariosCargados] = useState({});
 
   // Slider
-  const [slider, setSlider] = useState(restaurant.slider);
+  const [slider, setSlider] = useState(restaurant?.slider || []);
 
   // Otras
   useEffect(() => {
@@ -99,7 +99,7 @@ export default function AdminSettings() {
   return (
     <>
       <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
-      
+
       <div className="p-6 max-w-xl mx-auto text-white space-y-6">
         <h2 className="text-2xl font-bold">Horarios de atención</h2>
         {DIAS_SEMANA.map((dia) => {
@@ -161,7 +161,12 @@ export default function AdminSettings() {
 
 
         <div className="mt-20">
-          <SliderManager slider={slider} setSlider={setSlider} />
+          <ListManager
+            title="Imágenes del slider"
+            placeholder="URL de imagen"
+            items={slider}
+            setItems={setSlider}
+          />
         </div>
 
         {/* <ColorPickerSettings /> */}

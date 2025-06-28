@@ -22,7 +22,7 @@ import { CSS } from "@dnd-kit/utilities";
 import ToggleSwitch from "../../../components/ToogleSwitch.jsx"
 import ImageUploader from "../../../components/ImageUploader";
 import { PenIcon } from "lucide-react";
-import CategoryOrderManager from "./AdminCategoryOrden.jsx";
+import ListManager from "../../../components/ListManager.jsx"
 import audioService from "../../../servicies/audio.js";
 
 function SortableItem({ product, onUpdate, onDelete }) {
@@ -30,6 +30,7 @@ function SortableItem({ product, onUpdate, onDelete }) {
     const style = { transform: CSS.Transform.toString(transform), transition };
     const [edit, setEdit] = useState(false);
     const [form, setForm] = useState({ ...product });
+    const [variations, setVariations] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
 
     const { restaurant } = useRestaurant();
@@ -49,7 +50,7 @@ function SortableItem({ product, onUpdate, onDelete }) {
         const currentSupabaseUser = await supabaseService.getCurrentUser();
 
         let imageUrl = form.image || "";
-        
+
         if (currentSupabaseUser != null) {
             if (selectedImage) {
                 const processedImage = await processImage(selectedImage, 416, 0.8);
@@ -77,7 +78,7 @@ function SortableItem({ product, onUpdate, onDelete }) {
 
         if (isNaN(parsedPrice)) return toast.error("Precio inválido");
 
-        await onUpdate(product.id, { ...form, price: parsedPrice, image: (imageUrl || "") });
+        await onUpdate(product.id, { ...form, variations: variations, price: parsedPrice, image: (imageUrl || "") });
         setEdit(false);
     };
 
@@ -191,6 +192,15 @@ function SortableItem({ product, onUpdate, onDelete }) {
                         onPointerDownCapture={(e) => e.stopPropagation()}
                         className="w-full p-1 rounded bg-gray-600 text-white"
                         placeholder="Precio"
+                    />
+
+                    <ListManager
+                        className="mt-2"
+                        title="Variaciones"
+                        placeholder="Nombre de la variación"
+                        items={variations}
+                        setItems={setVariations}
+                        onPointerDownCapture={(e) => e.stopPropagation()}
                     />
 
                     <div className="flex justify-between mt-2">
